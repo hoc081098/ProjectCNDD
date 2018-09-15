@@ -101,7 +101,10 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
                     if (lastVisible == null) {
                         onFirstLoaded();
                     }
-                    lastVisible = queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size() - 1);
+                    final List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+                    if (!documents.isEmpty()) {
+                        lastVisible = documents.get(queryDocumentSnapshots.size() - 1);
+                    }
                     if (queryDocumentSnapshots.size() < pageSize) {
                         isLastItemReached = true;
                     }
@@ -130,7 +133,7 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
         if (item.getClass().equals(tClass)) {
             return TYPE_FIREBASE_MODEL_ITEM;
         }
-        throw new IllegalStateException();
+        return 0;
     }
 
     @Override

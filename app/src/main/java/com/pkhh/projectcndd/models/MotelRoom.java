@@ -39,6 +39,10 @@ public class MotelRoom extends FirebaseModel {
 
     public DocumentReference category;
 
+    public DocumentReference provinces;
+
+    public DocumentReference ward;
+
     public DocumentReference district;
 
     @PropertyName("created_at")

@@ -77,7 +77,7 @@ public class MotelRoomsListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         Query query = firestore.collection(MOTEL_ROOM_NAME_COLLECION)
-                .whereEqualTo("district", firestore.document("districts/Fd1zR38ewKGfoYaDcNbr"));
+                .orderBy("created_at", Query.Direction.DESCENDING);
 
         adapter = new MyFirebaseLoadMoreAdapter<MotelRoom>(query, PAGE_SIZE, recyclerView, MotelRoom.class) {
             @Override
