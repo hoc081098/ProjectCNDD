@@ -48,15 +48,15 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    private DisableScrollViewPager container;
-    private ImageView imagePrev, imageNext;
-    private ProgressBar progressBar;
-    private ViewGroup constraintLayout;
-    private int currentPosition = 0;
+    private DisableScrollViewPager mContainer;
+    private ImageView mImagePrev, mImageNext;
+    private ProgressBar mProgressBar;
+    private ViewGroup mConstraintLayout;
+    private int mCurrentPosition = 0;
 
-    private FragmentSelectCategory fragmentSelectCategory;
-    private Fragment2 fragment2;
-    private Fragment3 fragment3;
+    private FragmentSelectCategory mFragmentSelectCategory;
+    private Fragment2 mFragment2;
+    private Fragment3 mFragment3;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,12 +69,12 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
         initViews();
 
-        fragmentSelectCategory = new FragmentSelectCategory();
-        fragment2 = new Fragment2();
-        fragment3 = new Fragment3();
-        final List<Fragment> fragmentList = Arrays.asList(fragmentSelectCategory, fragment2, fragment3);
+        mFragmentSelectCategory = new FragmentSelectCategory();
+        mFragment2 = new Fragment2();
+        mFragment3 = new Fragment3();
+        final List<Fragment> fragmentList = Arrays.asList(mFragmentSelectCategory, mFragment2, mFragment3);
 
-        container.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+        mContainer.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
                 return fragmentList.get(position);
@@ -85,29 +85,29 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
                 return MAX_PAGE;
             }
         });
-        container.setOffscreenPageLimit(MAX_PAGE);
+        mContainer.setOffscreenPageLimit(MAX_PAGE);
 
-        progressBar.setMax(100);
-        progressBar.setProgress((int) ((double) 1 / MAX_PAGE * 100));
+        mProgressBar.setMax(100);
+        mProgressBar.setProgress((int) ((double) 1 / MAX_PAGE * 100));
 
-        imageNext.setOnClickListener(this);
-        imagePrev.setOnClickListener(this);
+        mImageNext.setOnClickListener(this);
+        mImagePrev.setOnClickListener(this);
     }
 
     private void onUpdate(int position) {
         changeFragmentByPosiyion(position);
         setProgressBarProgressWithAnimation((int) ((double) (position + 1) / MAX_PAGE * 100));
-        TransitionManager.beginDelayedTransition(constraintLayout, new AutoTransition()
-                .addTarget(imageNext)
-                .addTarget(imagePrev)
+        TransitionManager.beginDelayedTransition(mConstraintLayout, new AutoTransition()
+                .addTarget(mImageNext)
+                .addTarget(mImagePrev)
                 .setDuration(ANIM_DURATION));
-        imagePrev.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
+        mImagePrev.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
         final Drawable drawable = ContextCompat.getDrawable(this, position == MAX_PAGE - 1 ? R.drawable.ic_done_all_black_24dp : R.drawable.ic_navigate_next_black_24dp);
-        imageNext.setImageDrawable(drawable);
+        mImageNext.setImageDrawable(drawable);
     }
 
     private void setProgressBarProgressWithAnimation(int progress) {
-        final ObjectAnimator animator = ObjectAnimator.ofInt(progressBar, PROGRESS_PROPERTY, progressBar.getProgress(), progress);
+        final ObjectAnimator animator = ObjectAnimator.ofInt(mProgressBar, PROGRESS_PROPERTY, mProgressBar.getProgress(), progress);
         animator.setDuration(ANIM_DURATION);
         animator.setInterpolator(PROGRESS_ANIM_INTERPOLATOR);
         animator.start();
@@ -118,19 +118,19 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
         if (position == 0) {
         } else if (position == 1) {
-            fragment2.updateText(fragmentSelectCategory.getSelectedCategory() != null ? fragmentSelectCategory.getSelectedCategory().name : null);
+            mFragment2.updateText(mFragmentSelectCategory.getSelectedCategory() != null ? mFragmentSelectCategory.getSelectedCategory().name : null);
         } else if (position == 2) {
         }
 
-        container.setCurrentItem(position, true);
+        mContainer.setCurrentItem(position, true);
     }
 
     private void initViews() {
-        container = findViewById(R.id.post_container);
-        imageNext = findViewById(R.id.button_next);
-        imagePrev = findViewById(R.id.button_prev);
-        progressBar = findViewById(R.id.progressBar2);
-        constraintLayout = findViewById(R.id.constraintLayout);
+        mContainer = findViewById(R.id.post_container);
+        mImageNext = findViewById(R.id.button_next);
+        mImagePrev = findViewById(R.id.button_prev);
+        mProgressBar = findViewById(R.id.progressBar2);
+        mConstraintLayout = findViewById(R.id.constraintLayout);
     }
 
     @Override
@@ -142,19 +142,19 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
                     return;
                 }
 
-                if (currentPosition == MAX_PAGE - 1) {
+                if (mCurrentPosition == MAX_PAGE - 1) {
                     onComplete();
                 } else {
-                    ++currentPosition;
-                    onUpdate(currentPosition);
+                    ++mCurrentPosition;
+                    onUpdate(mCurrentPosition);
                 }
                 break;
             case R.id.button_prev:
-                if (currentPosition == 0) {
-                    onUpdate(currentPosition);
+                if (mCurrentPosition == 0) {
+                    onUpdate(mCurrentPosition);
                 } else {
-                    --currentPosition;
-                    onUpdate(currentPosition);
+                    --mCurrentPosition;
+                    onUpdate(mCurrentPosition);
                 }
                 break;
         }
@@ -163,20 +163,20 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private String getError() {
-        if (currentPosition == 0) {
+        if (mCurrentPosition == 0) {
             return "Hãy chọn một thể loại!";
         }
         //TODO
 
-        if (currentPosition == MAX_PAGE - 1) {
+        if (mCurrentPosition == MAX_PAGE - 1) {
             return "Hãy điền đầy đủ thông tin";
         }
         return "Lỗi xảy ra";
     }
 
     private boolean canGoNext() {
-        if (currentPosition == 0) {
-            return fragmentSelectCategory.getSelectedCategory() != null;
+        if (mCurrentPosition == 0) {
+            return mFragmentSelectCategory.getSelectedCategory() != null;
         }
         return true;
     }
