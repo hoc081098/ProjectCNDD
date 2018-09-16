@@ -23,6 +23,7 @@ import com.squareup.picasso.Picasso;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     private TextView textName;
     private TextView textEmail;
     private ImageView imageAvatar;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        final NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         final View headerView = navigationView.getHeaderView(0);
         textName = headerView.findViewById(R.id.text_name);
@@ -130,7 +132,19 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(this, PostActivity.class));
                 break;
             case R.id.nav_login:
-                startActivity(new Intent(this, LoginActivity.class));
+                if (firebaseAuth.getCurrentUser() == null) {
+                    startActivity(new Intent(this, LoginActivity.class));
+                } else {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Đăng xuất")
+                            .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+                            .setNegativeButton("Không", (dialog, __) -> dialog.dismiss())
+                            .setPositiveButton("Có", (dialog, __) -> {
+                                dialog.dismiss();
+                                firebaseAuth.signOut();
+                            })
+                            .show();
+                }
                 break;
         }
 
@@ -141,10 +155,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        final MenuItem loginOrLogoutMenuItem = navigationView.getMenu().findItem(R.id.nav_login);
+
         if (currentUser == null) {
             imageAvatar.setVisibility(View.INVISIBLE);
             textName.setText("Chưa đăng nhập");
             textEmail.setText("Chưa đăng nhập");
+
+            loginOrLogoutMenuItem.setTitle("Login");
+            loginOrLogoutMenuItem.setIcon(R.drawable.ic_person_add_black_24dp);
         } else {
             firebaseFirestore.document(USER_NAME_COLLECION + "/" + currentUser.getUid())
                     .addSnapshotListener(this, (documentSnapshot, e) -> {
@@ -155,11 +174,14 @@ public class MainActivity extends AppCompatActivity
                             imageAvatar.setVisibility(View.VISIBLE);
                             Picasso.get()
                                     .load(user.avatar)
-                                    .noFade()
+                                    .fit()
                                     .centerCrop()
+                                    .noFade()
                                     .into(imageAvatar);
                         }
                     });
+            loginOrLogoutMenuItem.setTitle("Logout");
+            loginOrLogoutMenuItem.setIcon(R.drawable.ic_exit_to_app_black_24dp);
         }
     }
 }
