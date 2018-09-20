@@ -16,7 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.User;
-import com.pkhh.projectcndd.ui.login.LoginRegisterActivity;
+import com.pkhh.projectcndd.ui.loginregister.LoginRegisterActivity;
 import com.pkhh.projectcndd.ui.post.PostActivity;
 import com.squareup.picasso.Picasso;
 
@@ -78,13 +78,17 @@ public class MainActivity extends AppCompatActivity
                     .add(R.id.main_content, new MotelRoomsListFragment())
                     .commit();
         }
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         firebaseAuth.addAuthStateListener(this);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         firebaseAuth.removeAuthStateListener(this);
     }
 
@@ -172,12 +176,15 @@ public class MainActivity extends AppCompatActivity
                             textName.setText(user.fullName);
                             textEmail.setText(user.email);
                             imageAvatar.setVisibility(View.VISIBLE);
-                            Picasso.get()
-                                    .load(user.avatar)
-                                    .fit()
-                                    .centerCrop()
-                                    .noFade()
-                                    .into(imageAvatar);
+                            final String avatar = user.avatar;
+                            if (avatar != null && !avatar.isEmpty()) {
+                                Picasso.get()
+                                        .load(avatar)
+                                        .fit()
+                                        .centerCrop()
+                                        .noFade()
+                                        .into(imageAvatar);
+                            }
                         }
                     });
             loginOrLogoutMenuItem.setTitle("Logout");

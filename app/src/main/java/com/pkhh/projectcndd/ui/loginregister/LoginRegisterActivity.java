@@ -1,4 +1,4 @@
-package com.pkhh.projectcndd.ui.login;
+package com.pkhh.projectcndd.ui.loginregister;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -22,6 +22,8 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.login_register_container, new LoginFragment(), "LOGIN_FRAGMENT")
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                            R.anim.slide_in_left, R.anim.slide_out_right)
                     .commit();
         }
     }
@@ -39,6 +41,8 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.login_register_container, new RegisterFragment(), "REGISTER_FRAGMENT")
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                        R.anim.slide_in_left, R.anim.slide_out_right)
                 .addToBackStack(null)
                 .commit();
     }
