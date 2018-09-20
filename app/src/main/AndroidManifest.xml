@@ -26,7 +26,7 @@
         </activity>
         <activity android:name=".ui.detail.MotelRoomDetailActivity" />
         <activity android:name=".ui.post.PostActivity" />
-        <activity android:name=".ui.login.LoginActivity" />
+        <activity android:name=".ui.login.LoginRegisterActivity" />
     </application>
 
 </manifest>
