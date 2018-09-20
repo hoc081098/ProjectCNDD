@@ -10,6 +10,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.post.Activity_district"></activity>
+        <activity android:name=".ui.post.Activity_province" />
 
         <meta-data
             android:name="preloaded_fonts"
