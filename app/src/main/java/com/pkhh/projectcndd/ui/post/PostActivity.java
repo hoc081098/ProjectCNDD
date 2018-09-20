@@ -2,6 +2,7 @@ package com.pkhh.projectcndd.ui.post;
 
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Property;
@@ -22,6 +23,7 @@ import java.util.List;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -57,6 +59,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     private FragmentSelectCategory mFragmentSelectCategory;
     private Fragment2 mFragment2;
     private Fragment3 mFragment3;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
