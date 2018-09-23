@@ -25,7 +25,7 @@ import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject;
 import static com.pkhh.projectcndd.utils.Constants.CATEGORY_NAME_COLLECION;
 
-public class FragmentSelectCategory extends Fragment implements RecyclerOnClickListener {
+public class SelectCategoryFragment extends Fragment implements RecyclerOnClickListener {
     private RecyclerView recyclerView;
     private FirestoreRecyclerAdapter<Category, ViewHolder> adapter;
     private Category selected;
@@ -62,7 +62,7 @@ public class FragmentSelectCategory extends Fragment implements RecyclerOnClickL
             @Override
             public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.category_item_layout, parent, false);
-                return new ViewHolder(itemView, FragmentSelectCategory.this);
+                return new ViewHolder(itemView, SelectCategoryFragment.this);
             }
         };
         recyclerView.setAdapter(adapter);

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.post.Activity_province">
+    tools:context=".ui.post.ProvinceActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_provinces"

@@ -10,14 +10,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity
             android:name=".ui.post.WardActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity
-            android:name=".ui.post.Activity_district"
             android:screenOrientation="portrait" />
+
         <activity
-            android:name=".ui.post.Activity_province"
+            android:name=".ui.post.DistrictActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.post.ProvinceActivity"
             android:screenOrientation="portrait" />
 
         <meta-data
@@ -34,25 +37,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<<<<<<< HEAD
+
         <activity
             android:name=".ui.detail.MotelRoomDetailActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".ui.post.PostActivity"
             android:screenOrientation="portrait" />
+
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".ui.loginregister.LoginRegisterActivity"
             android:screenOrientation="portrait" />
-=======
-        <activity android:name=".ui.detail.MotelRoomDetailActivity" />
-        <activity android:name=".ui.post.PostActivity" />
-<<<<<<< HEAD
-        <activity android:name=".ui.login.LoginRegisterActivity" />
->>>>>>> 158907231458c78e2025a31764730e0267018007
-=======
-        <activity android:name=".ui.loginregister.LoginRegisterActivity" />
->>>>>>> b04cab351bc8960398e11adf3d7ce0a15ac7e308
     </application>
 
 </manifest>

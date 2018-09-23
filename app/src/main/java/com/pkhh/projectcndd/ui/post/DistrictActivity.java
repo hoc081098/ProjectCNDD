@@ -13,8 +13,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
-import com.pkhh.projectcndd.models.FirebaseModel;
-import com.pkhh.projectcndd.models.Ward;
+import com.pkhh.projectcndd.models.District;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
 import androidx.annotation.NonNull;
@@ -22,21 +21,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject;
 import static java.util.Objects.requireNonNull;
 
-public class WardActivity extends AppCompatActivity implements RecyclerOnClickListener {
-    private RecyclerView mRecyclerViewWards;
-    private FirestoreRecyclerAdapter<Ward, WardViewHolder> mFirestoreRecyclerAdapter;
+public class DistrictActivity extends AppCompatActivity implements RecyclerOnClickListener {
+    private RecyclerView mRecyclerViewDistrict;
+    private FirestoreRecyclerAdapter<District, DistrictViewHolder> mFirestoreRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ward);
+        setContentView(R.layout.activity_district);
         requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mRecyclerViewWards = findViewById(R.id.recycler_ward);
-        mRecyclerViewWards.setHasFixedSize(true);
-        mRecyclerViewWards.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerViewDistrict = findViewById(R.id.recycler_distrct);
+        mRecyclerViewDistrict.setHasFixedSize(true);
+        mRecyclerViewDistrict.setLayoutManager(new LinearLayoutManager(this));
         setupAdapter();
     }
 
@@ -46,34 +46,33 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
             finish();
         }
         return super.onOptionsItemSelected(item);
+
     }
 
     private void setupAdapter() {
-        Intent intent = getIntent();
-        String districtId = intent.getStringExtra(SelectLocationFragment.EXTRA_DISTRICT_ID);
-        String provinceId = intent.getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
-
+        String id = getIntent().getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
         Query query = FirebaseFirestore.getInstance()
-                .document("provinces" + "/" + provinceId + "/" + "districts" + "/" + districtId)
-                .collection("wards")
+                .document("provinces" + "/" + id)
+                .collection("districts")
                 .orderBy("name");
 
-        FirestoreRecyclerOptions<Ward> options = new FirestoreRecyclerOptions.Builder<Ward>().
-                setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Ward.class)).build();
+        FirestoreRecyclerOptions<District> options = new FirestoreRecyclerOptions.Builder<District>()
+                .setQuery(query, snapshot -> documentSnapshotToObject(snapshot, District.class))
+                .build();
 
-        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Ward, WardViewHolder>(options) {
+        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<District, DistrictViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull WardViewHolder viewHolder, int i, @NonNull Ward ward) {
-                viewHolder.bind(ward);
+            protected void onBindViewHolder(@NonNull DistrictViewHolder viewHolder, int i, @NonNull District district) {
+                viewHolder.bind(district);
             }
 
             @NonNull
             @Override
-            public WardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new WardViewHolder(getLayoutInflater().inflate(R.layout.ward_item_layout, parent, false), WardActivity.this);
+            public DistrictViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new DistrictViewHolder(getLayoutInflater().inflate(R.layout.district_item_layout, parent, false), DistrictActivity.this);
             }
         };
-        mRecyclerViewWards.setAdapter(mFirestoreRecyclerAdapter);
+        mRecyclerViewDistrict.setAdapter(mFirestoreRecyclerAdapter);
         mFirestoreRecyclerAdapter.startListening();
     }
 
@@ -85,11 +84,11 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
 
     @Override
     public void onClick(@NonNull View view, int position) {
-        Ward item = mFirestoreRecyclerAdapter.getItem(position);
+        District item = mFirestoreRecyclerAdapter.getItem(position);
 
         Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.name);
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.id);
+        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.id);
+        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.name);
 
         setResult(Activity.RESULT_OK, intent);
         finish();
@@ -97,28 +96,27 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
 
     @Override
     public void onBackPressed() {
-        // truyen du lieu that bai khi ng ducng click balck
+        // truyen du lieu that bai khi ng ducng click back
         setResult(Activity.RESULT_CANCELED);
         super.onBackPressed();
     }
 
 }
 
-class WardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
+class DistrictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private final TextView mTextView;
     private final RecyclerOnClickListener mRecyclerOnClickListener;
 
 
-    public WardViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
+    public DistrictViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
         super(itemView);
-        mTextView = itemView.findViewById(R.id.text_ward_name);
+        mTextView = itemView.findViewById(R.id.text_district_name);
         itemView.setOnClickListener(this);
         this.mRecyclerOnClickListener = recyclerOnClickListener;
     }
 
-    public void bind(Ward ward) {
-        mTextView.setText(ward.name);
+    public void bind(District district) {
+        mTextView.setText(district.name);
     }
 
     @Override
