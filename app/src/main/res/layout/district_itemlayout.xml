@@ -7,7 +7,7 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/text_province_name"
+        android:id="@+id/text_district_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/nunito_sans"

@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f2e8e8"
+        android:fontFamily="@font/nunito_sans"
         android:text="TỈNH, THÀNH PHỐ(*):"
         android:textSize="20dp" />
 
@@ -22,18 +23,21 @@
         android:layout_height="wrap_content">
 
         <TextView
-
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_province"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/nunito_sans"
+            android:padding="10dp"
             android:text="Chọn tỉnh, thành phố?"
-            android:textSize="20dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
 
-            />
+            android:textSize="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="@id/layout_province"
@@ -47,6 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f2e8e8"
+        android:fontFamily="@font/nunito_sans"
         android:text="QUẬN, HUYỆN(*):"
         android:textSize="20dp" />
 
@@ -56,18 +61,22 @@
         android:layout_height="wrap_content">
 
         <TextView
-
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_district"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/nunito_sans"
+            android:padding="10dp"
             android:text="Chọn quận, huyện"
             android:textSize="20dp"
+
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:id="@+id/imageView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="@id/layout_districts"
@@ -81,6 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f2e8e8"
+        android:fontFamily="@font/nunito_sans"
         android:text="XÃ, PHƯỜNG, THỊ TRẤN(*):"
         android:textSize="20dp" />
 
@@ -90,18 +100,21 @@
         android:layout_height="wrap_content">
 
         <TextView
-
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_ward"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/nunito_sans"
+            android:padding="10dp"
             android:text="Chọn xã, phường, thị trấn"
-            android:textSize="20dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
 
-            />
+            android:textSize="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView6"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:id="@+id/imageView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="@id/layout_wards"
@@ -115,7 +128,9 @@
         android:id="@+id/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:ems="10"
+        android:fontFamily="@font/nunito_sans"
         android:hint="số đường, số nhà:"
         android:inputType="textPersonName" />
 
