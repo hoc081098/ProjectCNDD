@@ -16,7 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.User;
-import com.pkhh.projectcndd.ui.login.LoginActivity;
+import com.pkhh.projectcndd.ui.login.LoginRegisterActivity;
 import com.pkhh.projectcndd.ui.post.PostActivity;
 import com.squareup.picasso.Picasso;
 
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_login:
                 if (firebaseAuth.getCurrentUser() == null) {
-                    startActivity(new Intent(this, LoginActivity.class));
+                    startActivity(new Intent(this, LoginRegisterActivity.class));
                 } else {
                     new AlertDialog.Builder(this)
                             .setTitle("Đăng xuất")
