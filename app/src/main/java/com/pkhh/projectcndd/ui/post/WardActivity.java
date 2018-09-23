@@ -21,24 +21,27 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.District;
 import com.pkhh.projectcndd.models.FirebaseModel;
+import com.pkhh.projectcndd.models.Ward;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
-public class Activity_district extends AppCompatActivity implements RecyclerOnClickListener {
-    public static final String ID_DIS = "ID_DIS";
-    public static final String NAME_DIS = "NAME_DIS";
-    private RecyclerView recyclerView_district;
-    private FirestoreRecyclerAdapter<District, VH_dis> firestoreRecyclerAdapter;
+import static com.pkhh.projectcndd.ui.post.Activity_district.ID_DIS;
+import static com.pkhh.projectcndd.ui.post.Fragment2.ID_PRO;
+
+public class WardActivity extends AppCompatActivity implements RecyclerOnClickListener {
+    public static final String NAME_WARD = "NAME_WARD";
+    private RecyclerView recyclerView_ward;
+    private FirestoreRecyclerAdapter<Ward, VHWard> firestoreRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_district);
+        setContentView(R.layout.activity_ward);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        recyclerView_district = findViewById(R.id.recycler_distrct);
-        recyclerView_district.setHasFixedSize(true);
-        recyclerView_district.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_ward = findViewById(R.id.recycler_ward);
+        recyclerView_ward.setHasFixedSize(true);
+        recyclerView_ward.setLayoutManager(new LinearLayoutManager(this));
         setupAdapter();
     }
     @Override
@@ -51,24 +54,25 @@ public class Activity_district extends AppCompatActivity implements RecyclerOnCl
 
     private void setupAdapter() {
         Intent intent_getid = getIntent();
-        String id = intent_getid.getStringExtra("ID_PRO");
-        Query query = FirebaseFirestore.getInstance().document("provinces" +"/" + id).collection("districts").orderBy("name");
-        FirestoreRecyclerOptions<District> options = new FirestoreRecyclerOptions.Builder<District>().
-                setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, District.class)).build();
+        String iddis = intent_getid.getStringExtra(ID_DIS);
+        String idpro = intent_getid.getStringExtra(ID_PRO);
+        Query query = FirebaseFirestore.getInstance().document("provinces" +"/" + idpro + "/" + "districts"+ "/" + iddis).collection("wards").orderBy("name");
+        FirestoreRecyclerOptions<Ward> options = new FirestoreRecyclerOptions.Builder<Ward>().
+                setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Ward.class)).build();
 
-        firestoreRecyclerAdapter = new FirestoreRecyclerAdapter<District, VH_dis>(options) {
+        firestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Ward, VHWard>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull VH_dis vh_dis, int i, @NonNull District district) {
-                vh_dis.bind(district);
+            protected void onBindViewHolder(@NonNull VHWard vhWard, int i, @NonNull Ward ward) {
+                vhWard.bind(ward);
             }
 
             @NonNull
             @Override
-            public VH_dis onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new VH_dis(getLayoutInflater().inflate(R.layout.district_itemlayout, parent, false), Activity_district.this);
+            public VHWard onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new VHWard(getLayoutInflater().inflate(R.layout.ward_item_layout, parent, false), WardActivity.this);
             }
         };
-        recyclerView_district.setAdapter(firestoreRecyclerAdapter);
+        recyclerView_ward.setAdapter(firestoreRecyclerAdapter);
         firestoreRecyclerAdapter.startListening();
     }
 
@@ -81,8 +85,7 @@ public class Activity_district extends AppCompatActivity implements RecyclerOnCl
     @Override
     public void onClick(@NonNull View view, int position) {
         Intent intent= new Intent();
-        intent.putExtra(ID_DIS, firestoreRecyclerAdapter.getItem(position).id);
-        intent.putExtra(NAME_DIS, firestoreRecyclerAdapter.getItem(position).name);
+        intent.putExtra(NAME_WARD, firestoreRecyclerAdapter.getItem(position).name);
         setResult(Activity.RESULT_OK, intent);
         finish();
     }
@@ -95,21 +98,21 @@ public class Activity_district extends AppCompatActivity implements RecyclerOnCl
 
 }
 
-class VH_dis extends RecyclerView.ViewHolder implements View.OnClickListener {
+class VHWard extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private final TextView textView;
     private RecyclerOnClickListener recyclerOnClickListener;
 
 
-    public VH_dis(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
+    public VHWard(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
         super(itemView);
-        textView = itemView.findViewById(R.id.text_district_name);
+        textView = itemView.findViewById(R.id.text_ward_name);
         itemView.setOnClickListener(this);
         this.recyclerOnClickListener = recyclerOnClickListener;
     }
 
-    public void bind(District district) {
-        textView.setText(district.name);
+    public void bind(Ward ward) {
+        textView.setText(ward.name);
     }
 
     @Override

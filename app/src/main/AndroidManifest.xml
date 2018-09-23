@@ -10,8 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.post.Activity_district"></activity>
-        <activity android:name=".ui.post.Activity_province" />
+        <activity
+            android:name=".ui.post.WardActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".ui.post.Activity_district"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.post.Activity_province"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"
@@ -19,6 +26,7 @@
 
         <activity
             android:name=".ui.home.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,9 +34,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.detail.MotelRoomDetailActivity" />
-        <activity android:name=".ui.post.PostActivity" />
-        <activity android:name=".ui.login.LoginActivity" />
+        <activity
+            android:name=".ui.detail.MotelRoomDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.post.PostActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

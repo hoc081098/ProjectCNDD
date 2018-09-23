@@ -5,11 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -30,10 +31,21 @@ public class Activity_province extends AppCompatActivity implements RecyclerOnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_province);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
         recyclerView_provinces = findViewById(R.id.recycler_provinces);
         recyclerView_provinces.setHasFixedSize(true);
         recyclerView_provinces.setLayoutManager(new LinearLayoutManager(this));
         setupAdaper();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home )
+            finish();
+        return super.onOptionsItemSelected(item);
+
     }
 
     private void setupAdaper() {
@@ -68,9 +80,20 @@ public class Activity_province extends AppCompatActivity implements RecyclerOnCl
     public void onClick(@NonNull View view, int position) {
         Province item = firestoreRecyclerAdapter.getItem(position);
         String id = item.id;
-
+        String name = item.name;
+        Intent intent = new Intent();
+        intent.putExtra("NAME_PRO", name);
+        intent.putExtra("ID_PRO", id);
+        setResult(Activity.RESULT_OK, intent);
+        finish();                            // bat dau man hinh truoc
     }
 
+    @Override
+    public void onBackPressed() {
+        // truyen du lieu that bai khi ng ducng click balck
+        setResult(Activity.RESULT_CANCELED);
+        super.onBackPressed();
+    }
 }
 
 class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
