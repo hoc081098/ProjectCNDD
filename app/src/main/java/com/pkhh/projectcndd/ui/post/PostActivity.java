@@ -2,7 +2,6 @@ package com.pkhh.projectcndd.ui.post;
 
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Property;
@@ -15,15 +14,16 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.pkhh.projectcndd.R;
 
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -33,7 +33,6 @@ import androidx.transition.TransitionManager;
 import static java.util.Objects.requireNonNull;
 
 public class PostActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final String CURRENT_POSITION = "CURRENT_POSITION";
     public static final int MAX_PAGE = 3;
 
     private static final TimeInterpolator PROGRESS_ANIM_INTERPOLATOR = new DecelerateInterpolator();
@@ -54,29 +53,30 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView mImagePrev, mImageNext;
     private ProgressBar mProgressBar;
     private ViewGroup mConstraintLayout;
+    private View rootLayout;
+
     private int mCurrentPosition = 0;
-
-    private FragmentSelectCategory mFragmentSelectCategory;
-    private Fragment2 mFragment2;
-    private Fragment3 mFragment3;
-
+    private SelectCategoryFragment mSelectCategoryFragment;
+    private SelectLocationFragment mSelectLocationFragment;
+    private AddPhotoFragment mAddPhotoFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
+        setupActionBar();
+        findViews();
+        final List<Fragment> fragmentList = initFragments();
+        initStepLayout(fragmentList);
+    }
 
+    private void setupActionBar() {
         final ActionBar supportActionBar = requireNonNull(getSupportActionBar());
         supportActionBar.setDisplayHomeAsUpEnabled(true);
         supportActionBar.setTitle("Bạn đăng tin");
+    }
 
-        initViews();
-
-        mFragmentSelectCategory = new FragmentSelectCategory();
-        mFragment2 = new Fragment2();
-        mFragment3 = new Fragment3();
-        final List<Fragment> fragmentList = Arrays.asList(mFragmentSelectCategory, mFragment2, mFragment3);
-
+    private void initStepLayout(List<Fragment> fragmentList) {
         mContainer.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
@@ -97,8 +97,20 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         mImagePrev.setOnClickListener(this);
     }
 
+    @NonNull
+    private List<Fragment> initFragments() {
+        mSelectCategoryFragment = new SelectCategoryFragment();
+        mSelectLocationFragment = new SelectLocationFragment();
+        mAddPhotoFragment = new AddPhotoFragment();
+        return Arrays.asList(
+                mSelectCategoryFragment,
+                mSelectLocationFragment,
+                mAddPhotoFragment
+        );
+    }
+
     private void onUpdate(int position) {
-        changeFragmentByPosiyion(position);
+        changeFragmentByPosition(position);
         setProgressBarProgressWithAnimation((int) ((double) (position + 1) / MAX_PAGE * 100));
         TransitionManager.beginDelayedTransition(mConstraintLayout, new AutoTransition()
                 .addTarget(mImageNext)
@@ -116,35 +128,43 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         animator.start();
     }
 
-    private void changeFragmentByPosiyion(int position) {
+    private void changeFragmentByPosition(int position) {
         final ActionBar supportActionBar = requireNonNull(getSupportActionBar());
 
         if (position == 0) {
+            supportActionBar.setTitle("Chọn thể loại");
         } else if (position == 1) {
-            mFragment2.updateText(mFragmentSelectCategory.getSelectedCategory() != null ? mFragmentSelectCategory.getSelectedCategory().name : null);
+            supportActionBar.setTitle("Thêm địa chỉ");
         } else if (position == 2) {
+            supportActionBar.setTitle("Thêm ảnh");
         }
 
         mContainer.setCurrentItem(position, true);
     }
 
-    private void initViews() {
+    private void findViews() {
         mContainer = findViewById(R.id.post_container);
         mImageNext = findViewById(R.id.button_next);
         mImagePrev = findViewById(R.id.button_prev);
         mProgressBar = findViewById(R.id.progressBar2);
         mConstraintLayout = findViewById(R.id.constraintLayout);
+        rootLayout = findViewById(R.id.root_post_activity);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_next:
-                if (!canGoNext()) {
-                    Toast.makeText(this, getError(), Toast.LENGTH_SHORT).show();
+                final String message = getError();
+
+                // không thể đi tiếp
+                if (message != null) {
+                    Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT)
+                            .show();
                     return;
                 }
 
+                // đi tiếp
                 if (mCurrentPosition == MAX_PAGE - 1) {
                     onComplete();
                 } else {
@@ -164,24 +184,28 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
+    // return null nếu có thể đi tiếp, hoặc return string thông báo lỗi
+    @Nullable
     private String getError() {
         if (mCurrentPosition == 0) {
-            return "Hãy chọn một thể loại!";
+            if (mSelectCategoryFragment.getSelectedCategory() != null) {
+                return null;
+            } else {
+                return "Hãy chọn một thể loại!";
+            }
         }
-        //TODO
+        if (mCurrentPosition == 1) {
+            final String districtId = mSelectLocationFragment.getDistrictId();
+            final String provinceId = mSelectLocationFragment.getProvinceId();
+            final String wardId = mSelectLocationFragment.getWardId();
+            if (districtId != null && provinceId != null && wardId != null) {
+                return null;
+            } else {
+                return "Hãy cung cấp đủ địa chỉ!";
+            }
+        }
 
-        if (mCurrentPosition == MAX_PAGE - 1) {
-            return "Hãy điền đầy đủ thông tin";
-        }
-        return "Lỗi xảy ra";
-    }
-
-    private boolean canGoNext() {
-        if (mCurrentPosition == 0) {
-            return mFragmentSelectCategory.getSelectedCategory() != null;
-        }
-        return true;
+        return null;
     }
 
     @Override
@@ -196,13 +220,14 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
             finish();
         }
         if (item.getItemId() == R.id.action_review) {
-            //TODO
-            Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show();
+            //TODO: Xem lại thông tin
+            Toast.makeText(this, "TODO xem lại thông tin", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void onComplete() {
         Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
+        // TODO: Đăng bài
     }
 }

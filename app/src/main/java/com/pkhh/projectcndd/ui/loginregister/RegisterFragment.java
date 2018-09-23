@@ -53,14 +53,14 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     private FirebaseFirestore mFirebaseFirestore;
     private FirebaseStorage mFirebaseStorage;
 
-    private OnLoginClick mOnLoginClick;
+    private Listener mListener;
     @Nullable
     private Uri mSelectedImageUri;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mOnLoginClick = (OnLoginClick) context;
+        mListener = (Listener) context;
     }
 
     @Nullable
@@ -102,7 +102,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                 onRegister();
                 break;
             case R.id.button_back_to_login:
-                mOnLoginClick.onLoginClick();
+                mListener.onLoginClick();
                 break;
             case R.id.image_avatar:
                 final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -197,8 +197,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                 .addOnSuccessListener(documentReference -> {
                     mProgressBar.setVisibility(INVISIBLE);
                     mButtonRegister.setEnabled(true);
-                    Toast.makeText(requireContext(), "Đăng kí thành công", Toast.LENGTH_SHORT).show();
-                    requireActivity().finish();
+                    mListener.onRegisterSuccessfully();
                 })
                 .addOnFailureListener(this::onError);
     }
@@ -219,7 +218,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    interface OnLoginClick {
+    interface Listener {
         void onLoginClick();
+
+        void onRegisterSuccessfully();
     }
 }

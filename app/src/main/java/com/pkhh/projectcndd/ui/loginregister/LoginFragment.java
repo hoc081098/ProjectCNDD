@@ -40,13 +40,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private View mButtonRegister;
     private ViewGroup root_login_frag;
 
-    private OnRegisterClick onRegisterClick;
+    private Listener mListener;
     private FirebaseAuth mFirebaseAuth;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        onRegisterClick = (OnRegisterClick) context;
+        mListener = (Listener) context;
     }
 
     @Nullable
@@ -81,7 +81,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         if (v.getId() == R.id.button_login) {
             onLogin();
         } else if (v.getId() == R.id.button_register) {
-            onRegisterClick.onRegisterClick();
+            mListener.onRegisterClick();
         }
     }
 
@@ -158,8 +158,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         public void onTransitionEnd(@NonNull Transition transition) {
                             super.onTransitionEnd(transition);
 
-                            Toast.makeText(requireContext(), "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                            requireActivity().finish();
+                            mListener.onLoginSuccessfully();
                         }
                     });
 
@@ -208,12 +207,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     final ConstraintLayout.LayoutParams layoutParams2 = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
                     layoutParams2.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
                     mButtonLogin.setLayoutParams(layoutParams2);
-
-
                 });
     }
 
-    interface OnRegisterClick {
+    interface Listener {
         void onRegisterClick();
+
+        void onLoginSuccessfully();
     }
 }

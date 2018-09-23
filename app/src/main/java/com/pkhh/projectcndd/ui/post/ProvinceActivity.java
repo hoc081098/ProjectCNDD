@@ -14,7 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
-import com.pkhh.projectcndd.models.Ward;
+import com.pkhh.projectcndd.models.Province;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
 import androidx.annotation.NonNull;
@@ -24,19 +24,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import static java.util.Objects.requireNonNull;
 
-public class WardActivity extends AppCompatActivity implements RecyclerOnClickListener {
-    private RecyclerView mRecyclerViewWards;
-    private FirestoreRecyclerAdapter<Ward, WardViewHolder> mFirestoreRecyclerAdapter;
+
+public class ProvinceActivity extends AppCompatActivity implements RecyclerOnClickListener {
+    private RecyclerView mRecyclerviewProvinces;
+    private FirestoreRecyclerAdapter<Province, ProvinceViewHolder> mFirestoreRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ward);
+        setContentView(R.layout.activity_province);
         requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mRecyclerViewWards = findViewById(R.id.recycler_ward);
-        mRecyclerViewWards.setHasFixedSize(true);
-        mRecyclerViewWards.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerviewProvinces = findViewById(R.id.recycler_provinces);
+        mRecyclerviewProvinces.setHasFixedSize(true);
+        mRecyclerviewProvinces.setLayoutManager(new LinearLayoutManager(this));
         setupAdapter();
     }
 
@@ -46,34 +47,32 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
             finish();
         }
         return super.onOptionsItemSelected(item);
+
     }
 
     private void setupAdapter() {
-        Intent intent = getIntent();
-        String districtId = intent.getStringExtra(SelectLocationFragment.EXTRA_DISTRICT_ID);
-        String provinceId = intent.getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
-
         Query query = FirebaseFirestore.getInstance()
-                .document("provinces" + "/" + provinceId + "/" + "districts" + "/" + districtId)
-                .collection("wards")
+                .collection("provinces")
                 .orderBy("name");
 
-        FirestoreRecyclerOptions<Ward> options = new FirestoreRecyclerOptions.Builder<Ward>().
-                setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Ward.class)).build();
+        FirestoreRecyclerOptions<Province> options = new FirestoreRecyclerOptions.Builder<Province>()
+                .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Province.class))
+                .build();
 
-        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Ward, WardViewHolder>(options) {
-            @Override
-            protected void onBindViewHolder(@NonNull WardViewHolder viewHolder, int i, @NonNull Ward ward) {
-                viewHolder.bind(ward);
-            }
-
+        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Province, ProvinceViewHolder>(options) {
             @NonNull
             @Override
-            public WardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new WardViewHolder(getLayoutInflater().inflate(R.layout.ward_item_layout, parent, false), WardActivity.this);
+            public ProvinceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new ProvinceViewHolder(getLayoutInflater().inflate(R.layout.province_item_layout, parent, false), ProvinceActivity.this);
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull ProvinceViewHolder viewHolder, int i, @NonNull Province province) {
+                viewHolder.bind(province);
+
             }
         };
-        mRecyclerViewWards.setAdapter(mFirestoreRecyclerAdapter);
+        mRecyclerviewProvinces.setAdapter(mFirestoreRecyclerAdapter);
         mFirestoreRecyclerAdapter.startListening();
     }
 
@@ -85,40 +84,39 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
 
     @Override
     public void onClick(@NonNull View view, int position) {
-        Ward item = mFirestoreRecyclerAdapter.getItem(position);
+        Province item = mFirestoreRecyclerAdapter.getItem(position);
+        String id = item.id;
+        String name = item.name;
 
         Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.name);
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.id);
+        intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_NAME, name);
+        intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_ID, id);
 
         setResult(Activity.RESULT_OK, intent);
-        finish();
+        finish(); // quay dau man hinh truoc
     }
 
     @Override
     public void onBackPressed() {
-        // truyen du lieu that bai khi ng ducng click balck
+        // truyen du lieu that bai khi ng ducng click back
         setResult(Activity.RESULT_CANCELED);
         super.onBackPressed();
     }
-
 }
 
-class WardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
+class ProvinceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private final TextView mTextView;
     private final RecyclerOnClickListener mRecyclerOnClickListener;
 
-
-    public WardViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
+    public ProvinceViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
         super(itemView);
-        mTextView = itemView.findViewById(R.id.text_ward_name);
+        mTextView = itemView.findViewById(R.id.text_province_name);
         itemView.setOnClickListener(this);
         this.mRecyclerOnClickListener = recyclerOnClickListener;
     }
 
-    public void bind(Ward ward) {
-        mTextView.setText(ward.name);
+    public void bind(Province province) {
+        mTextView.setText(province.name);
     }
 
     @Override
