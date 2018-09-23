@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -31,7 +32,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.app.Activity.RESULT_OK;
 import static android.view.View.INVISIBLE;
@@ -41,7 +41,7 @@ import static com.pkhh.projectcndd.utils.FirebaseUtil.getMessageFromFirebaseAuth
 public class RegisterFragment extends Fragment implements View.OnClickListener {
     private static final int CHOOSE_AVATAR_IMAGE_REQUEST_CODE = 1;
 
-    private CircleImageView mImageAvatar;
+    private ImageView mImageAvatar;
     private EditText mEditName;
     private EditText mEditEmail;
     private EditText mEditPassword;
@@ -214,7 +214,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                         .load(mSelectedImageUri)
                         .fit()
                         .centerCrop()
-                        .noFade()
                         .into(mImageAvatar);
             }
         }
