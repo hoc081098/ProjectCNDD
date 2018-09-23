@@ -90,6 +90,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="64dp"
             android:fontFamily="@font/nunito_sans"
             android:text="Quay lại đăng nhập"
             android:textAlignment="center"
@@ -124,10 +125,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/image_avatar" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <ImageView
             android:id="@+id/image_avatar"
             android:layout_width="96dp"
             android:layout_height="96dp"
+            android:layout_marginTop="64dp"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toTopOf="@id/edit_full_name"
             app:layout_constraintEnd_toEndOf="parent"
@@ -135,7 +137,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            app:srcCompat="@drawable/ic_person_primary_24dp" />
+            app:srcCompat="@drawable/avatar_default_icon" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

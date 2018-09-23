@@ -21,9 +21,9 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.login_register_container, new LoginFragment(), "LOGIN_FRAGMENT")
                     .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
                             R.anim.slide_in_left, R.anim.slide_out_right)
+                    .add(R.id.login_register_container, new LoginFragment(), "LOGIN_FRAGMENT")
                     .commit();
         }
     }
@@ -31,7 +31,11 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStack();
+            } else {
+                finish();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -40,9 +44,9 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
     public void onRegisterClick() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.login_register_container, new RegisterFragment(), "REGISTER_FRAGMENT")
                 .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
                         R.anim.slide_in_left, R.anim.slide_out_right)
+                .replace(R.id.login_register_container, new RegisterFragment(), "REGISTER_FRAGMENT")
                 .addToBackStack(null)
                 .commit();
     }
