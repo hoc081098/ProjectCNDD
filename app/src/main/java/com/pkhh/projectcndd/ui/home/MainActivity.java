@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -32,6 +33,7 @@ import static com.pkhh.projectcndd.utils.Constants.USER_NAME_COLLECION;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
+    public static final String CLAZZ = "CLAZZ";
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -133,27 +135,42 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_home:
                 break;
             case R.id.nav_post:
-                startActivity(new Intent(this, PostActivity.class));
+                onClickNavPost();
                 break;
             case R.id.nav_login:
-                if (firebaseAuth.getCurrentUser() == null) {
-                    startActivity(new Intent(this, LoginRegisterActivity.class));
-                } else {
-                    new AlertDialog.Builder(this)
-                            .setTitle("Đăng xuất")
-                            .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
-                            .setNegativeButton("Không", (dialog, __) -> dialog.dismiss())
-                            .setPositiveButton("Có", (dialog, __) -> {
-                                dialog.dismiss();
-                                firebaseAuth.signOut();
-                            })
-                            .show();
-                }
+                onClickNavLogin();
                 break;
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void onClickNavLogin() {
+        if (firebaseAuth.getCurrentUser() == null) {
+            startActivity(new Intent(this, LoginRegisterActivity.class));
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Đăng xuất")
+                    .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+                    .setNegativeButton("Không", (dialog, __) -> dialog.dismiss())
+                    .setPositiveButton("Có", (dialog, __) -> {
+                        dialog.dismiss();
+                        firebaseAuth.signOut();
+                    })
+                    .show();
+        }
+    }
+
+    private void onClickNavPost() {
+        if (firebaseAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Bạn phải đăng nhập trước khi đăng bài", Toast.LENGTH_SHORT).show();
+            final Intent intent = new Intent(this, LoginRegisterActivity.class);
+            intent.putExtra(CLAZZ, PostActivity.class);
+            startActivity(intent);
+        } else {
+            startActivity(new Intent(this, PostActivity.class));
+        }
     }
 
     @Override
@@ -162,7 +179,12 @@ public class MainActivity extends AppCompatActivity
         final MenuItem loginOrLogoutMenuItem = navigationView.getMenu().findItem(R.id.nav_login);
 
         if (currentUser == null) {
-            imageAvatar.setVisibility(View.INVISIBLE);
+            Picasso.get()
+                    .load(R.drawable.avatar_default_icon)
+                    .fit()
+                    .centerCrop()
+                    .noFade()
+                    .into(imageAvatar);
             textName.setText("Chưa đăng nhập");
             textEmail.setText("Chưa đăng nhập");
 
@@ -175,7 +197,7 @@ public class MainActivity extends AppCompatActivity
                             final User user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);
                             textName.setText(user.fullName);
                             textEmail.setText(user.email);
-                            imageAvatar.setVisibility(View.VISIBLE);
+
                             final String avatar = user.avatar;
                             if (avatar != null && !avatar.isEmpty()) {
                                 Picasso.get()
