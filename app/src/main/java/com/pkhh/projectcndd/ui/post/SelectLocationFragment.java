@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +36,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     private TextView mTextViewProvinceName;
     private TextView mTextViewDistrictName;
     private TextView mTextViewWardName;
+    private EditText mEditTextAddress;
 
     @Nullable
     private String mProvinceName;
@@ -66,6 +68,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
         mConstraintLayoutProvince.setOnClickListener(this);
         mConstraintLayoutDistrict.setOnClickListener(this);
         mConstraintLayoutWard.setOnClickListener(this);
+        view.findViewById(R.id.image_current_location).setOnClickListener(this);
     }
 
 
@@ -76,6 +79,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
         mTextViewProvinceName = view.findViewById(R.id.tv_province);
         mTextViewDistrictName = view.findViewById(R.id.tv_district);
         mTextViewWardName = view.findViewById(R.id.tv_ward);
+        mEditTextAddress = view.findViewById(R.id.edit_text_address);
     }
 
     @Override
@@ -107,6 +111,9 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
                 intent.putExtra(EXTRA_PROVINCE_ID, mProvinceId);
                 intent.putExtra(EXTRA_DISTRICT_ID, mDistrictId);
                 startActivityForResult(intent, REQUEST_CODE_SELECT_WARD);
+                break;
+            case R.id.image_current_location:
+                startActivity(new Intent(requireContext(), PickAddressActivity.class));
                 break;
         }
     }
