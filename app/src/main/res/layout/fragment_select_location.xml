@@ -12,7 +12,8 @@
         android:fontFamily="@font/nunito_sans"
         android:padding="8dp"
         android:text="TỈNH, THÀNH PHỐ(*):"
-        android:textSize="18sp" />
+        android:textColor="#424242"
+        android:textSize="16sp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_province"
@@ -26,12 +27,11 @@
             android:id="@+id/tv_province"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="0dp"
             android:fontFamily="@font/nunito_sans"
             android:padding="10dp"
             android:text="Chọn tỉnh, thành phố?"
-
-            android:textSize="20dp"
+            android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/imageView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -40,6 +40,7 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="@id/layout_province"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -48,13 +49,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
+        android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f2e8e8"
         android:fontFamily="@font/nunito_sans"
         android:padding="8dp"
         android:text="QUẬN, HUYỆN(*):"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_districts"
@@ -68,12 +70,12 @@
             android:id="@+id/tv_district"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="0dp"
             android:fontFamily="@font/nunito_sans"
             android:padding="10dp"
             android:text="Chọn quận, huyện"
-            android:textSize="20dp"
-
+            android:textColor="#424242"
+            android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -83,6 +85,7 @@
             android:id="@+id/imageView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="@id/layout_districts"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -91,13 +94,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
+        android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f2e8e8"
         android:fontFamily="@font/nunito_sans"
         android:padding="8dp"
         android:text="XÃ, PHƯỜNG, THỊ TRẤN(*):"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_wards"
@@ -111,12 +115,12 @@
             android:id="@+id/tv_ward"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="0dp"
             android:fontFamily="@font/nunito_sans"
             android:padding="10dp"
             android:text="Chọn xã, phường, thị trấn"
-
-            android:textSize="20dp"
+            android:textColor="#424242"
+            android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/imageView6"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -125,6 +129,7 @@
             android:id="@+id/imageView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="@id/layout_wards"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -134,19 +139,18 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
+        android:layout_marginTop="8dp"
         android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/edit_text_address"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="8dp"
             android:ems="10"
             android:fontFamily="@font/nunito_sans"
-            android:hint="số đường, số nhà:"
-            android:inputType="textPersonName"
+            android:hint="số đường, số nhà (*):"
+            android:inputType="text"
+            android:textColor="#424242"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/image_current_location"
             app:layout_constraintStart_toStartOf="parent"
@@ -154,13 +158,12 @@
 
         <ImageView
             android:id="@+id/image_current_location"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:padding="8dp"
+            android:padding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

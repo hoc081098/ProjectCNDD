@@ -21,6 +21,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     public static final int REQUEST_CODE_SELECT_PROVINCE = 0;
     public static final int REQUEST_CODE_SELECT_DISTRICT = 1;
     public static final int REQUEST_CODE_SELECT_WARD = 2;
+    public static final int REQUEST_CODE_PICK_ADDRESS = 3;
 
     public static final String EXTRA_PROVINCE_ID = "EXTRA_PROVINCE_ID";
     public static final String EXTRA_PROVINCE_NAME = "EXTRA_PROVINCE_NAME";
@@ -113,7 +114,8 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
                 startActivityForResult(intent, REQUEST_CODE_SELECT_WARD);
                 break;
             case R.id.image_current_location:
-                startActivity(new Intent(requireContext(), PickAddressActivity.class));
+                startActivityForResult(new Intent(requireContext(), PickAddressActivity.class),
+                        REQUEST_CODE_PICK_ADDRESS);
                 break;
         }
     }
@@ -121,20 +123,23 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SELECT_PROVINCE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_SELECT_PROVINCE && resultCode == Activity.RESULT_OK && data != null) {
             mProvinceId = data.getStringExtra(EXTRA_PROVINCE_ID);
             mProvinceName = data.getStringExtra(EXTRA_PROVINCE_NAME);
             mTextViewProvinceName.setText(mProvinceName);
         }
-        if (requestCode == REQUEST_CODE_SELECT_DISTRICT && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_SELECT_DISTRICT && resultCode == Activity.RESULT_OK && data != null) {
             mDistrictId = data.getStringExtra(EXTRA_DISTRICT_ID);
             mDistrictName = data.getStringExtra(EXTRA_DISTRICT_NAME);
             mTextViewDistrictName.setText(mDistrictName);
         }
-        if (requestCode == REQUEST_CODE_SELECT_WARD && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_SELECT_WARD && resultCode == Activity.RESULT_OK && data != null) {
             mWardName = data.getStringExtra(EXTRA_WARD_NAME);
             mWardId = data.getStringExtra(EXTRA_WARD_ID);
             mTextViewWardName.setText(mWardName);
+        }
+        if (requestCode == REQUEST_CODE_PICK_ADDRESS && resultCode == Activity.RESULT_OK && data != null) {
+            mEditTextAddress.setText(data.getCharSequenceExtra(PickAddressActivity.EXTRA_ADDRESS));
         }
     }
 
