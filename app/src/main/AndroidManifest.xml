@@ -31,6 +31,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
+            android:screenOrientation="portrait"
             android:name=".ui.post.PickAddressActivity"
             android:label="@string/title_activity_pick_address" />
 

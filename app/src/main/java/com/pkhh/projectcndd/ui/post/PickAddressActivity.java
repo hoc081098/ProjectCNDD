@@ -57,10 +57,13 @@ import static java.util.Objects.requireNonNull;
 public class PickAddressActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 
     public static final String TAG = PickAddressActivity.class.getSimpleName();
+
     public static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
     public static final int REQUEST_CHECK_SETTINGS = 3;
     public static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+
     public static final String EXTRA_ADDRESS = "EXTRA_ADDRESS";
+    public static final String EXTRA_LATLNG = "EXTRA_LATLNG";
 
     @Nullable
     private GoogleMap mMap;
@@ -301,6 +304,26 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
                 case RESULT_OK:
                     Place place = PlaceAutocomplete.getPlace(this, data);
                     mEditTextSearchBox.setText(place.getAddress());
+
+                    if (locationCallback != null && fusedLocationProviderClient != null) {
+                        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+                    }
+                    requestUpdateLocation = false;
+
+                    if (mMarker != null) {
+                        mMarker.remove();
+                    }
+                    if (mMap != null) {
+                        final LatLng latLng = place.getLatLng();
+                        mMarker = mMap.addMarker(
+                                new MarkerOptions()
+                                        .position(latLng)
+                                        .title("Vị trí tìm kiếm")
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_name))
+                        );
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+                    }
+
                     break;
                 case PlaceAutocomplete.RESULT_ERROR:
                     Status status = PlaceAutocomplete.getStatus(this, data);
@@ -329,6 +352,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
     public void finish() {
         final Intent data = new Intent();
         data.putExtra(EXTRA_ADDRESS, mEditTextSearchBox.getText());
+        data.putExtra(EXTRA_LATLNG, mMarker != null ? mMarker.getPosition() : null);
         setResult(RESULT_OK, data);
 
         super.finish();

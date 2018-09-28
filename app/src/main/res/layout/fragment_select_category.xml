@@ -3,9 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="#fafafa"
     android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
+        tools:listitem="@layout/category_item_layout"
         android:id="@+id/recycler_category"
         android:layout_width="0dp"
         android:layout_height="0dp"

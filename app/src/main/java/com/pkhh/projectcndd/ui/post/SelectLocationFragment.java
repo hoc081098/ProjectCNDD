@@ -10,7 +10,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.pkhh.projectcndd.R;
+
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +41,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     private TextView mTextViewDistrictName;
     private TextView mTextViewWardName;
     private EditText mEditTextAddress;
+    private TextView mTextViewLatLng;
 
     @Nullable
     private String mProvinceName;
@@ -81,6 +85,7 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
         mTextViewDistrictName = view.findViewById(R.id.tv_district);
         mTextViewWardName = view.findViewById(R.id.tv_ward);
         mEditTextAddress = view.findViewById(R.id.edit_text_address);
+        mTextViewLatLng = view.findViewById(R.id.tv_latlng);
     }
 
     @Override
@@ -140,6 +145,13 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
         }
         if (requestCode == REQUEST_CODE_PICK_ADDRESS && resultCode == Activity.RESULT_OK && data != null) {
             mEditTextAddress.setText(data.getCharSequenceExtra(PickAddressActivity.EXTRA_ADDRESS));
+            final LatLng latLng = data.getParcelableExtra(PickAddressActivity.EXTRA_LATLNG);
+            if (latLng != null) {
+                mTextViewLatLng.setVisibility(View.VISIBLE);
+                mTextViewLatLng.setText(String.format(Locale.getDefault(), "Kinh độ: %f, vĩ độ: %f", latLng.latitude, latLng.longitude));
+            } else {
+                mTextViewLatLng.setVisibility(View.INVISIBLE);
+            }
         }
     }
 

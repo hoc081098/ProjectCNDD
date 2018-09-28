@@ -18,17 +18,44 @@
                                 <PersistentState>
                                   <option name="children">
                                     <map>
-                                      <entry key="clipartAsset">
+                                      <entry key="clipArt">
                                         <value>
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/D:/Admin/Other/android-stuido-3.3/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_location_on_black_24dp.xml" />
+                                                <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
                                           </PersistentState>
                                         </value>
                                       </entry>
+                                      <entry key="clipartAsset">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="url" value="jar:file:/D:/Admin/Other/android-studio-3.2/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_location_on_black_24dp.xml" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="trimmed" value="true" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                    </map>
+                                  </option>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="theme" value="CUSTOM" />
                                     </map>
                                   </option>
                                 </PersistentState>
