@@ -14,12 +14,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.snackbar.Snackbar;
 import com.pkhh.projectcndd.R;
 
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -55,6 +57,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     private ViewGroup mConstraintLayout;
     private View rootLayout;
 
+    @IntRange(from = 0, to = MAX_PAGE - 1)
     private int mCurrentPosition = 0;
     private SelectCategoryFragment mSelectCategoryFragment;
     private SelectLocationFragment mSelectLocationFragment;
@@ -109,7 +112,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         );
     }
 
-    private void onUpdate(int position) {
+    private void onUpdate(@IntRange(from = 0, to = MAX_PAGE - 1) int position) {
         changeFragmentByPosition(position);
         setProgressBarProgressWithAnimation((int) ((double) (position + 1) / MAX_PAGE * 100));
         TransitionManager.beginDelayedTransition(mConstraintLayout, new AutoTransition()
@@ -128,7 +131,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         animator.start();
     }
 
-    private void changeFragmentByPosition(int position) {
+    private void changeFragmentByPosition(@IntRange(from = 0, to = MAX_PAGE - 1) int position) {
         final ActionBar supportActionBar = requireNonNull(getSupportActionBar());
 
         if (position == 0) {
@@ -138,7 +141,6 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         } else if (position == 2) {
             supportActionBar.setTitle("Thêm ảnh");
         }
-
         mContainer.setCurrentItem(position, true);
     }
 
@@ -156,32 +158,37 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.button_next:
                 final String message = getError();
-
-                // không thể đi tiếp
-                if (message != null) {
+                if (message != null) { // không thể đi tiếp
                     Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT)
                             .show();
-                    return;
-                }
-
-                // đi tiếp
-                if (mCurrentPosition == MAX_PAGE - 1) {
-                    onComplete();
                 } else {
-                    ++mCurrentPosition;
-                    onUpdate(mCurrentPosition);
+                    goNext(); // đi tiếp
                 }
                 break;
             case R.id.button_prev:
-                if (mCurrentPosition == 0) {
-                    onUpdate(mCurrentPosition);
-                } else {
-                    --mCurrentPosition;
-                    onUpdate(mCurrentPosition);
-                }
+                goPrevious();
                 break;
         }
 
+    }
+
+    // return true, nếu có thể quay về fragment trước, false ngược lại
+    private boolean goPrevious() {
+        if (mCurrentPosition > 0) {
+            --mCurrentPosition;
+            onUpdate(mCurrentPosition);
+            return true;
+        }
+        return false;
+    }
+
+    private void goNext() {
+        if (mCurrentPosition == MAX_PAGE - 1) {
+            onComplete();
+        } else {
+            ++mCurrentPosition;
+            onUpdate(mCurrentPosition);
+        }
     }
 
     // return null nếu có thể đi tiếp, hoặc return string thông báo lỗi
@@ -194,18 +201,34 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
                 return "Hãy chọn một thể loại!";
             }
         }
+
         if (mCurrentPosition == 1) {
             final String districtId = mSelectLocationFragment.getDistrictId();
             final String provinceId = mSelectLocationFragment.getProvinceId();
             final String wardId = mSelectLocationFragment.getWardId();
-            if (districtId != null && provinceId != null && wardId != null) {
+            final LatLng latLng = mSelectLocationFragment.getLatLng();
+            final String addressString = mSelectLocationFragment.getAddressString();
+
+            if (districtId != null
+                    && provinceId != null
+                    && wardId != null
+                    && latLng != null
+                    && addressString != null) {
                 return null;
             } else {
                 return "Hãy cung cấp đủ địa chỉ!";
             }
         }
 
+        // TODO: default not implement
         return null;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!goPrevious()) {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -217,17 +240,17 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            onBackPressed();
         }
         if (item.getItemId() == R.id.action_review) {
             //TODO: Xem lại thông tin
-            Toast.makeText(this, "TODO xem lại thông tin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "TODO: xem lại thông tin", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void onComplete() {
-        Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "TODO: onComplete", Toast.LENGTH_SHORT).show();
         // TODO: Đăng bài
     }
 }

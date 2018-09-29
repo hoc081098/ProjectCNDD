@@ -89,7 +89,7 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
 
         Intent intent = new Intent();
         intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.name);
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.id);
+        intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.getId());
 
         setResult(Activity.RESULT_OK, intent);
         finish();

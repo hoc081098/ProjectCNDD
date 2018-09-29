@@ -85,7 +85,7 @@ public class ProvinceActivity extends AppCompatActivity implements RecyclerOnCli
     @Override
     public void onClick(@NonNull View view, int position) {
         Province item = mFirestoreRecyclerAdapter.getItem(position);
-        String id = item.id;
+        String id = item.getId();
         String name = item.name;
 
         Intent intent = new Intent();

@@ -13,11 +13,10 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.pkhh.projectcndd.R;
 
-import java.util.Locale;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 
 public class SelectLocationFragment extends Fragment implements View.OnClickListener {
@@ -32,7 +31,6 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     public static final String EXTRA_DISTRICT_NAME = "EXTRA_DISTRICT_NAME";
     public static final String EXTRA_WARD_ID = "EXTRA_WARD_ID";
     public static final String EXTRA_WARD_NAME = "EXTRA_WARD_NAME";
-
 
     private ConstraintLayout mConstraintLayoutProvince;
     private ConstraintLayout mConstraintLayoutDistrict;
@@ -58,6 +56,10 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     @Nullable
     private String mWardId;
 
+    @Nullable
+    private String addressString;
+    @Nullable
+    private LatLng latLng;
 
     @Nullable
     @Override
@@ -119,8 +121,10 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
                 startActivityForResult(intent, REQUEST_CODE_SELECT_WARD);
                 break;
             case R.id.image_current_location:
-                startActivityForResult(new Intent(requireContext(), PickAddressActivity.class),
-                        REQUEST_CODE_PICK_ADDRESS);
+                final Intent pickAddressIntent = new Intent(requireContext(), PickAddressActivity.class);
+                pickAddressIntent.putExtra(PickAddressActivity.EXTRA_LATLNG, latLng);
+                pickAddressIntent.putExtra(PickAddressActivity.EXTRA_ADDRESS, addressString);
+                startActivityForResult(pickAddressIntent, REQUEST_CODE_PICK_ADDRESS);
                 break;
         }
     }
@@ -144,11 +148,18 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
             mTextViewWardName.setText(mWardName);
         }
         if (requestCode == REQUEST_CODE_PICK_ADDRESS && resultCode == Activity.RESULT_OK && data != null) {
-            mEditTextAddress.setText(data.getCharSequenceExtra(PickAddressActivity.EXTRA_ADDRESS));
-            final LatLng latLng = data.getParcelableExtra(PickAddressActivity.EXTRA_LATLNG);
+            addressString = data.getCharSequenceExtra(PickAddressActivity.EXTRA_ADDRESS).toString();
+            latLng = data.getParcelableExtra(PickAddressActivity.EXTRA_LATLNG);
+
+            mEditTextAddress.setText(addressString);
             if (latLng != null) {
                 mTextViewLatLng.setVisibility(View.VISIBLE);
-                mTextViewLatLng.setText(String.format(Locale.getDefault(), "Kinh độ: %f, vĩ độ: %f", latLng.latitude, latLng.longitude));
+                final String s = HtmlCompat.fromHtml("<small>" +
+                        "<i>Kinh độ: %.4f</i>" +
+                        "<br>" +
+                        "<i>Vĩ độ  : %.4f</i>" +
+                        "</small>", HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
+                mTextViewLatLng.setText(String.format(s, latLng.latitude, latLng.longitude));
             } else {
                 mTextViewLatLng.setVisibility(View.INVISIBLE);
             }
@@ -168,5 +179,15 @@ public class SelectLocationFragment extends Fragment implements View.OnClickList
     @Nullable
     public String getWardId() {
         return mWardId;
+    }
+
+    @Nullable
+    public String getAddressString() {
+        return addressString;
+    }
+
+    @Nullable
+    public LatLng getLatLng() {
+        return latLng;
     }
 }

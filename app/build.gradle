@@ -80,6 +80,9 @@ dependencies {
 
     // image slider
     implementation project(':image-slider')
+
+    // stream support
+    implementation 'com.annimon:stream:1.2.1'
 }
 
 

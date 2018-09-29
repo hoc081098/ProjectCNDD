@@ -7,4 +7,6 @@
     <color name="colorPrimary">#F2F2F2</color>
     <color name="colorPrimaryDark">#B6B6B6</color>
     <color name="colorAccent">#0075DA</color>
+
+    <color name="colorMaterialBlue400_Opacity80">#5042a5f5</color>
 </resources>

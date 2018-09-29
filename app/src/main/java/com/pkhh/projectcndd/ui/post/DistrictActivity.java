@@ -87,7 +87,7 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
         District item = mFirestoreRecyclerAdapter.getItem(position);
 
         Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.id);
+        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.getId());
         intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.name);
 
         setResult(Activity.RESULT_OK, intent);

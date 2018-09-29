@@ -54,28 +54,4 @@ public class MotelRoom extends FirebaseModel {
     // Firebase Firestore require empty constructor
     public MotelRoom() {
     }
-
-    @Override
-    public String toString() {
-        return "MotelRoom{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                ", countView=" + countView +
-                ", size=" + size +
-                ", address='" + address + '\'' +
-                ", addressGeoPoint=" + addressGeoPoint +
-                ", images=" + images +
-                ", phone='" + phone + '\'' +
-                ", owner=" + owner +
-                ", approve=" + approve +
-                ", utilities=" + utilities +
-                ", user=" + user +
-                ", category=" + category +
-                ", district=" + district +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", id='" + id + '\'' +
-                '}';
-    }
 }

@@ -99,7 +99,8 @@ public class MotelRoomsListFragment extends Fragment {
                 }
                 if (viewType == TYPE_FIREBASE_MODEL_ITEM) {
                     final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.motel_room_item_layout, parent, false);
-                    final RecyclerOnClickListener recyclerOnClickListener = (view, position) -> MotelRoomsListFragment.this.onItemClick(view.getId(), ((FirebaseModel) getItem(position)).id);
+                    final RecyclerOnClickListener recyclerOnClickListener = (view, position) ->
+                            MotelRoomsListFragment.this.onItemClick(view.getId(), ((FirebaseModel) getItem(position)).getId());
                     return new MotelRoomVH(
                             itemView,
                             recyclerOnClickListener
