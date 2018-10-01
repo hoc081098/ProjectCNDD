@@ -1,5 +1,6 @@
 package com.pkhh.projectcndd.ui.loginregister;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,8 +34,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import static android.app.Activity.RESULT_OK;
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
 import static com.pkhh.projectcndd.utils.FirebaseUtil.getMessageFromFirebaseAuthExceptionErrorCode;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
@@ -46,8 +44,8 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     private EditText mEditEmail;
     private EditText mEditPassword;
     private Button mButtonRegister;
-    private ProgressBar mProgressBar;
     private View mButtonBackToLogin;
+    private ProgressDialog mProgressDialog;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseFirestore mFirebaseFirestore;
@@ -90,7 +88,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         mEditEmail = view.findViewById(R.id.edit_email);
         mEditPassword = view.findViewById(R.id.edit_password);
         mButtonRegister = view.findViewById(R.id.button_register);
-        mProgressBar = view.findViewById(R.id.progress_bar);
         mButtonBackToLogin = view.findViewById(R.id.button_back_to_login);
         mImageAvatar = view.findViewById(R.id.image_avatar);
     }
@@ -137,7 +134,10 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
-        mProgressBar.setVisibility(VISIBLE);
+        mProgressDialog = new ProgressDialog(requireContext());
+        mProgressDialog.setTitle("Đang xử lý");
+        mProgressDialog.setMessage("Vui lòng chờ...");
+        mProgressDialog.show();
         mButtonRegister.setEnabled(false);
 
         mFirebaseAuth.createUserWithEmailAndPassword(email, password)
@@ -182,7 +182,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     }
 
     private void onError(@Nullable Exception e) {
-        mProgressBar.setVisibility(INVISIBLE);
+        mProgressDialog.dismiss();
         mButtonRegister.setEnabled(true);
 
         String message = e instanceof FirebaseAuthException
@@ -195,7 +195,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         mFirebaseFirestore.document(Constants.USER_NAME_COLLECION + "/" + uid)
                 .set(user)
                 .addOnSuccessListener(documentReference -> {
-                    mProgressBar.setVisibility(INVISIBLE);
+                    mProgressDialog.dismiss();
                     mButtonRegister.setEnabled(true);
                     mListener.onRegisterSuccessfully();
                 })
@@ -215,6 +215,14 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                         .centerCrop()
                         .into(mImageAvatar);
             }
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
         }
     }
 

@@ -88,7 +88,7 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
         Ward item = mFirestoreRecyclerAdapter.getItem(position);
 
         Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.name);
+        intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.getName());
         intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.getId());
 
         setResult(Activity.RESULT_OK, intent);
@@ -118,7 +118,7 @@ class WardViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
     }
 
     public void bind(Ward ward) {
-        mTextView.setText(ward.name);
+        mTextView.setText(ward.getName());
     }
 
     @Override

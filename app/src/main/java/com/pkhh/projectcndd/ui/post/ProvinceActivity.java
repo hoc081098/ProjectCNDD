@@ -86,7 +86,7 @@ public class ProvinceActivity extends AppCompatActivity implements RecyclerOnCli
     public void onClick(@NonNull View view, int position) {
         Province item = mFirestoreRecyclerAdapter.getItem(position);
         String id = item.getId();
-        String name = item.name;
+        String name = item.getName();
 
         Intent intent = new Intent();
         intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_NAME, name);
@@ -116,7 +116,7 @@ class ProvinceViewHolder extends RecyclerView.ViewHolder implements View.OnClick
     }
 
     public void bind(Province province) {
-        mTextView.setText(province.name);
+        mTextView.setText(province.getName());
     }
 
     @Override

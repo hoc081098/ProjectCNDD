@@ -33,12 +33,14 @@ import androidx.transition.TransitionSet;
 import static com.pkhh.projectcndd.utils.FirebaseUtil.getMessageFromFirebaseAuthExceptionErrorCode;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
+    private static final int DURATION = 300;
+
     private EditText mEditEmail;
     private EditText mEditPassword;
     private Button mButtonLogin;
     private ProgressBar mProgressBar;
     private View mButtonRegister;
-    private ViewGroup root_login_frag;
+    private ViewGroup mRootLayout;
 
     private Listener mListener;
     private FirebaseAuth mFirebaseAuth;
@@ -73,7 +75,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         mButtonLogin = view.findViewById(R.id.button_login);
         mProgressBar = view.findViewById(R.id.progress_bar);
         mButtonRegister = view.findViewById(R.id.button_register);
-        root_login_frag = view.findViewById(R.id.root_login_frag);
+        mRootLayout = view.findViewById(R.id.root_login_frag);
     }
 
     @Override
@@ -104,110 +106,87 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
-//        mProgressBar.setVisibility(VISIBLE);
-//        mButtonLogin.setEnabled(false);
-        int duration = 300;
-        TransitionManager.beginDelayedTransition(root_login_frag, new TransitionSet()
+        beginTransition();
+
+        mFirebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        LoginFragment.this.onComplete(new TransitionListenerAdapter() {
+                            @Override
+                            public void onTransitionEnd(@NonNull Transition transition) {
+                                mListener.onLoginSuccessfully();
+                            }
+                        });
+                    } else {
+                        LoginFragment.this.onComplete(new TransitionListenerAdapter() {
+                            @Override
+                            public void onTransitionEnd(@NonNull Transition transition) {
+                                Exception e = task.getException();
+                                if (e instanceof FirebaseAuthException) {
+                                    final String message = getMessageFromFirebaseAuthExceptionErrorCode(((FirebaseAuthException) e).getErrorCode());
+                                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(requireContext(), e != null ? e.getMessage() : "", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void beginTransition() {
+        TransitionManager.beginDelayedTransition(mRootLayout, new TransitionSet()
                 .addTransition(
                         new ChangeBounds()
                                 .addTarget(mButtonLogin)
-                                .setDuration(duration)
+                                .setDuration(DURATION)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 )
                 .addTransition(
                         new Fade()
                                 .addTarget(mButtonLogin)
-                                .setDuration(duration)
+                                .setDuration(DURATION)
                 )
                 .addTransition(
                         new Fade().addTarget(mProgressBar)
-                                .setDuration(duration)
+                                .setDuration(DURATION)
                 )
                 .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
         );
 
-        final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
-        layoutParams.width = layoutParams.height;
-        mButtonLogin.setLayoutParams(layoutParams);
+        final ConstraintLayout.LayoutParams lp1 = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
+        lp1.width = lp1.height;
+        mButtonLogin.setLayoutParams(lp1);
         mButtonLogin.setVisibility(View.INVISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
+    }
 
-        mFirebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(authResult -> {
-//                    mProgressBar.setVisibility(INVISIBLE);
-//                    mButtonLogin.setEnabled(true);
+    private void onComplete(Transition.TransitionListener listener) {
+        final TransitionSet transition = new TransitionSet()
+                .addTransition(
+                        new Fade().addTarget(mProgressBar)
+                                .setDuration(DURATION)
+                )
+                .addTransition(
+                        new Fade()
+                                .addTarget(mButtonLogin)
+                                .setDuration(DURATION)
+                )
+                .addTransition(
+                        new ChangeBounds()
+                                .addTarget(mButtonLogin)
+                                .setDuration(DURATION)
+                                .setInterpolator(new AccelerateDecelerateInterpolator())
+                ).setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        transition.addListener(listener);
 
-                    final TransitionSet transition = new TransitionSet()
-                            .addTransition(
-                                    new Fade().addTarget(mProgressBar)
-                                            .setDuration(duration)
-                            )
-                            .addTransition(
-                                    new Fade()
-                                            .addTarget(mButtonLogin)
-                                            .setDuration(duration)
-                            )
-                            .addTransition(
-                                    new ChangeBounds()
-                                            .addTarget(mButtonLogin)
-                                            .setDuration(duration)
-                                            .setInterpolator(new AccelerateDecelerateInterpolator())
-                            ).setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-                    transition.addListener(new TransitionListenerAdapter() {
-                        @Override
-                        public void onTransitionEnd(@NonNull Transition transition) {
-                            super.onTransitionEnd(transition);
+        TransitionManager.beginDelayedTransition(mRootLayout, transition);
 
-                            mListener.onLoginSuccessfully();
-                        }
-                    });
-
-                    TransitionManager.beginDelayedTransition(root_login_frag, transition);
-                    mProgressBar.setVisibility(View.INVISIBLE);
-                    mButtonLogin.setVisibility(View.VISIBLE);
-                    final ConstraintLayout.LayoutParams layoutParams2 = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
-                    layoutParams2.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
-                    mButtonLogin.setLayoutParams(layoutParams2);
-
-                })
-                .addOnFailureListener(e -> {
-                    final TransitionSet transition = new TransitionSet()
-                            .addTransition(
-                                    new Fade().addTarget(mProgressBar)
-                                            .setDuration(duration)
-                            )
-                            .addTransition(
-                                    new Fade()
-                                            .addTarget(mButtonLogin)
-                                            .setDuration(duration)
-                            )
-                            .addTransition(
-                                    new ChangeBounds()
-                                            .addTarget(mButtonLogin)
-                                            .setDuration(duration)
-                                            .setInterpolator(new AccelerateDecelerateInterpolator())
-                            ).setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-                    transition.addListener(new TransitionListenerAdapter() {
-                        @Override
-                        public void onTransitionEnd(@NonNull Transition transition) {
-                            super.onTransitionEnd(transition);
-
-                            if (e instanceof FirebaseAuthException) {
-                                final String message = getMessageFromFirebaseAuthExceptionErrorCode(((FirebaseAuthException) e).getErrorCode());
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                    TransitionManager.beginDelayedTransition(root_login_frag, transition);
-                    mProgressBar.setVisibility(View.INVISIBLE);
-                    mButtonLogin.setVisibility(View.VISIBLE);
-                    final ConstraintLayout.LayoutParams layoutParams2 = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
-                    layoutParams2.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
-                    mButtonLogin.setLayoutParams(layoutParams2);
-                });
+        mProgressBar.setVisibility(View.INVISIBLE);
+        mButtonLogin.setVisibility(View.VISIBLE);
+        final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
+        params.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+        mButtonLogin.setLayoutParams(params);
     }
 
     interface Listener {

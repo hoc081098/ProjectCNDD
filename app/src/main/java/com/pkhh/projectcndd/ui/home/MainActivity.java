@@ -195,10 +195,10 @@ public class MainActivity extends AppCompatActivity
                     .addSnapshotListener(this, (documentSnapshot, e) -> {
                         if (documentSnapshot != null) {
                             final User user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);
-                            textName.setText(user.fullName);
-                            textEmail.setText(user.email);
+                            textName.setText(user.getFullName());
+                            textEmail.setText(user.getEmail());
 
-                            final String avatar = user.avatar;
+                            final String avatar = user.getAvatar();
                             if (avatar != null && !avatar.isEmpty()) {
                                 Picasso.get()
                                         .load(avatar)

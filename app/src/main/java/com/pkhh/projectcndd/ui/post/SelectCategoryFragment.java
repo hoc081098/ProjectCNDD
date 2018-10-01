@@ -156,6 +156,7 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
             textCategoryName = itemView.findViewById(R.id.text_category_name);
 
             itemView.setOnClickListener(this);
+            radioButton.setOnClickListener(this);
         }
 
         void bind(SelectionCategory item) {
@@ -190,8 +191,7 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SelectionCategory that = (SelectionCategory) o;
-            return isSelected == that.isSelected &&
-                    Objects.equals(category, that.category);
+            return isSelected == that.isSelected && Objects.equals(category, that.category);
         }
 
         @Override

@@ -5,7 +5,7 @@
     android:id="@+id/login_register_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/default_bg"
+    android:background="#fafafa"
     tools:showIn="@layout/fragment_login">
 
 </FrameLayout>

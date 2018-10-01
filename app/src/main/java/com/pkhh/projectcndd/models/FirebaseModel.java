@@ -15,7 +15,7 @@ public abstract class FirebaseModel {
 
     @NonNull
     public String getId() {
-        return requireNonNull(id, "Id must be initialize");
+        return requireNonNull(id, "Id must be initialized");
     }
 
     @NonNull
@@ -28,9 +28,8 @@ public abstract class FirebaseModel {
     @NonNull
     public static <T extends FirebaseModel> List<T> querySnapshotToObjects(@NonNull QuerySnapshot snapshot, Class<T> tClass) {
         return Stream.of(snapshot.getDocuments()) // Stream<DocumentSnapshot>
-                .map(doc -> documentSnapshotToObject(doc, tClass)) // Stream<FirebaseModel>
-                .toList(); // List<FirebaseModel>
-
+                .map(doc -> documentSnapshotToObject(doc, tClass)) // Stream<T>
+                .toList(); // List<T>
 //        List<T> list = new ArrayList<>(snapshot.size());
 //        for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
 //            list.add(documentSnapshotToObject(documentSnapshot, tClass));

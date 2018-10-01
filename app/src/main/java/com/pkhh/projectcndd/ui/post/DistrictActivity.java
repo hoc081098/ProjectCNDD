@@ -88,7 +88,7 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
 
         Intent intent = new Intent();
         intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.getId());
-        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.name);
+        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
 
         setResult(Activity.RESULT_OK, intent);
         finish();
@@ -116,7 +116,7 @@ class DistrictViewHolder extends RecyclerView.ViewHolder implements View.OnClick
     }
 
     public void bind(District district) {
-        mTextView.setText(district.name);
+        mTextView.setText(district.getName());
     }
 
     @Override

@@ -5,26 +5,58 @@ import com.google.firebase.firestore.PropertyName;
 import java.util.Date;
 
 public class User extends FirebaseModel {
-    public String email;
+    private String email;
 
-    public String phone;
+    private String phone;
 
     @PropertyName("full_name")
-    public String fullName;
+    private String fullName;
 
-    public String address;
+    private String address;
 
-    public String avatar;
+    private String avatar;
 
     @PropertyName("is_active")
-    public boolean isActive;
+    private boolean isActive;
 
     @PropertyName("created_at")
-    public Date createdAt;
+    private Date createdAt;
 
     @PropertyName("updated_at")
-    public Date updatedAt;
+    private Date updatedAt;
 
     public User() {
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 }

@@ -44,13 +44,13 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
     }
 
     void bind(MotelRoom motelRoom) {
-        textPrice.setText("$ " + decimalFormat.format(motelRoom.price) + " đ");
-        textAddress.setText(motelRoom.address);
-        motelRoom.user.get()
+        textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");
+        textAddress.setText(motelRoom.getAddress());
+        motelRoom.getUser().get()
                 .addOnSuccessListener(documentSnapshot -> textPostBy.setText("đăng bởi " + documentSnapshot.get("full_name")))
                 .addOnFailureListener(e -> textPostBy.setText("đăng bởi ..."));
 
-        List<String> imageUrls = motelRoom.images;
+        List<String> imageUrls = motelRoom.getImages();
         if (imageUrls != null && !imageUrls.isEmpty()) {
             Picasso.get()
                     .load(imageUrls.get(0))

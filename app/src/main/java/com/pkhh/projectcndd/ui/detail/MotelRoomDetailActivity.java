@@ -90,14 +90,14 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     private void updateUi(@NonNull MotelRoom motelRoom) {
         updateImageSlider(motelRoom);
 
-        textPrice.setText("$ " + decimalFormat.format(motelRoom.price) + " đ");
-        textAddress.setText(motelRoom.address);
-        textTimePost.setText("Ngày đăng: " + dateFormat.format(motelRoom.createdAt));
-        textArea.setText(HtmlCompat.fromHtml(motelRoom.size + " m<sup><small>2</small></sup>",
+        textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");
+        textAddress.setText(motelRoom.getAddress());
+        textTimePost.setText("Ngày đăng: " + dateFormat.format(motelRoom.getCreatedAt()));
+        textArea.setText(HtmlCompat.fromHtml(motelRoom.getSize() + " m<sup><small>2</small></sup>",
                 FROM_HTML_SEPARATOR_LINE_BREAK_DIV));
         imageMap.setImageResource(R.drawable.ic_home_black_24dp); // TODO
 
-        motelRoom.user.get()
+        motelRoom.getUser().get()
                 .addOnSuccessListener(documentSnapshot -> {
                     user = documentSnapshotToObject(documentSnapshot, User.class);
                     updateUserInformation(user);
@@ -107,20 +107,20 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
 
     private void updateUserInformation(@NonNull User user) {
         Picasso.get()
-                .load(user.avatar)
+                .load(user.getAvatar())
                 .fit()
                 .centerCrop()
                 .noFade()
                 .into(imageAvatar);
-        textName.setText(user.fullName);
-        textPhone.setText(user.phone);
+        textName.setText(user.getFullName());
+        textPhone.setText(user.getPhone());
     }
 
     private void updateImageSlider(@NonNull MotelRoom motelRoom) {
         sliderLayout.removeAllSliders();
 
         int index = 0;
-        for (String e : motelRoom.images) {
+        for (String e : motelRoom.getImages()) {
             BaseSliderView sliderView = new TextSliderView(this)
                     .description("Ảnh " + ++index)
                     .image(e)
@@ -152,7 +152,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
         if (v.getId() == R.id.button_call) {
             if (user != null && isTelephonyEnabled()) {
                 Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + user.phone));
+                intent.setData(Uri.parse("tel:" + user.getPhone()));
                 startActivity(intent);
             }
             return;
@@ -161,7 +161,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
             if (user != null) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setType("vnd.android-dir/mms-sms");
-                intent.putExtra("address", user.phone);
+                intent.putExtra("address", user.getPhone());
                 intent.putExtra("sms_body", "Nice");
                 startActivity(intent);
             }

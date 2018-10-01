@@ -9,49 +9,125 @@ import java.util.List;
 import java.util.Map;
 
 public class MotelRoom extends FirebaseModel {
-    public String title;
+    private String title;
 
-    public String description;
+    private String description;
 
-    public long price;
+    private long price;
 
     @PropertyName("count_view")
-    public long countView;
+    private long countView;
 
-    public double size;
+    private double size;
 
-    public String address;
+    private String address;
 
     @PropertyName("address_geopoint")
-    public GeoPoint addressGeoPoint;
+    private GeoPoint addressGeoPoint;
 
-    public List<String> images;
+    private List<String> images;
 
-    public String phone;
+    private String phone;
 
-    public boolean owner;
+    private boolean owner;
 
-    public boolean approve;
+    private boolean approve;
 
-    public Map<String, Object> utilities;
+    private Map<String, Object> utilities;
 
-    public DocumentReference user;
+    private DocumentReference user;
 
-    public DocumentReference category;
+    private DocumentReference category;
 
-    public DocumentReference provinces;
+    private DocumentReference provinces;
 
-    public DocumentReference ward;
+    private DocumentReference ward;
 
-    public DocumentReference district;
-
-    @PropertyName("created_at")
-    public Date createdAt;
+    private DocumentReference district;
 
     @PropertyName("created_at")
-    public Date updatedAt;
+    private Date createdAt;
+
+    @PropertyName("created_at")
+    private Date updatedAt;
 
     // Firebase Firestore require empty constructor
     public MotelRoom() {
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public long getCountView() {
+        return countView;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public GeoPoint getAddressGeoPoint() {
+        return addressGeoPoint;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public boolean isOwner() {
+        return owner;
+    }
+
+    public boolean isApprove() {
+        return approve;
+    }
+
+    public Map<String, Object> getUtilities() {
+        return utilities;
+    }
+
+    public DocumentReference getUser() {
+        return user;
+    }
+
+    public DocumentReference getCategory() {
+        return category;
+    }
+
+    public DocumentReference getProvinces() {
+        return provinces;
+    }
+
+    public DocumentReference getWard() {
+        return ward;
+    }
+
+    public DocumentReference getDistrict() {
+        return district;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 }
