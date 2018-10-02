@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -36,6 +37,7 @@ import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_NAME_COLLECION;
 import static java.util.Objects.requireNonNull;
 
 public class MotelRoomDetailActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String TAG = MotelRoomDetailActivity.class.getSimpleName();
     @SuppressLint("SimpleDateFormat")
     public static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
 
@@ -88,6 +90,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     }
 
     private void updateUi(@NonNull MotelRoom motelRoom) {
+        Log.d(TAG, motelRoom.toString());
         updateImageSlider(motelRoom);
 
         textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");

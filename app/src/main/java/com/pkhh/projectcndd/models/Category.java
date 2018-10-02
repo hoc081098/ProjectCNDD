@@ -5,14 +5,11 @@ import com.google.firebase.firestore.PropertyName;
 import java.util.Date;
 import java.util.Objects;
 
-// done
 public class Category extends FirebaseModel {
     private String name;
 
-    @PropertyName("created_at")
     private Date createdAt;
 
-    @PropertyName("updated_at")
     private Date updatedAt;
 
     public Category() {
@@ -21,9 +18,10 @@ public class Category extends FirebaseModel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Category)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Category category = (Category) o;
-        return Objects.equals(name, category.name) &&
+        return Objects.equals(id, category.id) &&
+                Objects.equals(name, category.name) &&
                 Objects.equals(createdAt, category.createdAt) &&
                 Objects.equals(updatedAt, category.updatedAt);
     }
@@ -33,15 +31,41 @@ public class Category extends FirebaseModel {
         return Objects.hash(name, createdAt, updatedAt);
     }
 
+    @Override
+    public String toString() {
+        return "Category{" +
+                "name='" + name + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", id='" + id + '\'' +
+                '}';
+    }
+
     public String getName() {
         return name;
     }
 
+    @PropertyName("created_at")
     public Date getCreatedAt() {
         return createdAt;
     }
 
+    @PropertyName("updated_at")
     public Date getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @PropertyName("created_at")
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @PropertyName("updated_at")
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
