@@ -1,12 +1,10 @@
 package com.pkhh.projectcndd.ui.loginregister;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.pkhh.projectcndd.R;
-import com.pkhh.projectcndd.ui.home.MainActivity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,16 +13,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import static java.util.Objects.requireNonNull;
 
 public final class LoginRegisterActivity extends AppCompatActivity implements LoginFragment.Listener, RegisterFragment.Listener {
-    @Nullable
-    private Class<?> clazz;
+    public static final String TAG = LoginRegisterActivity.class.getSimpleName();
+    private boolean isSuccessfully = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
         requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        clazz = (Class<?>) getIntent().getSerializableExtra(MainActivity.CLAZZ);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager()
@@ -61,10 +57,8 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
 
     @Override
     public void onLoginSuccessfully() {
+        isSuccessfully = true;
         Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-        if (clazz != null) {
-            startActivity(new Intent(this, clazz));
-        }
         finish();
     }
 
@@ -75,10 +69,19 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
 
     @Override
     public void onRegisterSuccessfully() {
+        isSuccessfully = true;
         Toast.makeText(this, "Đăng kí thành công", Toast.LENGTH_SHORT).show();
-        if (clazz != null) {
-            startActivity(new Intent(this, clazz));
-        }
         finish();
+    }
+
+    @Override
+    public void finish() {
+
+        if (isSuccessfully) {
+            setResult(RESULT_OK);
+        } else {
+            setResult(RESULT_CANCELED);
+        }
+        super.finish();
     }
 }

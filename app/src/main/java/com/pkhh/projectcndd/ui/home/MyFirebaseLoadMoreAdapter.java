@@ -1,5 +1,6 @@
 package com.pkhh.projectcndd.ui.home;
 
+import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.models.FirebaseModel;
@@ -12,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static com.pkhh.projectcndd.models.FirebaseModel.querySnapshotToObjects;
 
 public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static final int TYPE_LOAD_MORE = 1;
@@ -31,14 +31,22 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
     private boolean isLastItemReached = false;
     private boolean hasError = false;
     private double visibleThreshold;
+    private SnapshotParser<T> snapshotParser;
 
 
-    MyFirebaseLoadMoreAdapter(@NonNull Query query, int pageSize, @NonNull RecyclerView recyclerView, @NonNull Class<T> tClass) {
+    MyFirebaseLoadMoreAdapter(@NonNull Query query, int pageSize, @NonNull RecyclerView recyclerView,
+                              @NonNull Class<T> tClass) {
+        this(query, pageSize, recyclerView, tClass, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, tClass));
+    }
+
+    MyFirebaseLoadMoreAdapter(@NonNull Query query, int pageSize, @NonNull RecyclerView recyclerView,
+                              @NonNull Class<T> tClass, @NonNull SnapshotParser<T> snapshotParser) {
 
         this.pageSize = pageSize;
         this.query = query;
         this.tClass = tClass;
         this.visibleThreshold = pageSize;
+        this.snapshotParser = snapshotParser;
 
         final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (!(layoutManager instanceof LinearLayoutManager)) {
@@ -84,7 +92,9 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
                 .limit(pageSize)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    final List<T> firebaseModels = querySnapshotToObjects(queryDocumentSnapshots, tClass);
+                    final List<T> firebaseModels = com.annimon.stream.Stream.of(queryDocumentSnapshots.getDocuments())
+                            .map(snapshotParser::parseSnapshot)
+                            .toList();
 
                     if (!this.list.isEmpty()) {
                         this.list.remove(this.list.size() - 1);
@@ -122,6 +132,16 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
     @NonNull
     public Object getItem(int position) {
         return list.get(position);
+    }
+
+    @NonNull
+    public List<Object> getList() {
+        return list;
+    }
+
+    public void setList(@NonNull List<Object> list) {
+        this.list = list;
+        notifyDataSetChanged();
     }
 
     @Override

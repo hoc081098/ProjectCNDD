@@ -16,9 +16,7 @@ public class User extends FirebaseModel {
 
     private String avatar;
 
-
     private boolean isActive;
-
 
     private Date createdAt;
 

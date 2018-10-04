@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -19,6 +18,7 @@ import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.ui.loginregister.LoginRegisterActivity;
 import com.pkhh.projectcndd.ui.post.PostActivity;
+import com.pkhh.projectcndd.ui.saved.SavedRoomsActivity;
 import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
@@ -33,7 +33,8 @@ import static com.pkhh.projectcndd.utils.Constants.USER_NAME_COLLECION;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
-    public static final String CLAZZ = "CLAZZ";
+    public static final int REQUEST_CODE_POST = 1;
+    public static final int REQUEST_CODE_LOGIN_SAVED = 2;
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -67,19 +68,31 @@ public class MainActivity extends AppCompatActivity
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        setupNavigationView();
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                            R.anim.slide_in_left, R.anim.slide_out_right)
+                    .add(R.id.main_content, new MotelRoomsListFragment(), MotelRoomsListFragment.TAG)
+                    .commit();
+        }
+    }
+
+    private void setupNavigationView() {
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
         final View headerView = navigationView.getHeaderView(0);
         textName = headerView.findViewById(R.id.text_name);
         textEmail = headerView.findViewById(R.id.text_email);
         imageAvatar = headerView.findViewById(R.id.image_avatar);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.main_content, new MotelRoomsListFragment())
-                    .commit();
-        }
+        navigationView.getMenu().findItem(R.id.nav_home).setCheckable(true);
+        navigationView.getMenu().findItem(R.id.nav_post).setCheckable(false);
+        navigationView.getMenu().findItem(R.id.nav_saved).setCheckable(false);
+        navigationView.getMenu().findItem(R.id.nav_login).setCheckable(false);
     }
 
     @Override
@@ -126,7 +139,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
@@ -137,6 +149,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_post:
                 onClickNavPost();
                 break;
+            case R.id.nav_saved:
+                onClickSaved();
+                break;
             case R.id.nav_login:
                 onClickNavLogin();
                 break;
@@ -146,12 +161,33 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void onClickSaved() {
+
+        if (firebaseAuth.getCurrentUser() == null) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Yêu cầu đăng nhập")
+                    .setIcon(R.drawable.ic_exit_to_app_black_24dp)
+                    .setMessage("Để có thể xem các nhà trọ đã lưu, yêu cầu bạn phải đăng nhập!")
+                    .setNegativeButton("Hủy", (dialog, __) -> dialog.dismiss())
+                    .setPositiveButton("Ok", (dialog, __) -> {
+                        dialog.dismiss();
+
+                        final Intent intent = new Intent(this, LoginRegisterActivity.class);
+                        startActivityForResult(intent, REQUEST_CODE_LOGIN_SAVED);
+                    })
+                    .show();
+        } else {
+            startActivity(new Intent(this, SavedRoomsActivity.class));
+        }
+    }
+
     private void onClickNavLogin() {
         if (firebaseAuth.getCurrentUser() == null) {
             startActivity(new Intent(this, LoginRegisterActivity.class));
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Đăng xuất")
+                    .setIcon(R.drawable.ic_exit_to_app_black_24dp)
                     .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
                     .setNegativeButton("Không", (dialog, __) -> dialog.dismiss())
                     .setPositiveButton("Có", (dialog, __) -> {
@@ -164,12 +200,38 @@ public class MainActivity extends AppCompatActivity
 
     private void onClickNavPost() {
         if (firebaseAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "Bạn phải đăng nhập trước khi đăng bài", Toast.LENGTH_SHORT).show();
-            final Intent intent = new Intent(this, LoginRegisterActivity.class);
-            intent.putExtra(CLAZZ, PostActivity.class);
-            startActivity(intent);
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Yêu cầu đăng nhập")
+                    .setIcon(R.drawable.ic_exit_to_app_black_24dp)
+                    .setMessage("Để hạn chế spam, lừa đảo, chức năng này yêu cầu bạn phải đăng nhập!")
+                    .setNegativeButton("Hủy", (dialog, __) -> dialog.dismiss())
+                    .setPositiveButton("Ok", (dialog, __) -> {
+                        dialog.dismiss();
+
+                        final Intent intent = new Intent(this, LoginRegisterActivity.class);
+                        startActivityForResult(intent, REQUEST_CODE_POST);
+                    })
+                    .show();
         } else {
             startActivity(new Intent(this, PostActivity.class));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_CODE_LOGIN_SAVED:
+                if (resultCode == RESULT_OK) {
+                    startActivity(new Intent(this, SavedRoomsActivity.class));
+                }
+                break;
+            case REQUEST_CODE_POST:
+                if (resultCode == RESULT_OK) {
+                    startActivity(new Intent(this, PostActivity.class));
+                }
+                break;
         }
     }
 

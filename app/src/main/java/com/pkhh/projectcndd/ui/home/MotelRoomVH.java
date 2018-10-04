@@ -4,8 +4,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.pkhh.projectcndd.R;
-import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 import com.squareup.picasso.Picasso;
 
@@ -27,6 +27,7 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
     private final ImageView imageShare;
     private final ImageView imageSave;
     private final RecyclerOnClickListener recyclerClickListener;
+    private final FirebaseFirestore firestore;
 
     MotelRoomVH(@NonNull View itemView, @NonNull RecyclerOnClickListener recyclerClickListener) {
         super(itemView);
@@ -36,21 +37,31 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
         imageShare = itemView.findViewById(R.id.image_share);
         imageSave = itemView.findViewById(R.id.image_save);
         imagePreview = itemView.findViewById(R.id.image_preview);
+
         this.recyclerClickListener = recyclerClickListener;
 
         imageSave.setOnClickListener(this);
         imageShare.setOnClickListener(this);
         itemView.setOnClickListener(this);
+
+
+        firestore = FirebaseFirestore.getInstance();
     }
 
-    void bind(MotelRoom motelRoom) {
-        textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");
-        textAddress.setText(motelRoom.getAddress());
-        motelRoom.getUser().get()
-                .addOnSuccessListener(documentSnapshot -> textPostBy.setText("đăng bởi " + documentSnapshot.get("full_name")))
-                .addOnFailureListener(e -> textPostBy.setText("đăng bởi ..."));
+    void bind(RoomItem item) {
+        textPrice.setText("$ " + decimalFormat.format(item.motelRoom.getPrice()) + " đ");
+        textAddress.setText(item.motelRoom.getAddress());
 
-        List<String> imageUrls = motelRoom.getImages();
+        item.motelRoom.getUser()
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    textPostBy.setText("đăng bởi " + documentSnapshot.getString("full_name"));
+                })
+                .addOnFailureListener(e -> {
+                    textPostBy.setText("đăng bởi ...");
+                });
+
+        List<String> imageUrls = item.motelRoom.getImages();
         if (imageUrls != null && !imageUrls.isEmpty()) {
             Picasso.get()
                     .load(imageUrls.get(0))
@@ -60,6 +71,19 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
                     .error(R.drawable.ic_home_black_24dp)
                     .into(imagePreview);
         }
+
+        if (item.isLogined) {
+            imageSave.setVisibility(View.VISIBLE);
+
+            if (item.isSaved) {
+                imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
+            } else {
+                imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);
+            }
+        } else {
+            imageSave.setVisibility(View.INVISIBLE);
+        }
+
     }
 
     @Override

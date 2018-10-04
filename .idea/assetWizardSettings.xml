@@ -91,7 +91,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/D:/Admin/Other/android-studio-3.2/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_arrow_back_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/D:/Admin/Other/android-studio-3.2/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_bookmark_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -101,8 +101,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_arrow_back_white_24dp" />
+                            <entry key="color" value="212121" />
+                            <entry key="outputName" value="ic_bookmark_black_24dp" />
                             <entry key="sourceFile" value="C:\Users\PeterHoc" />
                           </map>
                         </option>
