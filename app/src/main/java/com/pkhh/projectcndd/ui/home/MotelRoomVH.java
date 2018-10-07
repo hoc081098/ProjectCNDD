@@ -4,8 +4,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.pkhh.projectcndd.R;
+import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 import com.squareup.picasso.Picasso;
 
@@ -48,11 +51,11 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
         firestore = FirebaseFirestore.getInstance();
     }
 
-    void bind(RoomItem item) {
-        textPrice.setText("$ " + decimalFormat.format(item.motelRoom.getPrice()) + " đ");
-        textAddress.setText(item.motelRoom.getAddress());
+    void bind(MotelRoom item) {
+        textPrice.setText("$ " + decimalFormat.format(item.getPrice()) + " đ");
+        textAddress.setText(item.getAddress());
 
-        item.motelRoom.getUser()
+        item.getUser()
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     textPostBy.setText("đăng bởi " + documentSnapshot.getString("full_name"));
@@ -61,7 +64,7 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
                     textPostBy.setText("đăng bởi ...");
                 });
 
-        List<String> imageUrls = item.motelRoom.getImages();
+        List<String> imageUrls = item.getImages();
         if (imageUrls != null && !imageUrls.isEmpty()) {
             Picasso.get()
                     .load(imageUrls.get(0))
@@ -72,10 +75,10 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
                     .into(imagePreview);
         }
 
-        if (item.isLogined) {
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
             imageSave.setVisibility(View.VISIBLE);
-
-            if (item.isSaved) {
+            if (item.getUserIdsSaved().contains(currentUser.getUid())) {
                 imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
             } else {
                 imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);

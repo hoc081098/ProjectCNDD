@@ -4,10 +4,13 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
 
 public class MotelRoom extends FirebaseModel {
     private String title;
@@ -47,6 +50,8 @@ public class MotelRoom extends FirebaseModel {
     private Date createdAt;
 
     private Date updatedAt;
+
+    private List<String> userIdsSaved;
 
     // Firebase Firestore require empty constructor
     public MotelRoom() {
@@ -212,30 +217,15 @@ public class MotelRoom extends FirebaseModel {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "MotelRoom{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                ", countView=" + countView +
-                ", size=" + size +
-                ", address='" + address + '\'' +
-                ", addressGeoPoint=" + addressGeoPoint +
-                ", images=" + images +
-                ", phone='" + phone + '\'' +
-                ", owner=" + owner +
-                ", approve=" + approve +
-                ", utilities=" + utilities +
-                ", user=" + user +
-                ", category=" + category +
-                ", provinces=" + provinces +
-                ", ward=" + ward +
-                ", district=" + district +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", id='" + id + '\'' +
-                '}';
+    @NonNull
+    @PropertyName("user_ids_saved")
+    public List<String> getUserIdsSaved() {
+        return userIdsSaved == null ? Collections.emptyList() : userIdsSaved;
+    }
+
+    @PropertyName("user_ids_saved")
+    public void setUserIdsSaved(List<String> userIdsSaved) {
+        this.userIdsSaved = userIdsSaved;
     }
 
     @Override
@@ -262,13 +252,40 @@ public class MotelRoom extends FirebaseModel {
                 Objects.equals(ward, motelRoom.ward) &&
                 Objects.equals(district, motelRoom.district) &&
                 Objects.equals(createdAt, motelRoom.createdAt) &&
-                Objects.equals(updatedAt, motelRoom.updatedAt);
+                Objects.equals(updatedAt, motelRoom.updatedAt) &&
+                Objects.equals(userIdsSaved, motelRoom.userIdsSaved);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, price, countView, size, address, addressGeoPoint,
-                images, phone, owner, approve, utilities, user, category, provinces, ward, district,
-                createdAt, updatedAt);
+        return Objects.hash(id, title, description, price, countView, size, address, addressGeoPoint,
+                images, phone, owner, approve, utilities, user, category, provinces, ward, district, createdAt, updatedAt, userIdsSaved);
+    }
+
+    @Override
+    public String toString() {
+        return "MotelRoom{" +
+                "title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", countView=" + countView +
+                ", size=" + size +
+                ", address='" + address + '\'' +
+                ", addressGeoPoint=" + addressGeoPoint +
+                ", images=" + images +
+                ", phone='" + phone + '\'' +
+                ", owner=" + owner +
+                ", approve=" + approve +
+                ", utilities=" + utilities +
+                ", user=" + user +
+                ", category=" + category +
+                ", provinces=" + provinces +
+                ", ward=" + ward +
+                ", district=" + district +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", userIdsSaved=" + userIdsSaved +
+                ", id='" + id + '\'' +
+                '}';
     }
 }
