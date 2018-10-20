@@ -25,105 +25,105 @@ import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject
 import static java.util.Objects.requireNonNull;
 
 public class DistrictActivity extends AppCompatActivity implements RecyclerOnClickListener {
-    private RecyclerView mRecyclerViewDistrict;
-    private FirestoreRecyclerAdapter<District, DistrictViewHolder> mFirestoreRecyclerAdapter;
+  private RecyclerView mRecyclerViewDistrict;
+  private FirestoreRecyclerAdapter<District, DistrictViewHolder> mFirestoreRecyclerAdapter;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_district);
-        requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_district);
+    requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mRecyclerViewDistrict = findViewById(R.id.recycler_distrct);
-        mRecyclerViewDistrict.setHasFixedSize(true);
-        mRecyclerViewDistrict.setLayoutManager(new LinearLayoutManager(this));
-        setupAdapter();
+    mRecyclerViewDistrict = findViewById(R.id.recycler_distrct);
+    mRecyclerViewDistrict.setHasFixedSize(true);
+    mRecyclerViewDistrict.setLayoutManager(new LinearLayoutManager(this));
+    setupAdapter();
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == android.R.id.home) {
+      finish();
     }
+    return super.onOptionsItemSelected(item);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
+  }
 
-    }
+  private void setupAdapter() {
+    String id = getIntent().getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
+    Query query = FirebaseFirestore.getInstance()
+        .document("provinces" + "/" + id)
+        .collection("districts")
+        .orderBy("name");
 
-    private void setupAdapter() {
-        String id = getIntent().getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
-        Query query = FirebaseFirestore.getInstance()
-                .document("provinces" + "/" + id)
-                .collection("districts")
-                .orderBy("name");
+    FirestoreRecyclerOptions<District> options = new FirestoreRecyclerOptions.Builder<District>()
+        .setQuery(query, snapshot -> documentSnapshotToObject(snapshot, District.class))
+        .build();
 
-        FirestoreRecyclerOptions<District> options = new FirestoreRecyclerOptions.Builder<District>()
-                .setQuery(query, snapshot -> documentSnapshotToObject(snapshot, District.class))
-                .build();
+    mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<District, DistrictViewHolder>(options) {
+      @Override
+      protected void onBindViewHolder(@NonNull DistrictViewHolder viewHolder, int i, @NonNull District district) {
+        viewHolder.bind(district);
+      }
 
-        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<District, DistrictViewHolder>(options) {
-            @Override
-            protected void onBindViewHolder(@NonNull DistrictViewHolder viewHolder, int i, @NonNull District district) {
-                viewHolder.bind(district);
-            }
+      @NonNull
+      @Override
+      public DistrictViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new DistrictViewHolder(getLayoutInflater().inflate(R.layout.district_item_layout, parent, false), DistrictActivity.this);
+      }
+    };
+    mRecyclerViewDistrict.setAdapter(mFirestoreRecyclerAdapter);
+    mFirestoreRecyclerAdapter.startListening();
+  }
 
-            @NonNull
-            @Override
-            public DistrictViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new DistrictViewHolder(getLayoutInflater().inflate(R.layout.district_item_layout, parent, false), DistrictActivity.this);
-            }
-        };
-        mRecyclerViewDistrict.setAdapter(mFirestoreRecyclerAdapter);
-        mFirestoreRecyclerAdapter.startListening();
-    }
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    mFirestoreRecyclerAdapter.stopListening();
+  }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mFirestoreRecyclerAdapter.stopListening();
-    }
+  @Override
+  public void onClick(@NonNull View view, int position) {
+    District item = mFirestoreRecyclerAdapter.getItem(position);
 
-    @Override
-    public void onClick(@NonNull View view, int position) {
-        District item = mFirestoreRecyclerAdapter.getItem(position);
+    Intent intent = new Intent();
+    intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.getId());
+    intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
 
-        Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.getId());
-        intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
+    setResult(Activity.RESULT_OK, intent);
+    finish();
+  }
 
-        setResult(Activity.RESULT_OK, intent);
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        // truyen du lieu that bai khi ng ducng click back
-        setResult(Activity.RESULT_CANCELED);
-        super.onBackPressed();
-    }
+  @Override
+  public void onBackPressed() {
+    // truyen du lieu that bai khi ng ducng click back
+    setResult(Activity.RESULT_CANCELED);
+    super.onBackPressed();
+  }
 
 }
 
 class DistrictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final TextView mTextView;
-    private final RecyclerOnClickListener mRecyclerOnClickListener;
+  private final TextView mTextView;
+  private final RecyclerOnClickListener mRecyclerOnClickListener;
 
 
-    public DistrictViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
-        super(itemView);
-        mTextView = itemView.findViewById(R.id.text_district_name);
-        itemView.setOnClickListener(this);
-        this.mRecyclerOnClickListener = recyclerOnClickListener;
+  public DistrictViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
+    super(itemView);
+    mTextView = itemView.findViewById(R.id.text_district_name);
+    itemView.setOnClickListener(this);
+    this.mRecyclerOnClickListener = recyclerOnClickListener;
+  }
+
+  public void bind(District district) {
+    mTextView.setText(district.getName());
+  }
+
+  @Override
+  public void onClick(View v) {
+    int adapterPosition = getAdapterPosition();
+    if (adapterPosition != RecyclerView.NO_POSITION) {
+      mRecyclerOnClickListener.onClick(v, adapterPosition);
     }
-
-    public void bind(District district) {
-        mTextView.setText(district.getName());
-    }
-
-    @Override
-    public void onClick(View v) {
-        int adapterPosition = getAdapterPosition();
-        if (adapterPosition != RecyclerView.NO_POSITION) {
-            mRecyclerOnClickListener.onClick(v, adapterPosition);
-        }
-    }
+  }
 }

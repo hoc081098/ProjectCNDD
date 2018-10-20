@@ -27,70 +27,70 @@ import androidx.recyclerview.widget.RecyclerView;
 
 class MotelRoomAdapter extends ListAdapter<MotelRoom, MotelRoomAdapter.ViewHolder> {
 
-    private static final DiffUtil.ItemCallback<MotelRoom> DIFF_CALLBACK = new DiffUtil.ItemCallback<MotelRoom>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull MotelRoom oldItem, @NonNull MotelRoom newItem) {
-            return oldItem.getId().equals(newItem.getId());
-        }
-
-        @Override
-        public boolean areContentsTheSame(@NonNull MotelRoom oldItem, @NonNull MotelRoom newItem) {
-            return oldItem.equals(newItem);
-        }
-    };
-
-    MotelRoomAdapter() {
-        super(DIFF_CALLBACK);
-    }
-
-    @NonNull
+  private static final DiffUtil.ItemCallback<MotelRoom> DIFF_CALLBACK = new DiffUtil.ItemCallback<MotelRoom>() {
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.province_item_layout, parent, false);
-        return new ViewHolder(itemView);
+    public boolean areItemsTheSame(@NonNull MotelRoom oldItem, @NonNull MotelRoom newItem) {
+      return oldItem.getId().equals(newItem.getId());
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position));
+    public boolean areContentsTheSame(@NonNull MotelRoom oldItem, @NonNull MotelRoom newItem) {
+      return oldItem.equals(newItem);
+    }
+  };
+
+  MotelRoomAdapter() {
+    super(DIFF_CALLBACK);
+  }
+
+  @NonNull
+  @Override
+  public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.province_item_layout, parent, false);
+    return new ViewHolder(itemView);
+  }
+
+  @Override
+  public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    holder.bind(getItem(position));
+  }
+
+  class ViewHolder extends RecyclerView.ViewHolder {
+    ViewHolder(@NonNull View itemView) {
+      super(itemView);
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        ViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-
-        void bind(MotelRoom item) {
-            itemView.<TextView>findViewById(R.id.text_province_name).setText(item.getPrice() + "--" + item.getAddress());
-        }
+    void bind(MotelRoom item) {
+      itemView.<TextView>findViewById(R.id.text_province_name).setText(item.getPrice() + "--" + item.getAddress());
     }
+  }
 }
 
 public final class SavedRoomsActivity extends AppCompatActivity {
-    MotelRoomAdapter adapter = new MotelRoomAdapter();
-    private RecyclerView recycler;
+  MotelRoomAdapter adapter = new MotelRoomAdapter();
+  private RecyclerView recycler;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_saved_room);
+  @Override
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_saved_room);
 
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        recycler = findViewById(R.id.recycler);
+    recycler = findViewById(R.id.recycler);
 
-        recycler.setHasFixedSize(true);
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setAdapter(adapter);
+    recycler.setHasFixedSize(true);
+    recycler.setLayoutManager(new LinearLayoutManager(this));
+    recycler.setAdapter(adapter);
 
-        FirebaseFirestore.getInstance()
-                .collection(Constants.MOTEL_ROOM_NAME_COLLECION)
-                .whereArrayContains("user_ids_saved", Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    final List<MotelRoom> motelRooms = FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class);
-                    adapter.submitList(motelRooms);
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
+    FirebaseFirestore.getInstance()
+        .collection(Constants.MOTEL_ROOM_NAME_COLLECION)
+        .whereArrayContains("user_ids_saved", Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+        .get()
+        .addOnSuccessListener(queryDocumentSnapshots -> {
+          final List<MotelRoom> motelRooms = FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class);
+          adapter.submitList(motelRooms);
+        })
+        .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());
+  }
 }

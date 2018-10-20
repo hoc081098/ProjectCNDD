@@ -28,7 +28,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        app:elevation="8dp"
         app:fabSize="normal"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:pressedTranslationZ="8dp"
+        app:rippleColor="@color/colorAccent"
+        app:srcCompat="@drawable/ic_near_me_white_24dp"
+        app:useCompatPadding="false" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

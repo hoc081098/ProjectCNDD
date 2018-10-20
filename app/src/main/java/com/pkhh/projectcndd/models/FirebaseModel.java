@@ -11,29 +11,29 @@ import androidx.annotation.NonNull;
 import static java.util.Objects.requireNonNull;
 
 public abstract class FirebaseModel {
-    protected String id;
+  protected String id;
 
-    @NonNull
-    public String getId() {
-        return requireNonNull(id, "Id must be initialized");
-    }
+  @NonNull
+  public static <T extends FirebaseModel> T documentSnapshotToObject(@NonNull DocumentSnapshot snapshot, Class<T> tClass) {
+    T t = requireNonNull(snapshot.toObject(tClass), "FirebaseModel::documentSnapshotToObject");
+    t.id = snapshot.getId();
+    return t;
+  }
 
-    @NonNull
-    public static <T extends FirebaseModel> T documentSnapshotToObject(@NonNull DocumentSnapshot snapshot, Class<T> tClass) {
-        T t = requireNonNull(snapshot.toObject(tClass), "FirebaseModel::documentSnapshotToObject");
-        t.id = snapshot.getId();
-        return t;
-    }
-
-    @NonNull
-    public static <T extends FirebaseModel> List<T> querySnapshotToObjects(@NonNull QuerySnapshot snapshot, Class<T> tClass) {
-        return Stream.of(snapshot.getDocuments()) // Stream<DocumentSnapshot>
-                .map(doc -> documentSnapshotToObject(doc, tClass)) // Stream<T>
-                .toList(); // List<T>
+  @NonNull
+  public static <T extends FirebaseModel> List<T> querySnapshotToObjects(@NonNull QuerySnapshot snapshot, Class<T> tClass) {
+    return Stream.of(snapshot.getDocuments()) // Stream<DocumentSnapshot>
+        .map(doc -> documentSnapshotToObject(doc, tClass)) // Stream<T>
+        .toList(); // List<T>
 //        List<T> list = new ArrayList<>(snapshot.size());
 //        for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
 //            list.add(documentSnapshotToObject(documentSnapshot, tClass));
 //        }
 //        return list;
-    }
+  }
+
+  @NonNull
+  public String getId() {
+    return requireNonNull(id, "Id must be initialized");
+  }
 }

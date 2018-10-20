@@ -79,6 +79,9 @@ dependencies {
 
     // stream support
     implementation 'com.annimon:stream:1.2.1'
+
+    // mapbox
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.21.0'
 }
 
 
