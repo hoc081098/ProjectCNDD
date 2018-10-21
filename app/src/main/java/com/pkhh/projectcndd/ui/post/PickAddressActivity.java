@@ -242,11 +242,12 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   }
 
   private void onClickLayoutRelativePosition() {
-    isCheckedRelative = !isCheckedRelative;
-    final int color = ContextCompat.getColor(this, isCheckedRelative ? R.color.colorAccent : android.R.color.white);
-    mImageRelative.setImageDrawable(new ColorDrawable(color));
-
-    updateSearchEditTextAndMap(mEditTextSearchBox.getText(), mLatLng, mLatestMarkerTitle);
+    if (mLatLng != null && mLatestMarkerTitle != null) {
+      isCheckedRelative = !isCheckedRelative;
+      final int color = ContextCompat.getColor(this, isCheckedRelative ? R.color.colorAccent : android.R.color.white);
+      mImageRelative.setImageDrawable(new ColorDrawable(color));
+      updateSearchEditTextAndMap(mEditTextSearchBox.getText(), mLatLng, mLatestMarkerTitle);
+    }
   }
 
   private void onClickImageCurrentLocation() {
