@@ -6,5 +6,5 @@ import androidx.annotation.NonNull;
 
 @FunctionalInterface
 public interface RecyclerOnLongClickListener {
-    void onLongClick(@NonNull View view, int position);
+  void onLongClick(@NonNull View view, int position);
 }

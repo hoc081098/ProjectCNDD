@@ -2,23 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/select_img"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="#b4acac">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary">
 
-        <ImageView
-            android:id="@+id/imageView7"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/textView"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_select_take_photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="12dp"
+            android:text="Chọn ảnh / Chụp ảnh"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_camera_enhance_black_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:rippleColor="@android:color/white"
             app:srcCompat="@drawable/ic_camera_enhance_black_24dp" />
 
         <TextView
@@ -30,6 +39,7 @@
             android:text="Bạn cần đăng ít nhất 3 hình"
             android:textColor="#212121"
             android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/button_select_take_photo"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />

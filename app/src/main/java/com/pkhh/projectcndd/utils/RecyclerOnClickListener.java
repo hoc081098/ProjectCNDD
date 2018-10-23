@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 @FunctionalInterface
 public interface RecyclerOnClickListener {
-    void onClick(@NonNull View view, int position);
+  void onClick(@NonNull View view, int position);
 }
 
 
