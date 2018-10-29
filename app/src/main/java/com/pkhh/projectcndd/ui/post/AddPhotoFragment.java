@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.pkhh.projectcndd.R;
@@ -31,6 +32,7 @@ public class AddPhotoFragment extends Fragment implements RecyclerOnClickListene
     private ConstraintLayout mSelectImage;
     private RecyclerView mRecyclerViewImages;
     private ImageAdapter mAdapter;
+    private Button mImginCamera;
 
     @Nullable
     @Override
@@ -43,6 +45,7 @@ public class AddPhotoFragment extends Fragment implements RecyclerOnClickListene
         super.onViewCreated(view, savedInstanceState);
         initView(view);
 
+        mImginCamera.setOnClickListener(this);
         mSelectImage.setOnClickListener(this);
 
         mRecyclerViewImages.setHasFixedSize(true);
@@ -56,6 +59,7 @@ public class AddPhotoFragment extends Fragment implements RecyclerOnClickListene
     }
 
     private void initView(View view) {
+        mImginCamera = view.findViewById(R.id.button_chupanh);
         mSelectImage = view.findViewById(R.id.select_img);
         mRecyclerViewImages = view.findViewById(R.id.recycler_img);
     }
@@ -67,12 +71,23 @@ public class AddPhotoFragment extends Fragment implements RecyclerOnClickListene
 
     @Override
     public void onClick(View v) {
-        final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        switch (v.getId()) {
+            case R.id.select_img: {
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
-        final Intent chooser = Intent.createChooser(intent, "Chọn ảnh");
-        startActivityForResult(chooser, REQUEST_CODE_SELECT_IMAGE);
+                final Intent chooser = Intent.createChooser(intent, "Chọn ảnh");
+                startActivityForResult(chooser, REQUEST_CODE_SELECT_IMAGE);
+                break;
+            }
+            case R.id.button_chupanh:{
+                Intent intentCamera = new Intent(requireContext(), Camera2Activity.class);
+                startActivityForResult(intentCamera, 1);
+                break;
+            }
+
+        }
     }
 
     @Override
