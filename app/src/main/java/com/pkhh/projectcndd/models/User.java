@@ -6,135 +6,133 @@ import java.util.Date;
 import java.util.Objects;
 
 public class User extends FirebaseModel {
-    private String email;
+  private String email;
 
-    private String phone;
+  private String phone;
 
-    private String fullName;
+  private String fullName;
 
-    private String address;
+  private String address;
 
-    private String avatar;
+  private String avatar;
 
+  private boolean isActive;
 
-    private boolean isActive;
+  private Date createdAt;
 
+  private Date updatedAt;
 
-    private Date createdAt;
+  public User() {
+  }
 
-    private Date updatedAt;
+  public String getEmail() {
+    return email;
+  }
 
-    public User() {
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getPhone() {
+    return phone;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
 
 
-    @PropertyName("full_name")
-    public String getFullName() {
-        return fullName;
-    }
+  @PropertyName("full_name")
+  public String getFullName() {
+    return fullName;
+  }
 
 
-    @PropertyName("full_name")
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
+  @PropertyName("full_name")
+  public void setFullName(String fullName) {
+    this.fullName = fullName;
+  }
 
-    public String getAddress() {
-        return address;
-    }
+  public String getAddress() {
+    return address;
+  }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-    public String getAvatar() {
-        return avatar;
-    }
+  public String getAvatar() {
+    return avatar;
+  }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
+  public void setAvatar(String avatar) {
+    this.avatar = avatar;
+  }
 
-    @PropertyName("is_active")
-    public boolean isActive() {
-        return isActive;
-    }
+  @PropertyName("is_active")
+  public boolean isActive() {
+    return isActive;
+  }
 
-    @PropertyName("is_active")
-    public void setActive(boolean active) {
-        isActive = active;
-    }
+  @PropertyName("is_active")
+  public void setActive(boolean active) {
+    isActive = active;
+  }
 
-    @PropertyName("created_at")
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+  @PropertyName("created_at")
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 
-    @PropertyName("created_at")
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+  @PropertyName("created_at")
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
 
-    @PropertyName("updated_at")
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
+  @PropertyName("updated_at")
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
 
-    @PropertyName("updated_at")
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  @PropertyName("updated_at")
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", address='" + address + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", isActive=" + isActive +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", id='" + id + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "User{" +
+        "email='" + email + '\'' +
+        ", phone='" + phone + '\'' +
+        ", fullName='" + fullName + '\'' +
+        ", address='" + address + '\'' +
+        ", avatar='" + avatar + '\'' +
+        ", isActive=" + isActive +
+        ", createdAt=" + createdAt +
+        ", updatedAt=" + updatedAt +
+        ", id='" + id + '\'' +
+        '}';
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id) &&
-                isActive == user.isActive &&
-                Objects.equals(email, user.email) &&
-                Objects.equals(phone, user.phone) &&
-                Objects.equals(fullName, user.fullName) &&
-                Objects.equals(address, user.address) &&
-                Objects.equals(avatar, user.avatar) &&
-                Objects.equals(createdAt, user.createdAt) &&
-                Objects.equals(updatedAt, user.updatedAt);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    User user = (User) o;
+    return Objects.equals(id, user.id) &&
+        isActive == user.isActive &&
+        Objects.equals(email, user.email) &&
+        Objects.equals(phone, user.phone) &&
+        Objects.equals(fullName, user.fullName) &&
+        Objects.equals(address, user.address) &&
+        Objects.equals(avatar, user.avatar) &&
+        Objects.equals(createdAt, user.createdAt) &&
+        Objects.equals(updatedAt, user.updatedAt);
+  }
 
-    @Override
-    public int hashCode() {
+  @Override
+  public int hashCode() {
 
-        return Objects.hash(email, phone, fullName, address, avatar, isActive, createdAt, updatedAt);
-    }
+    return Objects.hash(email, phone, fullName, address, avatar, isActive, createdAt, updatedAt);
+  }
 }

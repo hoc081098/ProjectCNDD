@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // androidx
     implementation 'androidx.appcompat:appcompat:1.0.0'
@@ -79,6 +79,12 @@ dependencies {
 
     // stream support
     implementation 'com.annimon:stream:1.2.1'
+
+    // mapbox
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.21.0'
+
+    implementation 'com.jakewharton:butterknife:9.0.0-rc1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
 }
 
 

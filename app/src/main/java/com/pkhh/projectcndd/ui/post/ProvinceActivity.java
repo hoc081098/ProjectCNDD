@@ -26,104 +26,104 @@ import static java.util.Objects.requireNonNull;
 
 
 public class ProvinceActivity extends AppCompatActivity implements RecyclerOnClickListener {
-    private RecyclerView mRecyclerviewProvinces;
-    private FirestoreRecyclerAdapter<Province, ProvinceViewHolder> mFirestoreRecyclerAdapter;
+  private RecyclerView mRecyclerviewProvinces;
+  private FirestoreRecyclerAdapter<Province, ProvinceViewHolder> mFirestoreRecyclerAdapter;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_province);
-        requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_province);
+    requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mRecyclerviewProvinces = findViewById(R.id.recycler_provinces);
-        mRecyclerviewProvinces.setHasFixedSize(true);
-        mRecyclerviewProvinces.setLayoutManager(new LinearLayoutManager(this));
-        setupAdapter();
+    mRecyclerviewProvinces = findViewById(R.id.recycler_provinces);
+    mRecyclerviewProvinces.setHasFixedSize(true);
+    mRecyclerviewProvinces.setLayoutManager(new LinearLayoutManager(this));
+    setupAdapter();
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == android.R.id.home) {
+      finish();
     }
+    return super.onOptionsItemSelected(item);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
+  }
 
-    }
+  private void setupAdapter() {
+    Query query = FirebaseFirestore.getInstance()
+        .collection("provinces")
+        .orderBy("name");
 
-    private void setupAdapter() {
-        Query query = FirebaseFirestore.getInstance()
-                .collection("provinces")
-                .orderBy("name");
+    FirestoreRecyclerOptions<Province> options = new FirestoreRecyclerOptions.Builder<Province>()
+        .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Province.class))
+        .build();
 
-        FirestoreRecyclerOptions<Province> options = new FirestoreRecyclerOptions.Builder<Province>()
-                .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, Province.class))
-                .build();
+    mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Province, ProvinceViewHolder>(options) {
+      @NonNull
+      @Override
+      public ProvinceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ProvinceViewHolder(getLayoutInflater().inflate(R.layout.province_item_layout, parent, false), ProvinceActivity.this);
+      }
 
-        mFirestoreRecyclerAdapter = new FirestoreRecyclerAdapter<Province, ProvinceViewHolder>(options) {
-            @NonNull
-            @Override
-            public ProvinceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new ProvinceViewHolder(getLayoutInflater().inflate(R.layout.province_item_layout, parent, false), ProvinceActivity.this);
-            }
+      @Override
+      protected void onBindViewHolder(@NonNull ProvinceViewHolder viewHolder, int i, @NonNull Province province) {
+        viewHolder.bind(province);
 
-            @Override
-            protected void onBindViewHolder(@NonNull ProvinceViewHolder viewHolder, int i, @NonNull Province province) {
-                viewHolder.bind(province);
+      }
+    };
+    mRecyclerviewProvinces.setAdapter(mFirestoreRecyclerAdapter);
+    mFirestoreRecyclerAdapter.startListening();
+  }
 
-            }
-        };
-        mRecyclerviewProvinces.setAdapter(mFirestoreRecyclerAdapter);
-        mFirestoreRecyclerAdapter.startListening();
-    }
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    mFirestoreRecyclerAdapter.stopListening();
+  }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mFirestoreRecyclerAdapter.stopListening();
-    }
+  @Override
+  public void onClick(@NonNull View view, int position) {
+    Province item = mFirestoreRecyclerAdapter.getItem(position);
+    String id = item.getId();
+    String name = item.getName();
 
-    @Override
-    public void onClick(@NonNull View view, int position) {
-        Province item = mFirestoreRecyclerAdapter.getItem(position);
-        String id = item.getId();
-        String name = item.getName();
+    Intent intent = new Intent();
+    intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_NAME, name);
+    intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_ID, id);
 
-        Intent intent = new Intent();
-        intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_NAME, name);
-        intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_ID, id);
+    setResult(Activity.RESULT_OK, intent);
+    finish(); // quay dau man hinh truoc
+  }
 
-        setResult(Activity.RESULT_OK, intent);
-        finish(); // quay dau man hinh truoc
-    }
-
-    @Override
-    public void onBackPressed() {
-        // truyen du lieu that bai khi ng ducng click back
-        setResult(Activity.RESULT_CANCELED);
-        super.onBackPressed();
-    }
+  @Override
+  public void onBackPressed() {
+    // truyen du lieu that bai khi ng ducng click back
+    setResult(Activity.RESULT_CANCELED);
+    super.onBackPressed();
+  }
 }
 
 class ProvinceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final TextView mTextView;
-    private final RecyclerOnClickListener mRecyclerOnClickListener;
+  private final TextView mTextView;
+  private final RecyclerOnClickListener mRecyclerOnClickListener;
 
-    public ProvinceViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
-        super(itemView);
-        mTextView = itemView.findViewById(R.id.text_province_name);
-        itemView.setOnClickListener(this);
-        this.mRecyclerOnClickListener = recyclerOnClickListener;
-    }
+  public ProvinceViewHolder(@NonNull View itemView, RecyclerOnClickListener recyclerOnClickListener) {
+    super(itemView);
+    mTextView = itemView.findViewById(R.id.text_province_name);
+    itemView.setOnClickListener(this);
+    this.mRecyclerOnClickListener = recyclerOnClickListener;
+  }
 
-    public void bind(Province province) {
-        mTextView.setText(province.getName());
-    }
+  public void bind(Province province) {
+    mTextView.setText(province.getName());
+  }
 
-    @Override
-    public void onClick(View v) {
-        int adapterPosition = getAdapterPosition();
-        if (adapterPosition != RecyclerView.NO_POSITION) {
-            mRecyclerOnClickListener.onClick(v, adapterPosition);
-        }
+  @Override
+  public void onClick(View v) {
+    int adapterPosition = getAdapterPosition();
+    if (adapterPosition != RecyclerView.NO_POSITION) {
+      mRecyclerOnClickListener.onClick(v, adapterPosition);
     }
+  }
 }
