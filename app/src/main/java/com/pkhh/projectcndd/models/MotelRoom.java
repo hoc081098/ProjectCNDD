@@ -4,6 +4,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -221,7 +222,7 @@ public class MotelRoom extends FirebaseModel {
   @NonNull
   @PropertyName("user_ids_saved")
   public List<String> getUserIdsSaved() {
-    return userIdsSaved == null ? Collections.emptyList() : userIdsSaved;
+    return userIdsSaved == null ? new ArrayList<>() : userIdsSaved;
   }
 
   @PropertyName("user_ids_saved")

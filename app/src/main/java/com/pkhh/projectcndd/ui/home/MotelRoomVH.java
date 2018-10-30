@@ -30,7 +30,6 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
   private final ImageView imageShare;
   private final ImageView imageSave;
   private final RecyclerOnClickListener recyclerClickListener;
-  private final FirebaseFirestore firestore;
 
   MotelRoomVH(@NonNull View itemView, @NonNull RecyclerOnClickListener recyclerClickListener) {
     super(itemView);
@@ -46,32 +45,32 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
     imageSave.setOnClickListener(this);
     imageShare.setOnClickListener(this);
     itemView.setOnClickListener(this);
-
-
-    firestore = FirebaseFirestore.getInstance();
   }
 
   void bind(MotelRoom item) {
     textPrice.setText("$ " + decimalFormat.format(item.getPrice()) + " đ");
     textAddress.setText(item.getAddress());
 
+    textPostBy.setText("đăng bởi ...loading...");
     item.getUser()
         .get()
         .addOnSuccessListener(documentSnapshot -> {
           textPostBy.setText("đăng bởi " + documentSnapshot.getString("full_name"));
         })
         .addOnFailureListener(e -> {
-          textPostBy.setText("đăng bởi ...");
+          textPostBy.setText("đăng bởi ...error...");
         });
 
     List<String> imageUrls = item.getImages();
-    if (imageUrls != null && !imageUrls.isEmpty()) {
+    if (imageUrls == null || imageUrls.isEmpty()) {
+      imagePreview.setImageResource(R.drawable.ic_home_primary_dark_24dp);
+    } else {
       Picasso.get()
           .load(imageUrls.get(0))
           .fit()
           .centerCrop()
-          .placeholder(R.drawable.ic_home_black_24dp)
-          .error(R.drawable.ic_home_black_24dp)
+          .placeholder(R.drawable.ic_home_primary_dark_24dp)
+          .error(R.drawable.ic_home_primary_dark_24dp)
           .into(imagePreview);
     }
 

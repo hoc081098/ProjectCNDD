@@ -303,25 +303,24 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
           for (int i = 0; i < imageUris.size(); i++) {
             final Uri uri = imageUris.get(i);
 
-            storageImage
-                .child("room_images/" + uid + "/image_" + i)
+            StorageReference storageReference = storageImage
+                .child("room_images/" + uid + "/" + documentReference.getId() + "/image_" + i);
+
+            storageReference
                 .putFile(uri)
                 .continueWithTask(task -> {
-                  if (!task.isSuccessful()) {
-                    throw requireNonNull(task.getException());
-                  }
-                  return storageImage.getDownloadUrl();
+                  if (!task.isSuccessful()) throw requireNonNull(task.getException());
+                  return storageReference.getDownloadUrl();
                 })
                 .addOnSuccessListener(this, downloadUrl -> {
-
-                  documentReference.update("images", FieldValue.arrayUnion(downloadUrl));
-                  Toast.makeText(this, "Upload image " + uri + " successfully", Toast.LENGTH_SHORT).show();
-
-                  if (count.incrementAndGet() == imageUris.size() - 1) {
-                    Toast.makeText(this, "Upload image done", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                  }
-
+                  documentReference
+                      .update("images", FieldValue.arrayUnion(downloadUrl.toString()))
+                      .addOnSuccessListener(aVoid -> {
+                        if (count.incrementAndGet() == imageUris.size() - 1) {
+                          Toast.makeText(this, "Add room done", Toast.LENGTH_SHORT).show();
+                          dialog.dismiss();
+                        }
+                      });
                 })
                 .addOnFailureListener(this, e -> {
                   Toast.makeText(this, "Upload image " + uri + " error " + e.getMessage(), Toast.LENGTH_SHORT).show();

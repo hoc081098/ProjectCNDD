@@ -8,6 +8,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
@@ -59,9 +61,13 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_motel_room_detail);
 
-    requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    getWindow().setFlags(
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+    );
+
+    setContentView(R.layout.activity_motel_room_detail);
 
     sliderLayout = findViewById(R.id.sliderLayout);
     textPrice = findViewById(R.id.text_price);
@@ -72,6 +78,9 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     textName = findViewById(R.id.text_name);
     textPhone = findViewById(R.id.text_phone);
     imageAvatar = findViewById(R.id.image_avatar);
+
+    CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_layout);
+    collapsingToolbarLayout.setTitle(null);
 
     findViewById(R.id.button_sms).setOnClickListener(this);
     findViewById(R.id.button_call).setOnClickListener(this);

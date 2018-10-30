@@ -21,7 +21,9 @@ import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +34,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_NAME_COLLECION;
+import static java.util.Objects.requireNonNull;
 
 public class MotelRoomsListFragment extends Fragment {
   public static final String TAG = MotelRoomsListFragment.class.getSimpleName();
@@ -41,7 +44,6 @@ public class MotelRoomsListFragment extends Fragment {
   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
   private ViewGroup rootLayout;
-  @Nullable
   private MyFirebaseLoadMoreAdapter<MotelRoom> adapter;
   private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -92,34 +94,31 @@ public class MotelRoomsListFragment extends Fragment {
       if (currentUser == null) {
         throw new IllegalStateException("Bạn phải login mới thưc hiện được chức năng này!");
       }
+      final String uid = currentUser.getUid();
 
       final DocumentReference document = firestore
           .collection(MOTEL_ROOM_NAME_COLLECION)
           .document(id);
-      final String uid = currentUser.getUid();
-      final List userIdsSaved = (List) transaction.get(document).get("user_ids_saved");
-      if (userIdsSaved == null || !userIdsSaved.contains(uid)) {
-        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
-      } else {
+
+      final MotelRoom item = FirebaseModel.documentSnapshotToObject(transaction.get(document), MotelRoom.class);
+      final List<String> userIdsSaved = item.getUserIdsSaved();
+
+      if (userIdsSaved.contains(uid)) {
         transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
+        userIdsSaved.remove(uid);
+      } else {
+        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
+        userIdsSaved.add(uid);
       }
-      return null;
-    }).addOnSuccessListener(aNull -> {
-      firestore
-          .collection(MOTEL_ROOM_NAME_COLLECION)
-          .document(id)
-          .get()
-          .addOnSuccessListener(snapshot -> {
-            if (adapter != null) {
-              final MotelRoom motelRoom = FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class);
-              adapter.getList().set(position, motelRoom);
-              adapter.notifyItemChanged(position);
-              Snackbar.make(rootLayout, "Done", Snackbar.LENGTH_SHORT).show();
-            }
-          })
-          .addOnFailureListener(e -> {
-            Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
-          });
+
+      item.setUserIdsSaved(userIdsSaved);
+      return item;
+    }).addOnSuccessListener(item -> {
+
+      adapter.getList().set(position, item);
+      adapter.notifyItemChanged(position);
+      Snackbar.make(rootLayout, "Done", Snackbar.LENGTH_SHORT).show();
+
     }).addOnFailureListener(e -> {
       Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
     });
@@ -196,7 +195,5 @@ public class MotelRoomsListFragment extends Fragment {
     };
 
     recyclerView.setAdapter(adapter);
-
-
   }
 }
