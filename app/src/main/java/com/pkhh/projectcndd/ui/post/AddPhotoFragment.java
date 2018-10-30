@@ -24,16 +24,24 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 public class AddPhotoFragment extends Fragment implements RecyclerOnClickListener, View.OnClickListener {
-<<<<<<< HEAD
-    public static final int REQUEST_CODE_SELECT_IMAGE = 1;
-    private ConstraintLayout mSelectImage;
-    private RecyclerView mRecyclerViewImages;
-    private ImageAdapter mAdapter;
-    private Button mImginCamera;
+    private static final int REQUEST_CODE_SELECT_IMAGE = 1;
+    private final List<Uri> imageUris = new ArrayList<>();
+    private final ImageAdapter mAdapter = new ImageAdapter(this, imageUris);
+
+    @BindView(R.id.button_select_take_photo)
+    View mSelectTakeImage;
+
+    @BindView(R.id.recycler_img)
+    RecyclerView mRecyclerViewImages;
+
+    private Unbinder unbinder;
 
     @Nullable
     @Override
@@ -44,194 +52,82 @@ public class AddPhotoFragment extends Fragment implements RecyclerOnClickListene
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initView(view);
 
-        mImginCamera.setOnClickListener(this);
-        mSelectImage.setOnClickListener(this);
-=======
-  public static final int REQUEST_CODE_SELECT_IMAGE = 1;
-  private final List<Uri> imageUris = new ArrayList<>();
-  private View mSelectTakeImage;
-  private RecyclerView mRecyclerViewImages;
-  private ImageAdapter mAdapter = new ImageAdapter(this, imageUris);
+        unbinder = ButterKnife.bind(this, view);
 
-  @Nullable
-  @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_add_photo, container, false);
-  }
-
-  @Override
-  public void onClick(View v) {
-    if (R.id.button_select_take_photo == v.getId()) {
-      final View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_photo, null);
-      final AlertDialog dialog = new AlertDialog.Builder(requireContext())
-          .setView(view)
-          .show();
-      final View.OnClickListener onClickListener = button -> {
-        if (button.getId() == R.id.button_cancel) {
-          dialog.dismiss();
-          return;
-        }
-
-        if (button.getId() == R.id.button_take_photo) {
-          Toast.makeText(requireContext(), "TODO", Toast.LENGTH_SHORT).show();
-          dialog.dismiss();
-          return;
-        }
->>>>>>> 0dac6d2bffdebfa3f27070a08720de41bde1ae4d
-
-        if (button.getId() == R.id.button_select_image) {
-          dialog.dismiss();
-
-          final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-          intent.setType("image/*");
-
-<<<<<<< HEAD
-    private void initView(View view) {
-        mImginCamera = view.findViewById(R.id.button_chupanh);
-        mSelectImage = view.findViewById(R.id.select_img);
-        mRecyclerViewImages = view.findViewById(R.id.recycler_img);
-=======
-          final Intent chooser = Intent.createChooser(intent, "Chọn ảnh");
-          startActivityForResult(chooser, REQUEST_CODE_SELECT_IMAGE);
-        }
-      };
-      view.findViewById(R.id.button_take_photo).setOnClickListener(onClickListener);
-      view.findViewById(R.id.button_select_image).setOnClickListener(onClickListener);
-      view.findViewById(R.id.button_cancel).setOnClickListener(onClickListener);
->>>>>>> 0dac6d2bffdebfa3f27070a08720de41bde1ae4d
-    }
-  }
-
-  @Override
-  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    initView(view);
-
-    mSelectTakeImage.setOnClickListener(this);
-
-    mRecyclerViewImages.setHasFixedSize(true);
-    mRecyclerViewImages.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-    mRecyclerViewImages.setAdapter(mAdapter);
-  }
-
-  private void initView(View view) {
-    mSelectTakeImage = view.findViewById(R.id.button_select_take_photo);
-    mRecyclerViewImages = view.findViewById(R.id.recycler_img);
-  }
-
-  @Override
-  public void onClick(@NonNull View view, int position) {
-    if (view.getId() == R.id.img_close) {
-      imageUris.remove(position);
-      mAdapter.notifyItemRemoved(position);
-      return;
+        mSelectTakeImage.setOnClickListener(this);
+        mRecyclerViewImages.setHasFixedSize(true);
+        mRecyclerViewImages.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        mRecyclerViewImages.setAdapter(mAdapter);
     }
 
-<<<<<<< HEAD
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.select_img: {
-                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-
-                final Intent chooser = Intent.createChooser(intent, "Chọn ảnh");
-                startActivityForResult(chooser, REQUEST_CODE_SELECT_IMAGE);
-                break;
-            }
-            case R.id.button_chupanh:{
-                Intent intentCamera = new Intent(requireContext(), Camera2Activity.class);
-                startActivityForResult(intentCamera, 1);
-                break;
-            }
-
-        }
-=======
-    Toast.makeText(requireContext(), "Clicked " + imageUris.get(position).getPath(), Toast.LENGTH_SHORT).show();
-  }
-
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    if (requestCode == REQUEST_CODE_SELECT_IMAGE
-        && resultCode == Activity.RESULT_OK
-        && data != null) {
-      final Uri uri = data.getData();
-      if (uri != null) {
-        imageUris.add(uri);
-        mAdapter.notifyItemInserted(imageUris.size() - 1);
-      }
->>>>>>> 0dac6d2bffdebfa3f27070a08720de41bde1ae4d
-    }
-  }
-
-  public List<Uri> getImageUris() {
-    return imageUris;
-  }
-}
-
-class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.VH> {
-  private RecyclerOnClickListener mRecyclerOnClickListener;
-  private List<Uri> mUris;
-
-  ImageAdapter(RecyclerOnClickListener recyclerOnClickListener, List<Uri> uris) {
-    mRecyclerOnClickListener = recyclerOnClickListener;
-    mUris = uris;
-  }
-
-  @NonNull
-  @Override
-  public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_iteam_layout, parent, false);
-    return new VH(view);
-  }
-
-  @Override
-  public void onBindViewHolder(@NonNull VH holder, int position) {
-    holder.bind(mUris.get(position));
-  }
-
-  @Override
-  public int getItemCount() {
-    return mUris.size();
-  }
-
-  class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private ImageView mImageViewPreview;
-    private ImageView mImageViewClose;
-
-    public VH(@NonNull View itemView) {
-      super(itemView);
-      mImageViewPreview = itemView.findViewById(R.id.img_preview);
-      mImageViewClose = itemView.findViewById(R.id.img_close);
-
-      mImageViewPreview.setOnClickListener(this);
-      mImageViewClose.setOnClickListener(this);
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
     public void onClick(View v) {
-      int adapterPosition = getAdapterPosition();
-      if (adapterPosition != NO_POSITION) {
-        mRecyclerOnClickListener.onClick(v, adapterPosition);
-      }
+        if (R.id.button_select_take_photo == v.getId()) {
+            final View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_photo, null);
+            final AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setView(view)
+                    .show();
+            final View.OnClickListener onClickListener = button -> {
+                if (button.getId() == R.id.button_cancel) {
+                    dialog.dismiss();
+                    return;
+                }
+
+                if (button.getId() == R.id.button_take_photo) {
+                    Intent intentCamera = new Intent(requireContext(), Camera2Activity.class);
+                    startActivityForResult(intentCamera, 1);
+                    dialog.dismiss();
+                    return;
+                }
+
+                if (button.getId() == R.id.button_select_image) {
+                    dialog.dismiss();
+
+                    final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("image/*");
+
+                    startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE);
+                }
+            };
+            view.findViewById(R.id.button_take_photo).setOnClickListener(onClickListener);
+            view.findViewById(R.id.button_select_image).setOnClickListener(onClickListener);
+            view.findViewById(R.id.button_cancel).setOnClickListener(onClickListener);
+        }
     }
 
-    public void bind(Uri uri) {
-      Picasso.get()
-          .load(uri)
-          .fit()
-          .centerCrop()
-          .into(mImageViewPreview);
-      Picasso.get()
-          .load(R.drawable.ic_action_close)
-          .fit()
-          .centerCrop()
-          .noFade()
-          .into(mImageViewClose);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SELECT_IMAGE
+                && resultCode == Activity.RESULT_OK
+                && data != null) {
+            final Uri uri = data.getData();
+            if (uri != null) {
+                imageUris.add(uri);
+                mAdapter.notifyItemInserted(imageUris.size() - 1);
+            }
+        }
     }
-  }
+
+    public List<Uri> getImageUris() {
+        return imageUris;
+    }
+
+    @Override
+    public void onClick(@NonNull View view, int position) {
+        if (view.getId() == R.id.img_close) {
+            imageUris.remove(position);
+            mAdapter.notifyItemRemoved(position);
+        } else if (view.getId() == R.id.img_preview) {
+            Toast.makeText(requireContext(), "Clicked " + imageUris.get(position), Toast.LENGTH_SHORT).show();
+        }
+    }
 }
+
