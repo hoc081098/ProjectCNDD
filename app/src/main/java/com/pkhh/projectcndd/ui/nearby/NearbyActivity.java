@@ -316,11 +316,11 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   public void onConnected() {
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      Toast.makeText(this, "Location permission is not granted", Toast.LENGTH_SHORT).show();
+      //Toast.makeText(this, "Location permission is not granted", Toast.LENGTH_SHORT).show();
       return;
     }
     locationEngine.requestLocationUpdates();
-    Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
+    //Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
   }
 
   @Override
@@ -332,7 +332,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
     getDocumentNearBy(originCoord.getLatitude(), originCoord.getLongitude(), distance);
 
     Timber.tag(TAG).d("onLocationChanged: %s", location);
-    Toast.makeText(this, "onLocationChanged: " + location, Toast.LENGTH_SHORT).show();
+    //Toast.makeText(this, "onLocationChanged: " + location, Toast.LENGTH_SHORT).show();
   }
 
   private void getDocumentNearBy(double latitude, double longitude, double distance) {
@@ -373,10 +373,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
                   .snippet(room.getDescription())
               )
               .toList();
-          if (markers.isEmpty()) {
-            Timber.tag(TAG).d("getDocumentNearBy: " + latitude + ", " + longitude + ", " + distance + ": empty");
-            Toast.makeText(this, "getDocumentNearBy: " + latitude + ", " + longitude + ", " + distance + ": empty", Toast.LENGTH_SHORT).show();
-          }
+          Toast.makeText(this, "getDocumentNearBy: {" + latitude + ", " + longitude + ", " + distance + "} --> " + markers.size(), Toast.LENGTH_SHORT).show();
           this.markers = mMap.addMarkers(markers);
         })
         .addOnFailureListener(e -> {

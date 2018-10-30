@@ -15,11 +15,12 @@
         android:background="@android:color/white">
 
         <com.google.android.material.card.MaterialCardView
+            app:layout_constraintTop_toTopOf="parent"
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="4dp"
-            app:cardElevation="0dp"
+            app:cardElevation="2dp"
             app:cardPreventCornerOverlap="false"
             app:cardUseCompatPadding="true"
             app:contentPadding="8dp"
@@ -103,10 +104,10 @@
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardview2"
+            app:cardElevation="2dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:cardCornerRadius="4dp"
-            app:cardElevation="0dp"
             app:cardPreventCornerOverlap="false"
             app:cardUseCompatPadding="true"
             app:contentPadding="8dp"
@@ -240,7 +241,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:cardCornerRadius="4dp"
-            app:cardElevation="0dp"
+            app:cardElevation="2dp"
             app:cardPreventCornerOverlap="false"
             app:cardUseCompatPadding="true"
             app:contentPadding="8dp"
@@ -276,6 +277,52 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_sans"
                         android:inputType="textMultiLine"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardview5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="2dp"
+            app:cardPreventCornerOverlap="false"
+            app:cardUseCompatPadding="true"
+            app:contentPadding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardview4"
+            app:strokeColor="@color/colorMaterialTeal500"
+            app:strokeWidth="1dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/text_input_phone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Số điện thoại liên lạc"
+                    app:hintAnimationEnabled="true"
+                    app:hintEnabled="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunito_sans"
+                        android:inputType="phone"
                         android:textSize="16sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 

@@ -6,6 +6,7 @@ import com.google.firebase.firestore.PropertyName;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class MotelRoom extends FirebaseModel {
 
   private DocumentReference category;
 
-  private DocumentReference provinces;
+  private DocumentReference province;
 
   private DocumentReference ward;
 
@@ -173,12 +174,12 @@ public class MotelRoom extends FirebaseModel {
     this.category = category;
   }
 
-  public DocumentReference getProvinces() {
-    return provinces;
+  public DocumentReference getProvince() {
+    return province;
   }
 
-  public void setProvinces(DocumentReference provinces) {
-    this.provinces = provinces;
+  public void setProvince(DocumentReference province) {
+    this.province = province;
   }
 
   public DocumentReference getWard() {
@@ -248,7 +249,7 @@ public class MotelRoom extends FirebaseModel {
         Objects.equals(utilities, motelRoom.utilities) &&
         Objects.equals(user, motelRoom.user) &&
         Objects.equals(category, motelRoom.category) &&
-        Objects.equals(provinces, motelRoom.provinces) &&
+        Objects.equals(province, motelRoom.province) &&
         Objects.equals(ward, motelRoom.ward) &&
         Objects.equals(district, motelRoom.district) &&
         Objects.equals(createdAt, motelRoom.createdAt) &&
@@ -259,7 +260,7 @@ public class MotelRoom extends FirebaseModel {
   @Override
   public int hashCode() {
     return Objects.hash(id, title, description, price, countView, size, address, addressGeoPoint,
-        images, phone, owner, approve, utilities, user, category, provinces, ward, district, createdAt, updatedAt, userIdsSaved);
+        images, phone, owner, approve, utilities, user, category, province, ward, district, createdAt, updatedAt, userIdsSaved);
   }
 
   @Override
@@ -279,7 +280,7 @@ public class MotelRoom extends FirebaseModel {
         ", utilities=" + utilities +
         ", user=" + user +
         ", category=" + category +
-        ", provinces=" + provinces +
+        ", provinces=" + province +
         ", ward=" + ward +
         ", district=" + district +
         ", createdAt=" + createdAt +
@@ -287,5 +288,30 @@ public class MotelRoom extends FirebaseModel {
         ", userIdsSaved=" + userIdsSaved +
         ", id='" + id + '\'' +
         '}';
+  }
+
+  public Map<String, Object> toMap() {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put("title", title);
+    map.put("description", description);
+    map.put("price", price);
+    map.put("count_view", countView);
+    map.put("size", size);
+    map.put("address", address);
+    map.put("address_geopoint", addressGeoPoint);
+    map.put("images", images);
+    map.put("phone", phone);
+    map.put("owner", owner);
+    map.put("approve", approve);
+    map.put("utilities", utilities);
+    map.put("user", user);
+    map.put("category", category);
+    map.put("province", province);
+    map.put("ward", ward);
+    map.put("district", district);
+    map.put("created_at", createdAt);
+    map.put("updated_at", updatedAt);
+    map.put("user_ids_saved", userIdsSaved);
+    return map;
   }
 }

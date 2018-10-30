@@ -2,7 +2,9 @@ package com.pkhh.projectcndd.ui.post;
 
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.app.ProgressDialog;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Property;
 import android.view.Menu;
@@ -16,10 +18,22 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.pkhh.projectcndd.R;
+import com.pkhh.projectcndd.models.MotelRoom;
+import com.pkhh.projectcndd.utils.Constants;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
@@ -230,6 +244,14 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
         return "Cần đăng ít nhất 3 hình";
       }
     }
+
+    if (mCurrentPosition == 3) {
+      if (mAddPriceTitleSizeDescriptionFragment.canGoNext()) {
+        return null;
+      }
+      return "Hãy điền đầy đủ thông tin";
+    }
+
     // TODO: default not implement
     return null;
   }
@@ -260,7 +282,93 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   private void onComplete() {
-    Toast.makeText(this, "TODO: onComplete", Toast.LENGTH_SHORT).show();
-    // TODO: Đăng bài
+    final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    final FirebaseStorage storage = FirebaseStorage.getInstance();
+    final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    final StorageReference storageImage = storage.getReference();
+
+    final Map<String, Object> mapData = getRoomAsMap(firestore, uid);
+
+    final ProgressDialog dialog = new ProgressDialog(this);
+    dialog.setTitle("Adding...");
+    dialog.setMessage("Please wait...");
+    dialog.show();
+
+    firestore.collection(Constants.MOTEL_ROOM_NAME_COLLECION)
+        .add(mapData)
+        .addOnSuccessListener(this, documentReference -> {
+          AtomicInteger count = new AtomicInteger();
+          List<Uri> imageUris = mAddPhotoFragment.getImageUris();
+
+          for (int i = 0; i < imageUris.size(); i++) {
+            final Uri uri = imageUris.get(i);
+
+            storageImage
+                .child("room_images/" + uid + "/image_" + i)
+                .putFile(uri)
+                .continueWithTask(task -> {
+                  if (!task.isSuccessful()) {
+                    throw requireNonNull(task.getException());
+                  }
+                  return storageImage.getDownloadUrl();
+                })
+                .addOnSuccessListener(this, downloadUrl -> {
+
+                  documentReference.update("images", FieldValue.arrayUnion(downloadUrl));
+                  Toast.makeText(this, "Upload image " + uri + " successfully", Toast.LENGTH_SHORT).show();
+
+                  if (count.incrementAndGet() == imageUris.size() - 1) {
+                    Toast.makeText(this, "Upload image done", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                  }
+
+                })
+                .addOnFailureListener(this, e -> {
+                  Toast.makeText(this, "Upload image " + uri + " error " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                  dialog.dismiss();
+                });
+          }
+
+        })
+        .addOnFailureListener(this, e -> {
+          Toast.makeText(this, "Add room error " + e.getMessage(), Toast.LENGTH_SHORT).show();
+          dialog.dismiss();
+        });
+  }
+
+  private Map<String, Object> getRoomAsMap(FirebaseFirestore firestore, String uid) {
+    MotelRoom room = new MotelRoom();
+
+    // category
+    room.setCategory(firestore.document(Constants.CATEGORY_NAME_COLLECION + "/" + mSelectCategoryFragment.getSelectedCategory().getId()));
+
+    // address
+    room.setAddress(mSelectLocationFragment.getAddressString());
+    room.setAddressGeoPoint(new GeoPoint(mSelectLocationFragment.getLatLng().latitude, mSelectLocationFragment.getLatLng().longitude));
+    room.setProvince(firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + mSelectLocationFragment.getProvinceId()));
+    room.setDistrict(firestore.document(Constants.DISTRICTS_NAME_COLLECION + "/" + mSelectLocationFragment.getDistrictId()));
+    room.setWard(firestore.document(Constants.WARDS_NAME_COLLECION + "/" + mSelectLocationFragment.getWardId()));
+
+    // some others
+    room.setApprove(false);
+    room.setCountView(0);
+    room.setUpdatedAt(null);
+    room.setOwner(false);
+
+
+    room.setSize(mAddPriceTitleSizeDescriptionFragment.getSize());
+    room.setTitle(mAddPriceTitleSizeDescriptionFragment.getTitleText());
+    room.setDescription(mAddPriceTitleSizeDescriptionFragment.getDescriptionText());
+    room.setPrice(mAddPriceTitleSizeDescriptionFragment.getPrice());
+    room.setPhone(mAddPriceTitleSizeDescriptionFragment.getPhone());
+
+    room.setUtilities(new HashMap<>());
+    room.setUserIdsSaved(Collections.emptyList());
+    room.setUser(firestore.document(Constants.USER_NAME_COLLECION + "/" + uid));
+    room.setImages(Collections.emptyList());
+
+    Map<String, Object> mapData = room.toMap();
+    mapData.put("created_at", FieldValue.serverTimestamp());
+    return mapData;
   }
 }
