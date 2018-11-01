@@ -17,7 +17,10 @@ import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
@@ -86,6 +89,9 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     findViewById(R.id.button_call).setOnClickListener(this);
 
     String id = getIntent().getStringExtra(MOTEL_ROOM_ID);
+
+    increaseViewCount(id);
+
     firestore.document(MOTEL_ROOM_NAME_COLLECION + "/" + id)
         .addSnapshotListener(this, (queryDocumentSnapshots, e) -> {
           if (e != null) {
@@ -96,6 +102,21 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
             updateUi(documentSnapshotToObject(queryDocumentSnapshots, MotelRoom.class));
           }
         });
+  }
+
+  private void increaseViewCount(final String id) {
+    firestore.runTransaction((Transaction.Function<Void>) transaction -> {
+      final DocumentReference documentRef = firestore.document(MOTEL_ROOM_NAME_COLLECION + "/" + id);
+      Integer viewCount = (Integer) transaction.get(documentRef).get("view_count");
+      if (viewCount == null) viewCount = 0;
+
+      transaction.update(documentRef, "view_count", viewCount + 1);
+      return null;
+    }).addOnSuccessListener(aVoid -> {
+      Log.d("@@@", "update view_count successfully");
+    }).addOnFailureListener(e -> {
+      Log.d("@@@", "update view_count error: " + e.getMessage(), e);
+    });
   }
 
   private void updateUi(@NonNull MotelRoom motelRoom) {
