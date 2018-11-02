@@ -1,9 +1,12 @@
 package com.pkhh.projectcndd.ui.home;
 
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.annimon.stream.Stream;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,9 +25,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.transition.Fade;
+import androidx.transition.Slide;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_NAME_COLLECION;
-import static java.util.Objects.requireNonNull;
 
 public class MotelRoomsListFragment extends Fragment {
   public static final String TAG = MotelRoomsListFragment.class.getSimpleName();
@@ -33,10 +43,19 @@ public class MotelRoomsListFragment extends Fragment {
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
-  private ViewGroup rootLayout;
   private HomeAdapter adapter;
   private List<HomeListItem> homeListItems = new ArrayList<>();
-  //  private SwipeRefreshLayout swipeRefreshLayout;
+
+  @BindView(R.id.root_motel_rooms_list_fragment)
+  ViewGroup rootLayout;
+
+  @BindView(R.id.swipe_refresh_layout)
+  SwipeRefreshLayout swipeRefreshLayout;
+
+  @BindView(R.id.loading_layout)
+  ViewGroup loadingLayout;
+
+  private Unbinder unbinder;
 
   @Nullable
   @Override
@@ -48,21 +67,20 @@ public class MotelRoomsListFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
+    unbinder = ButterKnife.bind(this, view);
+
     setupRecyclerViewAndAdapter(view);
 
-    rootLayout = view.findViewById(R.id.root_motel_rooms_list_fragment);
-//    swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
-//    swipeRefreshLayout.setOnRefreshListener(() -> {
-//      if (adapter != null) {
-//        adapter.refresh();
-//      }
-//    });
-//    swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
-
-    FirebaseFirestore.setLoggingEnabled(true);
+    swipeRefreshLayout.setOnRefreshListener(() -> loadData(false));
   }
-/*
-  private void onItemClick(int viewId, @NonNull MotelRoom roomItem, int position) {
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    unbinder.unbind();
+  }
+
+  /*private void onItemClick(int viewId, @NonNull MotelRoom roomItem, int position) {
     if (viewId == R.id.image_share) {
       Toast.makeText(requireContext(), "Share clicked", Toast.LENGTH_SHORT).show();
       onShareClicked(roomItem.getId());
@@ -121,23 +139,43 @@ public class MotelRoomsListFragment extends Fragment {
 
 
   private void setupRecyclerViewAndAdapter(@NonNull View view) {
+    adapter = new HomeAdapter();
+
     RecyclerView recyclerView = view.findViewById(R.id.recycler);
     recyclerView.setHasFixedSize(true);
+
     final GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2);
-    recyclerView.setLayoutManager(layoutManager);
     layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
       @Override
       public int getSpanSize(int position) {
-        final HomeListItem item = homeListItems.get(position);
-        if (item instanceof RoomItem) {
+        if (adapter.getItemViewType(position) == R.layout.home_room_item_layout) {
           return 1;
         }
         return 2;
       }
     });
 
-    adapter = new HomeAdapter();
+    recyclerView.setLayoutManager(layoutManager);
     recyclerView.setAdapter(adapter);
+    final int space = 4;
+    recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+      @Override
+      public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+        final int position = parent.getChildLayoutPosition(view);
+        if (adapter.getItemViewType(position) == R.layout.home_room_item_layout) {
+          outRect.left = space;
+          outRect.right = space;
+          outRect.bottom = space;
+          outRect.top = space;
+        }
+      }
+    });
+
+    loadData(true);
+  }
+
+  private void loadData(boolean isFirstLoad) {
+    homeListItems.clear();
 
     homeListItems.add(
         new BannerItem(
@@ -148,103 +186,52 @@ public class MotelRoomsListFragment extends Fragment {
             )
         )
     );
-    adapter.submitList(homeListItems = new ArrayList<>(homeListItems));
 
     firestore.collection(MOTEL_ROOM_NAME_COLLECION)
         .orderBy("created_at", Query.Direction.DESCENDING)
-        .limit(6)
+        .limit(20)
         .get()
         .addOnSuccessListener(queryDocumentSnapshots -> {
 
           homeListItems.add(new HeaderItem("Mới nhất"));
           homeListItems.addAll(
               Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
-                  .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice()))
+                  .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice(), motelRoom.getImages(), motelRoom.getDistrict()))
                   .toList()
           );
-          adapter.submitList(homeListItems = new ArrayList<>(homeListItems));
-
+          homeListItems.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
 
           firestore.collection(MOTEL_ROOM_NAME_COLLECION)
               .orderBy("view_count", Query.Direction.DESCENDING)
-              .limit(6)
+              .limit(20)
               .get()
               .addOnSuccessListener(queryDocumentSnapshots1 -> {
+
                 homeListItems.add(new HeaderItem("Xem nhiều"));
                 homeListItems.addAll(
                     Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots1, MotelRoom.class))
-                        .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice()))
+                        .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice(), motelRoom.getImages(), motelRoom.getDistrict()))
                         .toList()
                 );
-                adapter.submitList(homeListItems = new ArrayList<>(homeListItems));
+                homeListItems.add(new SeeAll(QueryDirection.VIEW_COUNT_DESCENDING));
+
+                adapter.submitList(new ArrayList<>(homeListItems));
+
+                if (isFirstLoad) {
+                  TransitionManager.beginDelayedTransition(rootLayout, new TransitionSet()
+                      .addTransition(new Fade(Fade.OUT))
+                      .addTransition(new Slide(Gravity.END))
+                      .setDuration(500)
+                      .addTarget(loadingLayout)
+                  );
+                  loadingLayout.setVisibility(View.INVISIBLE);
+                } else {
+                  Toast.makeText(requireContext(), "Refresh successfully", Toast.LENGTH_SHORT).show();
+                  if (swipeRefreshLayout.isRefreshing()) {
+                    swipeRefreshLayout.setRefreshing(false);
+                  }
+                }
               });
-
         });
-
-
   }
 }
-/*
-
-
-class X extends MyFirebaseLoadMoreAdapter<MotelRoom> {
-
-  public X(Query query, int pageSize, RecyclerView recyclerView, Class<MotelRoom> motelRoomClass) {
-    super(query, pageSize, recyclerView, motelRoomClass);
-  }
-
-  @Override
-  protected void onLastItemReached() {
-    Snackbar.make(rootLayout, "Get all!!!", Snackbar.LENGTH_SHORT).show();
-  }
-
-  @Override
-  protected void onFirstLoaded() {
-    swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(false));
-  }
-
-  @NonNull
-  @Override
-  public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    if (viewType == TYPE_LOAD_MORE) {
-      final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.load_more_item_layout, parent, false);
-      return new LoadMoreVH(itemView);
-    }
-    if (viewType == TYPE_FIREBASE_MODEL_ITEM) {
-      final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.motel_room_item_layout, parent, false);
-      final RecyclerOnClickListener recyclerOnClickListener =
-          (view, position) -> onItemClick(view.getId(), ((MotelRoom) getItem(position)), position);
-      return new MotelRoomVH(
-          itemView,
-          recyclerOnClickListener
-      );
-    }
-    throw new IllegalStateException("Unknown view type " + viewType);
-  }
-
-  @Override
-  public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-    Object item = getItem(position);
-
-    if (holder instanceof LoadMoreVH) {
-      ((LoadMoreVH) holder).bind();
-    } else if (holder instanceof MotelRoomVH && item instanceof MotelRoom) {
-      ((MotelRoomVH) holder).bind((MotelRoom) item);
-    } else {
-      throw new IllegalStateException("Unknown view holder " + holder);
-    }
-  }
-
-  class LoadMoreVH extends RecyclerView.ViewHolder {
-    private final ProgressBar progressBar;
-
-    LoadMoreVH(@NonNull View itemView) {
-      super(itemView);
-      progressBar = itemView.findViewById(R.id.progressBar2);
-    }
-
-    void bind() {
-      progressBar.setIndeterminate(true);
-    }
-  }
-};*/
