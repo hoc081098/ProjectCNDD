@@ -19,6 +19,7 @@ import com.pkhh.projectcndd.models.MotelRoom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -56,6 +57,7 @@ public class MotelRoomsListFragment extends Fragment {
   ViewGroup loadingLayout;
 
   private Unbinder unbinder;
+  private boolean isLoading = false;
 
   @Nullable
   @Override
@@ -66,12 +68,20 @@ public class MotelRoomsListFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-
     unbinder = ButterKnife.bind(this, view);
 
     setupRecyclerViewAndAdapter(view);
 
-    swipeRefreshLayout.setOnRefreshListener(() -> loadData(false));
+    swipeRefreshLayout.setOnRefreshListener(() -> {
+      if (isLoading) swipeRefreshLayout.setRefreshing(false);
+      else loadData(false);
+    });
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    if (!isLoading) loadData(false);
   }
 
   @Override
@@ -175,6 +185,7 @@ public class MotelRoomsListFragment extends Fragment {
   }
 
   private void loadData(boolean isFirstLoad) {
+    isLoading = true;
     homeListItems.clear();
 
     homeListItems.add(
@@ -191,7 +202,7 @@ public class MotelRoomsListFragment extends Fragment {
         .orderBy("created_at", Query.Direction.DESCENDING)
         .limit(20)
         .get()
-        .addOnSuccessListener(queryDocumentSnapshots -> {
+        .addOnSuccessListener(Objects.requireNonNull(getActivity()), queryDocumentSnapshots -> {
 
           homeListItems.add(new HeaderItem("Mới nhất"));
           homeListItems.addAll(
@@ -205,7 +216,7 @@ public class MotelRoomsListFragment extends Fragment {
               .orderBy("view_count", Query.Direction.DESCENDING)
               .limit(20)
               .get()
-              .addOnSuccessListener(queryDocumentSnapshots1 -> {
+              .addOnSuccessListener(Objects.requireNonNull(getActivity()), queryDocumentSnapshots1 -> {
 
                 homeListItems.add(new HeaderItem("Xem nhiều"));
                 homeListItems.addAll(
@@ -231,6 +242,7 @@ public class MotelRoomsListFragment extends Fragment {
                     swipeRefreshLayout.setRefreshing(false);
                   }
                 }
+                isLoading = false;
               });
         });
   }

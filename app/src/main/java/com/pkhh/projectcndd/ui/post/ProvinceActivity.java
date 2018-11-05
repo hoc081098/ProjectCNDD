@@ -89,8 +89,8 @@ public class ProvinceActivity extends AppCompatActivity implements RecyclerOnCli
     String name = item.getName();
 
     Intent intent = new Intent();
-    intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_NAME, name);
-    intent.putExtra(SelectLocationFragment.EXTRA_PROVINCE_ID, id);
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_NAME, name);
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_ID, id);
 
     setResult(Activity.RESULT_OK, intent);
     finish(); // quay dau man hinh truoc

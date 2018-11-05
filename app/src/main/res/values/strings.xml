@@ -12,4 +12,7 @@
     <string name="user_location_permission_explanation" />
     <string name="user_location_permission_not_granted" />
     <string name="access_token">pk.eyJ1IjoicGV0cnVzdGhhaWhvYyIsImEiOiJjampycW1uY2s4bTRnM3BwMXo0M2Q3OTduIn0.dRqQsp8tc1SictvFyOP7tQ</string>
+    <string name="select_province_city">Chọn tỉnh, thành phố</string>
+    <string name="selected_district">Chọn quận, huyện</string>
+    <string name="selecte_ward">Chọn xã, phường, thị trấn</string>
 </resources>

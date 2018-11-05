@@ -3,28 +3,30 @@ package com.pkhh.projectcndd.ui.post;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
+import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.hoc.lib.NumberToVietnamese;
 import com.pkhh.projectcndd.R;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.text.DecimalFormat;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
-import androidx.fragment.app.Fragment;
-import androidx.transition.TransitionManager;
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
-public class AddPriceTitleSizeDescriptionFragment extends Fragment {
+public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitleSizeDescriptionFragmentOutput> {
   private static final int MIN_LENGTH_OF_TITLE = 10;
-
 
   @BindView(R.id.cardView)
   ViewGroup card1;
@@ -34,9 +36,6 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
 
   @BindView(R.id.text_price)
   TextView textPrice;
-
-  @BindView(R.id.text_error_price)
-  TextView textErrorPrice;
 
   @BindView(R.id.text_input_size)
   TextInputLayout textInputSize;
@@ -56,8 +55,6 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
   @BindView(R.id.text_input_phone)
   TextInputLayout textInputPhone;
 
-  private Unbinder unbinder;
-
   private EditText priceEditText;
   private boolean isPriceValid;
 
@@ -68,18 +65,16 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
   private boolean isTitleValid;
 
   private EditText descriptionEditText;
+
   private EditText phoneEditText;
+  private boolean isPhoneValid;
 
   @Nullable
-  @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_add_price_title_size_description, container, false);
-  }
+  private String districtName;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    unbinder = ButterKnife.bind(this, view);
 
     priceEditText = textInputPrice.getEditText();
     sizeEditText = textInputSize.getEditText();
@@ -112,14 +107,16 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
           price = 0;
           isPriceValid = false;
         }
+        getDataOutput().setPrice(price);
+
+        textPrice.setText(NumberToVietnamese.convert(price));
 
         if (price < 100_000) {
-          TransitionManager.beginDelayedTransition(card1);
-          textErrorPrice.setVisibility(View.VISIBLE);
+          textInputPrice.setError("Giá quá thấp. Vui lòng sửa lại giá thực tế");
           isPriceValid = false;
+        } else if (price > 10_000_000) {
+          textInputPrice.setError("Giá quá cao. Vui lòng sửa lại giá thực tế");
         } else {
-          TransitionManager.beginDelayedTransition(card1);
-          textErrorPrice.setVisibility(View.GONE);
           isPriceValid = true;
         }
       }
@@ -139,17 +136,25 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
         double size;
         try {
           size = Double.parseDouble(s.toString());
-          textInputSize.setError(null);
-          isSizeValid = true;
 
           if (Double.compare(size, 0) <= 0) {
             isSizeValid = false;
             textInputSize.setError("Nhập sai diện tích");
+          } else {
+
+            updateSuggestTitle(size);
+
+            isSizeValid = true;
+            textInputSize.setError(null);
           }
+
         } catch (NumberFormatException e) {
           textInputSize.setError("Nhập sai diện tích");
           isSizeValid = false;
+          size = 0;
         }
+
+        getDataOutput().setSize(size);
       }
 
       @Override
@@ -171,41 +176,90 @@ public class AddPriceTitleSizeDescriptionFragment extends Fragment {
           textInputTitle.setError(null);
           isTitleValid = true;
         }
+
+        getDataOutput().setTitle(s.toString());
       }
 
       @Override
       public void afterTextChanged(Editable s) {
       }
     });
+
+    descriptionEditText.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        getDataOutput().setDescription(s.toString());
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+      }
+    });
+
+    phoneEditText.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        getDataOutput().setPhone(s.toString());
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+
+      }
+    });
+
+    phoneEditText.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        isPhoneValid = Patterns.PHONE.matcher(s).matches();
+        textInputPhone.setError(isPhoneValid ? null : "Số điện thoại sai định dạng. Vui lòng nhập lại!");
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+
+      }
+    });
+  }
+
+  private void updateSuggestTitle(double size) {
+    chipSuggestTitle.setText(String.format("Phòng trọ %s %sm2", districtName == null ? "" : districtName, new DecimalFormat("#.##").format(size)));
+  }
+
+  @NotNull
+  @Override
+  public PriceTitleSizeDescriptionFragmentOutput initialData() {
+    return new PriceTitleSizeDescriptionFragmentOutput();
   }
 
   @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    unbinder.unbind();
+  protected void onInvalid() {
+    super.onInvalid();
+    Snackbar.make(Objects.requireNonNull(getView()), "Hãy cung cấp đủ thông tin!", Snackbar.LENGTH_SHORT).show();
   }
 
-  public String getPhone() {
-    return phoneEditText.getText().toString();
+
+  @Override
+  public boolean isInvalidData() {
+    return !(isPriceValid && isTitleValid && isSizeValid && isPhoneValid);
   }
 
-  public long getPrice() {
-    return Long.parseLong(priceEditText.getText().toString());
-  }
+  @Override
+  public int getLayoutId() { return R.layout.fragment_add_price_title_size_description; }
 
-  public double getSize() {
-    return Double.parseDouble(sizeEditText.getText().toString());
-  }
-
-  public String getTitleText() {
-    return titleEditText.getText().toString();
-  }
-
-  public String getDescriptionText() {
-    return descriptionEditText.getText().toString();
-  }
-
-  public boolean canGoNext() {
-    return isPriceValid && isTitleValid && isSizeValid;
+  public void setDistrictName(@Nullable String districtName) {
+    this.districtName = districtName;
   }
 }

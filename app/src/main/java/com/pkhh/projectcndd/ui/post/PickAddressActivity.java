@@ -71,8 +71,8 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   private static final int REQUEST_CODE_LOCATION_PERMISSION = 2;
   private static final int REQUEST_CHECK_SETTINGS = 3;
   private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-  private static final int INTERVAL = 5_000;
-  private static final int FASTEST_INTERVAL = 3_000;
+  private static final int INTERVAL = 3_000;
+  private static final int FASTEST_INTERVAL = 1_000;
   private static final float SMALLEST_DISPLACEMENT = 10f;
   @Nullable
   private GoogleMap mMap;
@@ -104,7 +104,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   private LatLng mLatLng;
 
 
-  // input nhận từ SelectLocationFragment
+  // input nhận từ SelectAddressLocationFragment
   @Nullable
   private LatLng mInputLatLng;
   @Nullable

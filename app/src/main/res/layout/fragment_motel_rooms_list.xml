@@ -13,13 +13,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:paddingTop="4dp"
+            android:background="#fafafa"
             android:paddingBottom="4dp"
             android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,6 +32,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loading_layout"
+        tools:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fafafa"

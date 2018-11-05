@@ -50,7 +50,7 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
   }
 
   private void setupAdapter() {
-    String id = getIntent().getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
+    String id = getIntent().getStringExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_ID);
     Query query = FirebaseFirestore.getInstance()
         .document("provinces" + "/" + id)
         .collection("districts")
@@ -87,8 +87,8 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
     District item = mFirestoreRecyclerAdapter.getItem(position);
 
     Intent intent = new Intent();
-    intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_ID, item.getId());
-    intent.putExtra(SelectLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_DISTRICT_ID, item.getId());
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
 
     setResult(Activity.RESULT_OK, intent);
     finish();

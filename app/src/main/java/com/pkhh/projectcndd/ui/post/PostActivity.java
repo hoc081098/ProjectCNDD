@@ -16,9 +16,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -27,7 +26,9 @@ import com.google.firebase.storage.StorageReference;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.utils.Constants;
+import com.pkhh.projectcndd.utils.DepthPageTransformer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   public static final int MAX_PAGE = 4;
 
   private static final TimeInterpolator PROGRESS_ANIM_INTERPOLATOR = new DecelerateInterpolator();
-  private static final int ANIM_DURATION = 300;
+  private static final int ANIM_DURATION = 400;
   private static final Property<ProgressBar, Integer> PROGRESS_PROPERTY = new Property<ProgressBar, Integer>(Integer.class, "progress") {
     @Override
     public Integer get(ProgressBar object) {
@@ -74,9 +75,11 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   @IntRange(from = 0, to = MAX_PAGE - 1)
   private int mCurrentPosition = 0;
   private SelectCategoryFragment mSelectCategoryFragment;
-  private SelectLocationFragment mSelectLocationFragment;
+  private SelectAddressLocationFragment mSelectAddressLocationFragment;
   private AddPhotoFragment mAddPhotoFragment;
   private AddPriceTitleSizeDescriptionFragment mAddPriceTitleSizeDescriptionFragment;
+
+  private List<StepFragment> fragmentList;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,8 +87,15 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     setContentView(R.layout.activity_post);
     setupActionBar();
     findViews();
-    final List<Fragment> fragmentList = initFragments();
+
+    fragmentList = initFragments();
     initStepLayout(fragmentList);
+
+    int pos;
+    if (savedInstanceState != null && (pos = savedInstanceState.getInt("CURRENT_POSITION", -1)) >= 0) {
+      mCurrentPosition = pos;
+      onUpdate(pos);
+    }
   }
 
   private void setupActionBar() {
@@ -94,7 +104,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     supportActionBar.setTitle("Bạn đăng tin");
   }
 
-  private void initStepLayout(List<Fragment> fragmentList) {
+  private void initStepLayout(List<StepFragment> fragmentList) {
     mContainer.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
       @Override
       public Fragment getItem(int position) {
@@ -107,6 +117,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
       }
     });
     mContainer.setOffscreenPageLimit(MAX_PAGE);
+    mContainer.setPageTransformer(true, new DepthPageTransformer());
 
     mProgressBar.setMax(100);
     mProgressBar.setProgress((int) ((double) 1 / MAX_PAGE * 100));
@@ -116,17 +127,17 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   @NonNull
-  private List<Fragment> initFragments() {
+  private List<StepFragment> initFragments() {
     mSelectCategoryFragment = new SelectCategoryFragment();
-    mSelectLocationFragment = new SelectLocationFragment();
+    mSelectAddressLocationFragment = new SelectAddressLocationFragment();
     mAddPhotoFragment = new AddPhotoFragment();
     mAddPriceTitleSizeDescriptionFragment = new AddPriceTitleSizeDescriptionFragment();
-    return Arrays.asList(
+    return new ArrayList<>(Arrays.asList(
         mSelectCategoryFragment,
-        mSelectLocationFragment,
+        mSelectAddressLocationFragment,
         mAddPhotoFragment,
         mAddPriceTitleSizeDescriptionFragment
-    );
+    ));
   }
 
   private void onUpdate(@IntRange(from = 0, to = MAX_PAGE - 1) int position) {
@@ -157,6 +168,8 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
       supportActionBar.setTitle("Thêm địa chỉ");
     } else if (position == 2) {
       supportActionBar.setTitle("Thêm ảnh");
+    } else if (position == 3) {
+      supportActionBar.setTitle("Thêm thông tin");
     }
     mContainer.setCurrentItem(position, true);
   }
@@ -174,13 +187,11 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   public void onClick(View v) {
     switch (v.getId()) {
       case R.id.button_next:
-        final String message = getError();
-        if (message != null) { // không thể đi tiếp
-          Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT)
-              .show();
-        } else {
-          goNext(); // đi tiếp
+
+        if (fragmentList.get(mCurrentPosition).canGoNext()) {
+          goNext();
         }
+
         break;
       case R.id.button_prev:
         goPrevious();
@@ -205,55 +216,10 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     } else {
       ++mCurrentPosition;
       onUpdate(mCurrentPosition);
-    }
-  }
-
-  // return null nếu có thể đi tiếp, hoặc return string thông báo lỗi
-  @Nullable
-  private String getError() {
-    if (mCurrentPosition == 0) {
-      if (mSelectCategoryFragment.getSelectedCategory() != null) {
-        return null;
-      } else {
-        return "Hãy chọn một thể loại!";
+      if (fragmentList.get(mCurrentPosition) instanceof AddPriceTitleSizeDescriptionFragment) {
+        mAddPriceTitleSizeDescriptionFragment.setDistrictName(mSelectAddressLocationFragment.getDataOutput().getDistrictName());
       }
     }
-
-    if (mCurrentPosition == 1) {
-      final String districtId = mSelectLocationFragment.getDistrictId();
-      final String provinceId = mSelectLocationFragment.getProvinceId();
-      final String wardId = mSelectLocationFragment.getWardId();
-      final LatLng latLng = mSelectLocationFragment.getLatLng();
-      final String addressString = mSelectLocationFragment.getAddressString();
-
-      if (districtId != null
-          && provinceId != null
-          && wardId != null
-          && latLng != null
-          && addressString != null) {
-        return null;
-      } else {
-        return "Hãy cung cấp đủ địa chỉ!";
-      }
-    }
-
-    if (mCurrentPosition == 2) {
-      if (mAddPhotoFragment.getImageUris().size() >= 3) {
-        return null;
-      } else {
-        return "Cần đăng ít nhất 3 hình";
-      }
-    }
-
-    if (mCurrentPosition == 3) {
-      if (mAddPriceTitleSizeDescriptionFragment.canGoNext()) {
-        return null;
-      }
-      return "Hãy điền đầy đủ thông tin";
-    }
-
-    // TODO: default not implement
-    return null;
   }
 
   @Override
@@ -287,7 +253,6 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     final StorageReference storageImage = storage.getReference();
 
-    final Map<String, Object> mapData = getRoomAsMap(firestore, uid);
 
     final ProgressDialog dialog = new ProgressDialog(this);
     dialog.setTitle("Adding...");
@@ -295,10 +260,10 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     dialog.show();
 
     firestore.collection(Constants.MOTEL_ROOM_NAME_COLLECION)
-        .add(mapData)
+        .add(getRoomAsMap(firestore, uid))
         .addOnSuccessListener(this, documentReference -> {
           AtomicInteger count = new AtomicInteger();
-          List<Uri> imageUris = mAddPhotoFragment.getImageUris();
+          List<Uri> imageUris = mAddPhotoFragment.getDataOutput().getUris();
 
           for (int i = 0; i < imageUris.size(); i++) {
             final Uri uri = imageUris.get(i);
@@ -319,6 +284,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
                         if (count.incrementAndGet() == imageUris.size() - 1) {
                           Toast.makeText(this, "Add room done", Toast.LENGTH_SHORT).show();
                           dialog.dismiss();
+                          finish();
                         }
                       });
                 })
@@ -333,20 +299,24 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
           Toast.makeText(this, "Add room error " + e.getMessage(), Toast.LENGTH_SHORT).show();
           dialog.dismiss();
         });
+
   }
 
   private Map<String, Object> getRoomAsMap(FirebaseFirestore firestore, String uid) {
     MotelRoom room = new MotelRoom();
 
     // category
-    room.setCategory(firestore.document(Constants.CATEGORY_NAME_COLLECION + "/" + mSelectCategoryFragment.getSelectedCategory().getId()));
+    room.setCategory(firestore.document(Constants.CATEGORY_NAME_COLLECION + "/" + requireNonNull(mSelectCategoryFragment.getDataOutput()).getSelectedCategoryId()));
 
     // address
-    room.setAddress(mSelectLocationFragment.getAddressString());
-    room.setAddressGeoPoint(new GeoPoint(mSelectLocationFragment.getLatLng().latitude, mSelectLocationFragment.getLatLng().longitude));
-    room.setProvince(firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + mSelectLocationFragment.getProvinceId()));
-    room.setDistrict(firestore.document(Constants.DISTRICTS_NAME_COLLECION + "/" + mSelectLocationFragment.getDistrictId()));
-    room.setWard(firestore.document(Constants.WARDS_NAME_COLLECION + "/" + mSelectLocationFragment.getWardId()));
+    room.setAddress(mSelectAddressLocationFragment.getDataOutput().getAddress());
+    room.setAddressGeoPoint(new GeoPoint(mSelectAddressLocationFragment.getDataOutput().getLatLng().latitude, mSelectAddressLocationFragment.getDataOutput().getLatLng().longitude));
+    final DocumentReference provinceRef = firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + mSelectAddressLocationFragment.getDataOutput().getProvinceId());
+    room.setProvince(provinceRef);
+    final DocumentReference districtRef = provinceRef.collection(Constants.DISTRICTS_NAME_COLLECION).document(mSelectAddressLocationFragment.getDataOutput().getDistrictId());
+    room.setDistrict(districtRef);
+    final DocumentReference wardRef = districtRef.collection(Constants.WARDS_NAME_COLLECION).document(mSelectAddressLocationFragment.getDataOutput().getWardId());
+    room.setWard(wardRef);
 
     // some others
     room.setApprove(false);
@@ -355,19 +325,20 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     room.setOwner(false);
 
 
-    room.setSize(mAddPriceTitleSizeDescriptionFragment.getSize());
-    room.setTitle(mAddPriceTitleSizeDescriptionFragment.getTitleText());
-    room.setDescription(mAddPriceTitleSizeDescriptionFragment.getDescriptionText());
-    room.setPrice(mAddPriceTitleSizeDescriptionFragment.getPrice());
-    room.setPhone(mAddPriceTitleSizeDescriptionFragment.getPhone());
+    room.setSize(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getSize());
+    room.setTitle(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getTitle());
+    room.setDescription(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getDescription());
+    room.setPrice(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getPrice());
+    room.setPhone(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getPhone());
 
     room.setUtilities(new HashMap<>());
     room.setUserIdsSaved(Collections.emptyList());
     room.setUser(firestore.document(Constants.USER_NAME_COLLECION + "/" + uid));
     room.setImages(Collections.emptyList());
 
-    Map<String, Object> mapData = room.toMap();
-    mapData.put("created_at", FieldValue.serverTimestamp());
-    return mapData;
+    room.setDistrictName(mSelectAddressLocationFragment.getDataOutput().getDistrictName());
+    final Map<String, Object> map = room.toMap();
+    map.put("created_at", FieldValue.serverTimestamp());
+    return map;
   }
 }

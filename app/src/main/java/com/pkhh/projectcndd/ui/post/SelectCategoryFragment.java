@@ -1,7 +1,6 @@
 package com.pkhh.projectcndd.ui.post;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -17,23 +17,23 @@ import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.Category;
 import com.pkhh.projectcndd.models.FirebaseModel;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import androidx.annotation.IntDef;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.DividerItemDecoration.VERTICAL;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
@@ -45,8 +45,6 @@ import static com.pkhh.projectcndd.utils.Constants.CATEGORY_NAME_COLLECION;
  */
 
 class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
-  static final int TYPE_HEADER = 1;
-  static final int TYPE_CATEGORY_ITEM = 2;
   private static final DiffUtil.ItemCallback<Object> DIFF_CALLBACK = new DiffUtil.ItemCallback<Object>() {
 
     @Override
@@ -62,12 +60,17 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
       return oldItem.equals(newItem);
     }
   };
+
+  @Nullable
+  private final Function1<Category, Void> onSelectCategory;
+
   @Nullable
   private Category selectedCategory;
   private List<Category> categories;
 
-  CategoryAdapter() {
+  CategoryAdapter(@Nullable Function1<Category, Void> onSelectCategory) {
     super(DIFF_CALLBACK);
+    this.onSelectCategory = onSelectCategory;
   }
 
   void submitListCategories(@NonNull List<Category> categories) {
@@ -91,30 +94,32 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
     super.submitList(list);
   }
 
-  @ViewType
+  @LayoutRes
   @Override
   public int getItemViewType(int position) {
     Object item = getItem(position);
     if (item instanceof String) {
-      return TYPE_HEADER;
+      return R.layout.province_item_layout;
     }
     if (item instanceof SelectionCategory) {
-      return TYPE_CATEGORY_ITEM;
+      return R.layout.category_item_layout;
     }
     throw new IllegalStateException("Don't know item at position: " + position + ", item: " + item);
   }
 
   @NonNull
   @Override
-  public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, @ViewType int viewType) {
-    if (viewType == TYPE_CATEGORY_ITEM) {
-      final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.category_item_layout, parent, false);
+  public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, @LayoutRes int viewType) {
+    final View itemView = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+
+    if (viewType == R.layout.category_item_layout) {
       return new CategoryViewHolder(itemView);
     }
-    if (viewType == TYPE_HEADER) {
-      final View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.province_item_layout, parent, false);
+
+    if (viewType == R.layout.province_item_layout) {
       return new HeaderViewHolder(itemView);
     }
+
     throw new IllegalStateException();
   }
 
@@ -132,23 +137,17 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
     }
   }
 
-  @Nullable
-  public Category getSelectedCategory() {
-    return selectedCategory;
-  }
-
-  @IntDef(value = {TYPE_CATEGORY_ITEM, TYPE_HEADER})
-  @Retention(value = RetentionPolicy.SOURCE)
-  private @interface ViewType {
-  }
-
   static class HeaderViewHolder extends RecyclerView.ViewHolder {
+    @BindView(R.id.text_province_name)
+    TextView textView;
+
     HeaderViewHolder(@NonNull View itemView) {
       super(itemView);
+      ButterKnife.bind(this, itemView);
     }
 
     void bind(String s) {
-      itemView.<TextView>findViewById(R.id.text_province_name).setText(s);
+      textView.setText(s);
     }
   }
 
@@ -171,19 +170,19 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
 
     @Override
     public int hashCode() {
-
       return Objects.hash(isSelected, category);
     }
   }
 
   class CategoryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final RadioButton radioButton;
-    private final TextView textCategoryName;
+    @BindView(R.id.radio_button)
+    RadioButton radioButton;
+    @BindView(R.id.text_category_name)
+    TextView textCategoryName;
 
     CategoryViewHolder(@NonNull View itemView) {
       super(itemView);
-      radioButton = itemView.findViewById(R.id.radio_button);
-      textCategoryName = itemView.findViewById(R.id.text_category_name);
+      ButterKnife.bind(this, itemView);
 
       itemView.setOnClickListener(this);
       radioButton.setOnClickListener(this);
@@ -200,34 +199,33 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
       if (adapterPosition != NO_POSITION) {
         Object item = getItem(adapterPosition);
         if (item instanceof SelectionCategory) {
+
           selectedCategory = ((SelectionCategory) item).category;
+          if (onSelectCategory != null) onSelectCategory.invoke(selectedCategory);
           submitListCategories(categories);
+
         }
       }
     }
   }
 }
 
-public class SelectCategoryFragment extends Fragment {
-  private static final String TAG = SelectCategoryFragment.class.getSimpleName();
-
+public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput> {
   private final Query query = FirebaseFirestore.getInstance().collection(CATEGORY_NAME_COLLECION);
-  private final CategoryAdapter adapter = new CategoryAdapter();
+  private final CategoryAdapter adapter = new CategoryAdapter(this::onSelectCategory);
 
-  private RecyclerView recyclerView;
-  private ListenerRegistration registration;
-
-  @Nullable
-  @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_select_category, container, false);
+  private Void onSelectCategory(Category category) {
+    getDataOutput().setSelectedCategoryId(category.getId());
+    return null;
   }
+
+  @BindView(R.id.recycler_category)
+  RecyclerView recyclerView;
+  private ListenerRegistration registration;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-
-    recyclerView = view.findViewById(R.id.recycler_category);
     setupRecyclerView();
   }
 
@@ -236,10 +234,7 @@ public class SelectCategoryFragment extends Fragment {
     super.onResume();
 
     registration = query.addSnapshotListener((queryDocumentSnapshots, e) -> {
-      if (e != null) {
-        Log.d(TAG, "addSnapshotListener error=" + e, e);
-        return;
-      }
+      if (e != null) return;
       if (queryDocumentSnapshots != null) {
         List<Category> categories = FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, Category.class);
         adapter.submitListCategories(categories);
@@ -260,8 +255,23 @@ public class SelectCategoryFragment extends Fragment {
     recyclerView.setAdapter(adapter);
   }
 
-  @Nullable
-  public Category getSelectedCategory() {
-    return adapter.getSelectedCategory();
+  @Override
+  public void onInvalid() {
+    super.onInvalid();
+    Snackbar.make(Objects.requireNonNull(getView()), "Hãy chọn một thể loại", Snackbar.LENGTH_SHORT).show();
+  }
+
+  @Override
+  public int getLayoutId() { return R.layout.fragment_select_category; }
+
+  @NotNull
+  @Override
+  public CategoryFragmentOutput initialData() {
+    return new CategoryFragmentOutput();
+  }
+
+  @Override
+  public boolean isInvalidData() {
+    return getDataOutput().getSelectedCategoryId() == null;
   }
 }

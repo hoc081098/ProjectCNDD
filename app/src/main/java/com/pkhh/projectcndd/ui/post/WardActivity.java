@@ -50,8 +50,8 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
 
   private void setupAdapter() {
     Intent intent = getIntent();
-    String districtId = intent.getStringExtra(SelectLocationFragment.EXTRA_DISTRICT_ID);
-    String provinceId = intent.getStringExtra(SelectLocationFragment.EXTRA_PROVINCE_ID);
+    String districtId = intent.getStringExtra(SelectAddressLocationFragment.EXTRA_DISTRICT_ID);
+    String provinceId = intent.getStringExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_ID);
 
     Query query = FirebaseFirestore.getInstance()
         .document("provinces" + "/" + provinceId + "/" + "districts" + "/" + districtId)
@@ -88,8 +88,8 @@ public class WardActivity extends AppCompatActivity implements RecyclerOnClickLi
     Ward item = mFirestoreRecyclerAdapter.getItem(position);
 
     Intent intent = new Intent();
-    intent.putExtra(SelectLocationFragment.EXTRA_WARD_NAME, item.getName());
-    intent.putExtra(SelectLocationFragment.EXTRA_WARD_ID, item.getId());
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_WARD_NAME, item.getName());
+    intent.putExtra(SelectAddressLocationFragment.EXTRA_WARD_ID, item.getId());
 
     setResult(Activity.RESULT_OK, intent);
     finish();

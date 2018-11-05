@@ -5,7 +5,6 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,8 @@ public class MotelRoom extends FirebaseModel {
   private DocumentReference ward;
 
   private DocumentReference district;
+
+  private String districtName;
 
   private Date createdAt;
 
@@ -230,6 +231,16 @@ public class MotelRoom extends FirebaseModel {
     this.userIdsSaved = userIdsSaved;
   }
 
+  @PropertyName("district_name")
+  public String getDistrictName() {
+    return districtName;
+  }
+
+  @PropertyName("district_name")
+  public void setDistrictName(String districtName) {
+    this.districtName = districtName;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -255,13 +266,15 @@ public class MotelRoom extends FirebaseModel {
         Objects.equals(district, motelRoom.district) &&
         Objects.equals(createdAt, motelRoom.createdAt) &&
         Objects.equals(updatedAt, motelRoom.updatedAt) &&
-        Objects.equals(userIdsSaved, motelRoom.userIdsSaved);
+        Objects.equals(userIdsSaved, motelRoom.userIdsSaved) &&
+        Objects.equals(districtName, motelRoom.districtName);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(id, title, description, price, countView, size, address, addressGeoPoint,
-        images, phone, owner, approve, utilities, user, category, province, ward, district, createdAt, updatedAt, userIdsSaved);
+        images, phone, owner, approve, utilities, user, category, province, ward, district, createdAt,
+        updatedAt, userIdsSaved, districtName);
   }
 
   @Override
@@ -281,13 +294,13 @@ public class MotelRoom extends FirebaseModel {
         ", utilities=" + utilities +
         ", user=" + user +
         ", category=" + category +
-        ", provinces=" + province +
+        ", province=" + province +
         ", ward=" + ward +
         ", district=" + district +
+        ", districtName='" + districtName + '\'' +
         ", createdAt=" + createdAt +
         ", updatedAt=" + updatedAt +
         ", userIdsSaved=" + userIdsSaved +
-        ", id='" + id + '\'' +
         '}';
   }
 
@@ -313,6 +326,7 @@ public class MotelRoom extends FirebaseModel {
     map.put("created_at", createdAt);
     map.put("updated_at", updatedAt);
     map.put("user_ids_saved", userIdsSaved);
+    map.put("district_name", districtName);
     return map;
   }
 }
