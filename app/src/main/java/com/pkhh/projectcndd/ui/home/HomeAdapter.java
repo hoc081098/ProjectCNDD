@@ -19,8 +19,10 @@ import com.daimajia.slider.library.Transformers.BaseTransformer;
 import com.daimajia.slider.library.Transformers.CubeInTransformer;
 import com.daimajia.slider.library.Transformers.FlipHorizontalTransformer;
 import com.daimajia.slider.library.Transformers.RotateDownTransformer;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.pkhh.projectcndd.R;
+import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity;
 import com.squareup.picasso.Picasso;
 
@@ -31,12 +33,12 @@ import java.util.Random;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
@@ -95,39 +97,22 @@ class HeaderItem implements HomeListItem {
 }
 
 class RoomItem implements HomeListItem {
-  final String id;
-  final String title;
-  final String address;
-  final long price;
-  @Nullable
-  final List<String> images;
-  final DocumentReference district;
+  @NonNull
+  final MotelRoom room;
 
-  RoomItem(String id, String title, String address, long price, @Nullable List<String> images, DocumentReference district) {
-    this.id = id;
-    this.title = title;
-    this.address = address;
-    this.price = price;
-    this.images = images;
-    this.district = district;
-  }
+  RoomItem(@NonNull MotelRoom room) {this.room = room;}
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     RoomItem roomItem = (RoomItem) o;
-    return price == roomItem.price &&
-        Objects.equals(id, roomItem.id) &&
-        Objects.equals(title, roomItem.title) &&
-        Objects.equals(address, roomItem.address) &&
-        Objects.equals(images, roomItem.images) &&
-        Objects.equals(district, roomItem.district);
+    return Objects.equals(room, roomItem.room);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, title, address, price, images, district);
+    return Objects.hash(room);
   }
 }
 
@@ -174,15 +159,27 @@ class SeeAll implements HomeListItem {
 }
 
 class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
-  public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
-  public static final String QUERY_DIRECTION = "QUERY_DIRECTION";
+  private static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
+  static final String QUERY_DIRECTION = "QUERY_DIRECTION";
 
-  protected HomeAdapter() {
+  @NonNull
+  private final Function1<MotelRoom, Void> onAddToOrRemoveFromSavedRooms;
+
+  HomeAdapter(@NonNull Function1<MotelRoom, Void> onAddToOrRemoveFromSavedRooms) {
     super(new DiffUtil.ItemCallback<HomeListItem>() {
       @Override
       public boolean areItemsTheSame(@NonNull HomeListItem oldItem, @NonNull HomeListItem newItem) {
         if (oldItem instanceof RoomItem && newItem instanceof RoomItem) {
-          return ((RoomItem) oldItem).id.equals(((RoomItem) newItem).id);
+          return ((RoomItem) oldItem).room.getId().equals(((RoomItem) newItem).room.getId());
+        }
+        if (oldItem instanceof HeaderItem && newItem instanceof HeaderItem) {
+          return Objects.equals(((HeaderItem) oldItem).title, ((HeaderItem) newItem).title);
+        }
+        if (oldItem instanceof BannerItem && newItem instanceof BannerItem) {
+          return ((BannerItem) oldItem).images.equals(((BannerItem) newItem).images);
+        }
+        if (oldItem instanceof SeeAll && newItem instanceof SeeAll) {
+          return ((SeeAll) oldItem).queryDirection.equals(((SeeAll) newItem).queryDirection);
         }
         return oldItem.equals(newItem);
       }
@@ -192,6 +189,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
         return oldItem.equals(newItem);
       }
     });
+    this.onAddToOrRemoveFromSavedRooms = onAddToOrRemoveFromSavedRooms;
   }
 
   @Override
@@ -299,38 +297,50 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     @BindView(R.id.text_home_room_district)
     TextView textDistrict;
 
+    @BindView(R.id.image_saved_room_bookmark)
+    ImageView imageSave;
+
     RoomItemVH(@NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
+
       itemView.setOnClickListener(this);
+      imageSave.setOnClickListener(this);
     }
 
     @Override
     public void bind(HomeListItem item) {
       if (item instanceof RoomItem) {
-        final RoomItem roomItem = (RoomItem) item;
+        final MotelRoom roomItem = ((RoomItem) item).room;
 
-        textDistrict.setText("loading...");
-        roomItem.district.get().addOnSuccessListener(documentSnapshot -> {
-          textDistrict.setText(documentSnapshot.getString("name"));
-        }).addOnFailureListener(e -> {
-          textDistrict.setText("error...");
-        });
+        textDistrict.setText(roomItem.getDistrictName());
+        textAddress.setText(roomItem.getAddress());
+        textPrice.setText(PRICE_FORMAT.format(roomItem.getPrice()) + "đ/tháng");
+        textTitle.setText(roomItem.getTitle());
 
-        textAddress.setText(roomItem.address);
-        textPrice.setText(PRICE_FORMAT.format(roomItem.price) + "đ/tháng");
-        textTitle.setText(roomItem.title);
-
-        if (roomItem.images == null || roomItem.images.isEmpty()) {
+        if (roomItem.getImages() == null || roomItem.getImages().isEmpty()) {
           image.setImageResource(R.drawable.ic_home_primary_dark_24dp);
         } else {
           Picasso.get()
-              .load(roomItem.images.get(0))
+              .load(roomItem.getImages().get(0))
               .fit()
               .centerCrop()
               .placeholder(R.drawable.ic_home_primary_dark_24dp)
               .error(R.drawable.ic_home_primary_dark_24dp)
               .into(image);
+        }
+
+
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+          imageSave.setVisibility(View.VISIBLE);
+          if (roomItem.getUserIdsSaved().contains(currentUser.getUid())) {
+            imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
+          } else {
+            imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);
+          }
+        } else {
+          imageSave.setVisibility(View.INVISIBLE);
         }
 
       } else {
@@ -345,12 +355,19 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
         final HomeListItem item = getItem(adapterPosition);
         if (item instanceof RoomItem) {
 
-          final String id = ((RoomItem) item).id;
-          final Context context = itemView.getContext();
-          final Intent intent = new Intent(context, MotelRoomDetailActivity.class);
-          intent.putExtra(MOTEL_ROOM_ID, id);
-          context.startActivity(intent);
+          if (v.getId() == R.id.image_saved_room_bookmark) {
 
+            onAddToOrRemoveFromSavedRooms.invoke(((RoomItem) item).room);
+
+          } else {
+
+            final String id = ((RoomItem) item).room.getId();
+            final Context context = itemView.getContext();
+            final Intent intent = new Intent(context, MotelRoomDetailActivity.class);
+            intent.putExtra(MOTEL_ROOM_ID, id);
+            context.startActivity(intent);
+
+          }
         }
       }
     }

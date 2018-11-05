@@ -82,6 +82,7 @@
 
         <activity android:name=".ui.nearby.NearbyActivity" />
         <activity android:name=".ui.home.TestActivity" />
+        <activity android:name=".ui.profile.UserProfileActivity" />
     </application>
 
 </manifest>

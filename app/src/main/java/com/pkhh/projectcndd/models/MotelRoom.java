@@ -32,7 +32,7 @@ public class MotelRoom extends FirebaseModel {
 
   private String phone;
 
-  private boolean owner;
+  private boolean isActive;
 
   private boolean approve;
 
@@ -136,12 +136,14 @@ public class MotelRoom extends FirebaseModel {
     this.phone = phone;
   }
 
-  public boolean isOwner() {
-    return owner;
+  @PropertyName("is_active")
+  public boolean isActive() {
+    return isActive;
   }
 
-  public void setOwner(boolean owner) {
-    this.owner = owner;
+  @PropertyName("is_active")
+  public void setActive(boolean active) {
+    this.isActive = active;
   }
 
   public boolean isApprove() {
@@ -250,7 +252,7 @@ public class MotelRoom extends FirebaseModel {
         price == motelRoom.price &&
         countView == motelRoom.countView &&
         Double.compare(motelRoom.size, size) == 0 &&
-        owner == motelRoom.owner &&
+        isActive == motelRoom.isActive &&
         approve == motelRoom.approve &&
         Objects.equals(title, motelRoom.title) &&
         Objects.equals(description, motelRoom.description) &&
@@ -273,7 +275,7 @@ public class MotelRoom extends FirebaseModel {
   @Override
   public int hashCode() {
     return Objects.hash(id, title, description, price, countView, size, address, addressGeoPoint,
-        images, phone, owner, approve, utilities, user, category, province, ward, district, createdAt,
+        images, phone, isActive, approve, utilities, user, category, province, ward, district, createdAt,
         updatedAt, userIdsSaved, districtName);
   }
 
@@ -289,7 +291,7 @@ public class MotelRoom extends FirebaseModel {
         ", addressGeoPoint=" + addressGeoPoint +
         ", images=" + images +
         ", phone='" + phone + '\'' +
-        ", owner=" + owner +
+        ", isActive=" + isActive +
         ", approve=" + approve +
         ", utilities=" + utilities +
         ", user=" + user +
@@ -315,7 +317,7 @@ public class MotelRoom extends FirebaseModel {
     map.put("address_geopoint", addressGeoPoint);
     map.put("images", images);
     map.put("phone", phone);
-    map.put("owner", owner);
+    map.put("is_active", isActive);
     map.put("approve", approve);
     map.put("utilities", utilities);
     map.put("user", user);

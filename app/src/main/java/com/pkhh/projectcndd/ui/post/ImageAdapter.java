@@ -14,68 +14,64 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.VH> {
-    private RecyclerOnClickListener mRecyclerOnClickListener;
-    private List<Uri> mUris;
+  private RecyclerOnClickListener mRecyclerOnClickListener;
+  private List<Uri> mUris;
 
-    ImageAdapter(RecyclerOnClickListener recyclerOnClickListener, List<Uri> uris) {
-        mRecyclerOnClickListener = recyclerOnClickListener;
-        mUris = uris;
+  ImageAdapter(RecyclerOnClickListener recyclerOnClickListener, List<Uri> uris) {
+    mRecyclerOnClickListener = recyclerOnClickListener;
+    mUris = uris;
+  }
+
+  @NonNull
+  @Override
+  public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_iteam_layout, parent, false);
+    return new VH(view);
+  }
+
+  @Override
+  public void onBindViewHolder(@NonNull VH holder, int position) {
+    holder.bind(mUris.get(position));
+  }
+
+  @Override
+  public int getItemCount() {
+    return mUris.size();
+  }
+
+  class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
+    @BindView(R.id.img_preview)
+    ImageView mImageViewPreview;
+    @BindView(R.id.img_close)
+    View mImageViewClose;
+
+    VH(@NonNull View itemView) {
+      super(itemView);
+      ButterKnife.bind(this, itemView);
+      mImageViewPreview.setOnClickListener(this);
+      mImageViewClose.setOnClickListener(this);
     }
 
-    @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_iteam_layout, parent, false);
-        return new VH(view);
+    public void onClick(View v) {
+      int adapterPosition = getAdapterPosition();
+      if (adapterPosition != NO_POSITION) {
+        mRecyclerOnClickListener.onClick(v, adapterPosition);
+      }
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.bind(mUris.get(position));
+    public void bind(Uri uri) {
+      Picasso.get()
+          .load(uri)
+          .fit()
+          .centerCrop()
+          .into(mImageViewPreview);
     }
-
-    @Override
-    public int getItemCount() {
-        return mUris.size();
-    }
-
-    class VH extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView mImageViewPreview;
-        private ImageView mImageViewClose;
-
-        public VH(@NonNull View itemView) {
-            super(itemView);
-            mImageViewPreview = itemView.findViewById(R.id.img_preview);
-            mImageViewClose = itemView.findViewById(R.id.img_close);
-
-            mImageViewPreview.setOnClickListener(this);
-            mImageViewClose.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            if (adapterPosition != NO_POSITION) {
-                mRecyclerOnClickListener.onClick(v, adapterPosition);
-            }
-        }
-
-        public void bind(Uri uri) {
-            Picasso.get()
-                    .load(uri)
-                    .fit()
-                    .centerCrop()
-                    .into(mImageViewPreview);
-            Picasso.get()
-                    .load(R.drawable.ic_action_close)
-                    .fit()
-                    .centerCrop()
-                    .noFade()
-                    .into(mImageViewClose);
-        }
-    }
+  }
 }

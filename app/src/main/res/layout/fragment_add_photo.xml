@@ -1,59 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#fafafa"
     android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/select_img"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_select_take_photo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary">
+        android:layout_margin="8dp"
+        android:layout_marginBottom="8dp"
+        android:padding="12dp"
+        android:text="Chọn ảnh / Chụp ảnh"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_camera_enhance_black_24dp"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:rippleColor="@android:color/white"
+        app:srcCompat="@drawable/ic_camera_enhance_black_24dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_select_take_photo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:padding="12dp"
-            android:text="Chọn ảnh / Chụp ảnh"
-            app:cornerRadius="8dp"
-            app:icon="@drawable/ic_camera_enhance_black_24dp"
-            app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:rippleColor="@android:color/white"
-            app:srcCompat="@drawable/ic_camera_enhance_black_24dp" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/nunito_sans"
-            android:gravity="center"
-            android:text="Bạn cần đăng ít nhất 3 hình"
-            android:textColor="#212121"
-            android:textSize="20sp"
-            app:layout_constraintTop_toBottomOf="@id/button_select_take_photo"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/nunito_sans"
+        android:gravity="center"
+        android:text="Bạn cần đăng ít nhất 3 hình"
+        android:textColor="#424242"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/button_select_take_photo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_img"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/textView"
         android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/image_iteam_layout">
 
     </androidx.recyclerview.widget.RecyclerView>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

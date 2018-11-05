@@ -37,7 +37,7 @@ import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.DividerItemDecoration.VERTICAL;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static com.pkhh.projectcndd.utils.Constants.CATEGORY_NAME_COLLECION;
+import static com.pkhh.projectcndd.utils.Constants.CATEGORIES_NAME_COLLECION;
 
 /**
  * @author Peter Hoc
@@ -211,7 +211,7 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
 }
 
 public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput> {
-  private final Query query = FirebaseFirestore.getInstance().collection(CATEGORY_NAME_COLLECION);
+  private final Query query = FirebaseFirestore.getInstance().collection(CATEGORIES_NAME_COLLECION);
   private final CategoryAdapter adapter = new CategoryAdapter(this::onSelectCategory);
 
   private Void onSelectCategory(Category category) {

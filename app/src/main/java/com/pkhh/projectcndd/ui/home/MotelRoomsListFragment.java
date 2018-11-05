@@ -2,15 +2,18 @@ package com.pkhh.projectcndd.ui.home;
 
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.annimon.stream.Stream;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
@@ -26,38 +29,35 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.transition.Fade;
-import androidx.transition.Slide;
-import androidx.transition.TransitionManager;
-import androidx.transition.TransitionSet;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_NAME_COLLECION;
+import static com.pkhh.projectcndd.utils.Constants.PROVINCES_NAME_COLLECION;
+import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
+import static java.util.Collections.emptyList;
 
-public class MotelRoomsListFragment extends Fragment {
+public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.AuthStateListener {
   public static final String TAG = MotelRoomsListFragment.class.getSimpleName();
-  private static final int PAGE_SIZE = 30;
+  public static final int LIMIT_CREATED_DES = 20;
+  public static final int LIMIT_COUNT_VIEW_DES = 20;
+
+  private final String selectedProvinceId = "NtHjwobYdIi0YwTUHz05"; // TODO: user can change selected province
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
   private HomeAdapter adapter;
-  private List<HomeListItem> homeListItems = new ArrayList<>();
 
   @BindView(R.id.root_motel_rooms_list_fragment)
   ViewGroup rootLayout;
 
-  @BindView(R.id.swipe_refresh_layout)
-  SwipeRefreshLayout swipeRefreshLayout;
-
-  @BindView(R.id.loading_layout)
-  ViewGroup loadingLayout;
-
   private Unbinder unbinder;
-  private boolean isLoading = false;
+
+  private List<HomeListItem> createdAtDes;
+  private List<HomeListItem> countViewDes;
+  private ListenerRegistration registration1;
+  private ListenerRegistration registration2;
 
   @Nullable
   @Override
@@ -70,18 +70,93 @@ public class MotelRoomsListFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     unbinder = ButterKnife.bind(this, view);
 
-    setupRecyclerViewAndAdapter(view);
+    createdAtDes = new ArrayList<>();
+    createdAtDes.add(new HeaderItem("Mới nhất"));
+    createdAtDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
 
-    swipeRefreshLayout.setOnRefreshListener(() -> {
-      if (isLoading) swipeRefreshLayout.setRefreshing(false);
-      else loadData(false);
-    });
+    countViewDes = new ArrayList<>();
+    countViewDes.add(new HeaderItem("Xem nhiều"));
+    countViewDes.add(new SeeAll(QueryDirection.VIEW_COUNT_DESCENDING));
+
+    setupRecyclerViewAndAdapter(view);
+    updateRecycler(createdAtDes, countViewDes);
   }
 
   @Override
   public void onResume() {
     super.onResume();
-    if (!isLoading) loadData(false);
+    subscribe();
+    firebaseAuth.addAuthStateListener(this);
+  }
+
+  private void subscribe() {
+    final DocumentReference selectedProvinceRef = firestore.document(PROVINCES_NAME_COLLECION + "/" + selectedProvinceId);
+
+    registration1 = firestore.collection(ROOMS_NAME_COLLECION)
+        .whereEqualTo("province", selectedProvinceRef)
+        .whereEqualTo("is_active", true)
+        .orderBy("created_at", Query.Direction.DESCENDING)
+        .limit(LIMIT_CREATED_DES)
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
+          if (e != null) return;
+
+          final List<RoomItem> newRooms = queryDocumentSnapshots != null ? Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
+              .map(RoomItem::new)
+              .toList() : emptyList();
+
+          createdAtDes = new ArrayList<>(newRooms.size() + 2);
+          createdAtDes.add(new HeaderItem("Mới nhất"));
+          createdAtDes.addAll(newRooms);
+          createdAtDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
+
+          updateRecycler(createdAtDes, countViewDes);
+        });
+
+
+    registration2 = firestore.collection(ROOMS_NAME_COLLECION)
+        .whereEqualTo("province", selectedProvinceRef)
+        .whereEqualTo("is_active", true)
+        .orderBy("count_view", Query.Direction.DESCENDING)
+        .limit(LIMIT_COUNT_VIEW_DES)
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
+          if (e != null) return;
+
+          final List<RoomItem> newRooms = queryDocumentSnapshots != null ? Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
+              .map(RoomItem::new)
+              .toList() : emptyList();
+
+          countViewDes = new ArrayList<>(newRooms.size() + 2);
+          countViewDes.add(new HeaderItem("Xem nhiều"));
+          countViewDes.addAll(newRooms);
+          countViewDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
+
+          updateRecycler(createdAtDes, countViewDes);
+        });
+  }
+
+  private void updateRecycler(List<HomeListItem> createdAtDes, List<HomeListItem> countViewDes) {
+    final List<HomeListItem> homeListItems = new ArrayList<>(1 + createdAtDes.size() + countViewDes.size());
+    homeListItems.add(
+        new BannerItem(
+            Arrays.asList(
+                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1504333638930-c8787321eee0?ixlib=rb-0.3.5&s=8fa53af55b1f12c07d2c3d4c1358c20a&w=1000&q=80", "Image 1"),
+                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1483356256511-b48749959172?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=fbb470799cbb69de82bc80822eee3255&w=1000&q=80", "Image 2"),
+                new ImageAndDescriptionBanner("http://file.vforum.vn/hinh/2015/11/vforum.vn-hinh-anh-nen-ngan-ha-vu-tru-bao-la-10.jpg", "Image 3")
+            )
+        )
+    );
+    homeListItems.addAll(createdAtDes);
+    homeListItems.addAll(countViewDes);
+    adapter.submitList(homeListItems);
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+
+    firebaseAuth.removeAuthStateListener(this);
+    registration1.remove();
+    registration2.remove();
   }
 
   @Override
@@ -90,66 +165,8 @@ public class MotelRoomsListFragment extends Fragment {
     unbinder.unbind();
   }
 
-  /*private void onItemClick(int viewId, @NonNull MotelRoom roomItem, int position) {
-    if (viewId == R.id.image_share) {
-      Toast.makeText(requireContext(), "Share clicked", Toast.LENGTH_SHORT).show();
-      onShareClicked(roomItem.getId());
-      return;
-    }
-
-    if (viewId == R.id.image_save) {
-      onSaveClicked(roomItem.getId(), position);
-      return;
-    }
-
-    Intent intent = new Intent(requireContext(), MotelRoomDetailActivity.class);
-    intent.putExtra(MOTEL_ROOM_ID, roomItem.getId());
-    startActivity(intent);
-  }
-
-  private void onSaveClicked(String id, int position) {
-    FirebaseFirestore.getInstance().runTransaction(transaction -> {
-      final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-      if (currentUser == null) {
-        throw new IllegalStateException("Bạn phải login mới thưc hiện được chức năng này!");
-      }
-      final String uid = currentUser.getUid();
-
-      final DocumentReference document = firestore
-          .collection(MOTEL_ROOM_NAME_COLLECION)
-          .document(id);
-
-      final MotelRoom item = FirebaseModel.documentSnapshotToObject(transaction.get(document), MotelRoom.class);
-      final List<String> userIdsSaved = item.getUserIdsSaved();
-
-      if (userIdsSaved.contains(uid)) {
-        transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
-        userIdsSaved.remove(uid);
-      } else {
-        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
-        userIdsSaved.add(uid);
-      }
-
-      item.setUserIdsSaved(userIdsSaved);
-      return item;
-    }).addOnSuccessListener(item -> {
-
-      adapter.getList().set(position, item);
-      adapter.notifyItemChanged(position);
-      Snackbar.make(rootLayout, "Done", Snackbar.LENGTH_SHORT).show();
-
-    }).addOnFailureListener(e -> {
-      Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
-    });
-  }
-
-  private void onShareClicked(String modelId) {
-
-  }*/
-
-
   private void setupRecyclerViewAndAdapter(@NonNull View view) {
-    adapter = new HomeAdapter();
+    adapter = new HomeAdapter(this::onAddToOrRemoveFromSavedRooms);
 
     RecyclerView recyclerView = view.findViewById(R.id.recycler);
     recyclerView.setHasFixedSize(true);
@@ -180,70 +197,42 @@ public class MotelRoomsListFragment extends Fragment {
         }
       }
     });
-
-    loadData(true);
   }
 
-  private void loadData(boolean isFirstLoad) {
-    isLoading = true;
-    homeListItems.clear();
+  private Void onAddToOrRemoveFromSavedRooms(MotelRoom motelRoom) {
+    firestore.runTransaction(transaction -> {
+      final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+      if (currentUser == null) {
+        throw new IllegalStateException("Bạn phải login mới thưc hiện được chức năng này!");
+      }
 
-    homeListItems.add(
-        new BannerItem(
-            Arrays.asList(
-                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1504333638930-c8787321eee0?ixlib=rb-0.3.5&s=8fa53af55b1f12c07d2c3d4c1358c20a&w=1000&q=80", "Image 1"),
-                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1483356256511-b48749959172?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=fbb470799cbb69de82bc80822eee3255&w=1000&q=80", "Image 2"),
-                new ImageAndDescriptionBanner("http://file.vforum.vn/hinh/2015/11/vforum.vn-hinh-anh-nen-ngan-ha-vu-tru-bao-la-10.jpg", "Image 3")
-            )
-        )
-    );
+      final String uid = currentUser.getUid();
+      final DocumentReference document = firestore.collection(ROOMS_NAME_COLLECION).document(motelRoom.getId());
 
-    firestore.collection(MOTEL_ROOM_NAME_COLLECION)
-        .orderBy("created_at", Query.Direction.DESCENDING)
-        .limit(20)
-        .get()
-        .addOnSuccessListener(Objects.requireNonNull(getActivity()), queryDocumentSnapshots -> {
+      List<?> userIdsSaved = (List) transaction.get(document).get("user_ids_saved");
+      userIdsSaved = userIdsSaved == null ? emptyList() : userIdsSaved;
 
-          homeListItems.add(new HeaderItem("Mới nhất"));
-          homeListItems.addAll(
-              Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
-                  .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice(), motelRoom.getImages(), motelRoom.getDistrict()))
-                  .toList()
-          );
-          homeListItems.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
+      if (userIdsSaved.contains(uid)) {
 
-          firestore.collection(MOTEL_ROOM_NAME_COLLECION)
-              .orderBy("view_count", Query.Direction.DESCENDING)
-              .limit(20)
-              .get()
-              .addOnSuccessListener(Objects.requireNonNull(getActivity()), queryDocumentSnapshots1 -> {
+        transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
+        return "Xóa khỏi danh sach đã lưu thành công";
 
-                homeListItems.add(new HeaderItem("Xem nhiều"));
-                homeListItems.addAll(
-                    Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots1, MotelRoom.class))
-                        .map(motelRoom -> new RoomItem(motelRoom.getId(), motelRoom.getTitle(), motelRoom.getAddress(), motelRoom.getPrice(), motelRoom.getImages(), motelRoom.getDistrict()))
-                        .toList()
-                );
-                homeListItems.add(new SeeAll(QueryDirection.VIEW_COUNT_DESCENDING));
+      } else {
 
-                adapter.submitList(new ArrayList<>(homeListItems));
+        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
+        return "Thêm vào danh sach đã lưu thành công";
 
-                if (isFirstLoad) {
-                  TransitionManager.beginDelayedTransition(rootLayout, new TransitionSet()
-                      .addTransition(new Fade(Fade.OUT))
-                      .addTransition(new Slide(Gravity.END))
-                      .setDuration(500)
-                      .addTarget(loadingLayout)
-                  );
-                  loadingLayout.setVisibility(View.INVISIBLE);
-                } else {
-                  Toast.makeText(requireContext(), "Refresh successfully", Toast.LENGTH_SHORT).show();
-                  if (swipeRefreshLayout.isRefreshing()) {
-                    swipeRefreshLayout.setRefreshing(false);
-                  }
-                }
-                isLoading = false;
-              });
-        });
+      }
+    }).addOnSuccessListener(Objects.requireNonNull(getActivity()), message -> Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT).show())
+        .addOnFailureListener(Objects.requireNonNull(getActivity()), e -> Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show());
+
+    return null;
+  }
+
+  @Override
+  public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+    if (firebaseAuth.getCurrentUser() == null) {
+      adapter.notifyDataSetChanged();
+    }
   }
 }

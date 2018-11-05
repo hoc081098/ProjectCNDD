@@ -5,7 +5,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,11 +24,10 @@ import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
 import butterknife.BindView;
 
+import static androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY;
+
 public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitleSizeDescriptionFragmentOutput> {
   private static final int MIN_LENGTH_OF_TITLE = 10;
-
-  @BindView(R.id.cardView)
-  ViewGroup card1;
 
   @BindView(R.id.text_input_price)
   TextInputLayout textInputPrice;
@@ -83,10 +81,12 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
     phoneEditText = textInputPhone.getEditText();
 
     textSquareMeter.setText(
-        HtmlCompat.fromHtml("m<sup><small>2</small></sup>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        HtmlCompat.fromHtml("m<sup><small>2</small></sup>", FROM_HTML_MODE_LEGACY)
     );
 
     addTextChangeListener();
+
+    chipSuggestTitle.setOnClickListener(__ -> titleEditText.setText(chipSuggestTitle.getText()));
   }
 
   private void addTextChangeListener() {
@@ -117,6 +117,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
         } else if (price > 10_000_000) {
           textInputPrice.setError("Giá quá cao. Vui lòng sửa lại giá thực tế");
         } else {
+          textInputPrice.setError(null);
           isPriceValid = true;
         }
       }
@@ -125,6 +126,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       public void afterTextChanged(Editable s) {
       }
     });
+    priceEditText.setText("");
 
     sizeEditText.addTextChangedListener(new TextWatcher() {
       @Override
@@ -161,6 +163,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       public void afterTextChanged(Editable s) {
       }
     });
+    sizeEditText.setText("");
 
     titleEditText.addTextChangedListener(new TextWatcher() {
       @Override
@@ -169,7 +172,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
 
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (s.length() <= MIN_LENGTH_OF_TITLE) {
+        if (s.length() < MIN_LENGTH_OF_TITLE) {
           textInputTitle.setError("Tiêu đề quá ngắn");
           isTitleValid = false;
         } else {
@@ -184,6 +187,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       public void afterTextChanged(Editable s) {
       }
     });
+    titleEditText.setText("");
 
     descriptionEditText.addTextChangedListener(new TextWatcher() {
       @Override
@@ -199,22 +203,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       public void afterTextChanged(Editable s) {
       }
     });
-
-    phoneEditText.addTextChangedListener(new TextWatcher() {
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-      }
-
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
-        getDataOutput().setPhone(s.toString());
-      }
-
-      @Override
-      public void afterTextChanged(Editable s) {
-
-      }
-    });
+    descriptionEditText.setText("");
 
     phoneEditText.addTextChangedListener(new TextWatcher() {
       @Override
@@ -225,6 +214,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         isPhoneValid = Patterns.PHONE.matcher(s).matches();
         textInputPhone.setError(isPhoneValid ? null : "Số điện thoại sai định dạng. Vui lòng nhập lại!");
+        getDataOutput().setPhone(s.toString());
       }
 
       @Override
@@ -232,10 +222,16 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
 
       }
     });
+    phoneEditText.setText("");
   }
 
   private void updateSuggestTitle(double size) {
-    chipSuggestTitle.setText(String.format("Phòng trọ %s %sm2", districtName == null ? "" : districtName, new DecimalFormat("#.##").format(size)));
+    chipSuggestTitle.setText(
+        HtmlCompat.fromHtml(
+            "Phòng trọ " + (districtName == null ? "" : districtName) + " " + new DecimalFormat("#.##").format(size) + "m<sup><small>2</small></sup>",
+            FROM_HTML_MODE_LEGACY
+        )
+    );
   }
 
   @NotNull
@@ -259,7 +255,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
   @Override
   public int getLayoutId() { return R.layout.fragment_add_price_title_size_description; }
 
-  public void setDistrictName(@Nullable String districtName) {
+  void setDistrictName(@Nullable String districtName) {
     this.districtName = districtName;
   }
 }

@@ -8,14 +8,11 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_see_all"
-        android:textColor="@color/colorAccent"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/nunito_sans"
-        android:paddingBottom="16dp"
         android:paddingTop="16dp"
-        app:backgroundTint="@android:color/white"
+        android:paddingBottom="16dp"
         android:text="Xem tất cả"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"

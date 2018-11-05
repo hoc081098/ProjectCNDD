@@ -350,7 +350,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
     GeoPoint lesserGeoPoint = new GeoPoint(lowerLat, lowerLon);
     GeoPoint greaterGeoPoint = new GeoPoint(greaterLat, greaterLon);
 
-    CollectionReference docRef = FirebaseFirestore.getInstance().collection(Constants.MOTEL_ROOM_NAME_COLLECION);
+    CollectionReference docRef = FirebaseFirestore.getInstance().collection(Constants.ROOMS_NAME_COLLECION);
     Query query = docRef
         .whereGreaterThan("address_geopoint", lesserGeoPoint)
         .whereLessThan("address_geopoint", greaterGeoPoint);

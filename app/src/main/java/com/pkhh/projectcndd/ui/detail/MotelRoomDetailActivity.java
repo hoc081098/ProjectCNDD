@@ -19,11 +19,10 @@ import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Transaction;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
+import com.pkhh.projectcndd.ui.profile.UserProfileActivity;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -33,30 +32,34 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static androidx.core.text.HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_DIV;
 import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject;
 import static com.pkhh.projectcndd.ui.home.MotelRoomVH.decimalFormat;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_NAME_COLLECION;
-import static java.util.Objects.requireNonNull;
+import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 
-public class MotelRoomDetailActivity extends AppCompatActivity implements View.OnClickListener {
+public class MotelRoomDetailActivity extends AppCompatActivity {
   public static final String TAG = MotelRoomDetailActivity.class.getSimpleName();
   @SuppressLint("SimpleDateFormat")
   public static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+  public static final String USER_ID = "user_id";
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
-  private SliderLayout sliderLayout;
-  private TextView textPrice;
-  private TextView textAddress;
-  private TextView textTimePost;
-  private TextView textArea;
-  private ImageView imageMap;
-  private TextView textName;
-  private TextView textPhone;
-  private ImageView imageAvatar;
+  @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
+  @BindView(R.id.sliderLayout) SliderLayout sliderLayout;
+  @BindView(R.id.text_price) TextView textPrice;
+  @BindView(R.id.text_address) TextView textAddress;
+  @BindView(R.id.text_post_time) TextView textTimePost;
+  @BindView(R.id.text_area) TextView textArea;
+  @BindView(R.id.image_map) ImageView imageMap;
+  @BindView(R.id.text_name) TextView textName;
+  @BindView(R.id.text_phone) TextView textPhone;
+  @BindView(R.id.image_avatar) ImageView imageAvatar;
 
   @Nullable
   private User user;
@@ -64,35 +67,18 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     getWindow().setFlags(
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
     );
-
     setContentView(R.layout.activity_motel_room_detail);
 
-    sliderLayout = findViewById(R.id.sliderLayout);
-    textPrice = findViewById(R.id.text_price);
-    textAddress = findViewById(R.id.text_address);
-    textTimePost = findViewById(R.id.text_post_time);
-    textArea = findViewById(R.id.text_area);
-    imageMap = findViewById(R.id.image_map);
-    textName = findViewById(R.id.text_name);
-    textPhone = findViewById(R.id.text_phone);
-    imageAvatar = findViewById(R.id.image_avatar);
-
-    CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_layout);
+    ButterKnife.bind(this, this);
     collapsingToolbarLayout.setTitle(null);
 
-    findViewById(R.id.button_sms).setOnClickListener(this);
-    findViewById(R.id.button_call).setOnClickListener(this);
-
     String id = getIntent().getStringExtra(MOTEL_ROOM_ID);
-
     increaseViewCount(id);
-
-    firestore.document(MOTEL_ROOM_NAME_COLLECION + "/" + id)
+    firestore.document(ROOMS_NAME_COLLECION + "/" + id)
         .addSnapshotListener(this, (queryDocumentSnapshots, e) -> {
           if (e != null) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -105,17 +91,17 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
   }
 
   private void increaseViewCount(final String id) {
-    firestore.runTransaction((Transaction.Function<Void>) transaction -> {
-      final DocumentReference documentRef = firestore.document(MOTEL_ROOM_NAME_COLLECION + "/" + id);
-      Integer viewCount = (Integer) transaction.get(documentRef).get("view_count");
-      if (viewCount == null) viewCount = 0;
+    firestore.runTransaction(transaction -> {
+      final DocumentReference documentRef = firestore.document(ROOMS_NAME_COLLECION + "/" + id);
+      Long viewCount = (Long) transaction.get(documentRef).get("count_view");
+      if (viewCount == null) viewCount = 0L;
 
-      transaction.update(documentRef, "view_count", viewCount + 1);
-      return null;
-    }).addOnSuccessListener(aVoid -> {
-      Log.d("@@@", "update view_count successfully");
+      transaction.update(documentRef, "count_view", viewCount + 1);
+      return viewCount + 1;
+    }).addOnSuccessListener(newVal -> {
+      Log.d("@@@", "update newVal=" + newVal + " count_view successfully");
     }).addOnFailureListener(e -> {
-      Log.d("@@@", "update view_count error: " + e.getMessage(), e);
+      Log.d("@@@", "update count_view error: " + e.getMessage(), e);
     });
   }
 
@@ -128,7 +114,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     textTimePost.setText("Ngày đăng: " + dateFormat.format(motelRoom.getCreatedAt()));
     textArea.setText(HtmlCompat.fromHtml(motelRoom.getSize() + " m<sup><small>2</small></sup>",
         FROM_HTML_SEPARATOR_LINE_BREAK_DIV));
-    imageMap.setImageResource(R.drawable.ic_home_black_24dp); // TODO
+    //imageMap.setImageResource(R.drawable.ic_home_black_24dp); // TODO
 
     motelRoom.getUser().get()
         .addOnSuccessListener(documentSnapshot -> {
@@ -164,7 +150,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
   }
 
   private void setOnSliderClickListener(String url) {
-    // TODO
+    // TODO PhotoView
     Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
   }
 
@@ -180,9 +166,15 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
     sliderLayout.stopAutoCycle();
   }
 
-  @Override
+  @OnClick(value = {
+      R.id.button_call,
+      R.id.button_sms,
+      R.id.image_avatar,
+  })
   public void onClick(View v) {
-    if (v.getId() == R.id.button_call) {
+    final int id = v.getId();
+
+    if (id == R.id.button_call) {
       if (user != null && isTelephonyEnabled()) {
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse("tel:" + user.getPhone()));
@@ -190,12 +182,22 @@ public class MotelRoomDetailActivity extends AppCompatActivity implements View.O
       }
       return;
     }
-    if (v.getId() == R.id.button_sms) {
+
+    if (id == R.id.button_sms) {
       if (user != null) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setType("vnd.android-dir/mms-sms");
         intent.putExtra("address", user.getPhone());
         intent.putExtra("sms_body", "Nice");
+        startActivity(intent);
+      }
+      return;
+    }
+
+    if (id == R.id.image_avatar) {
+      if (user != null) {
+        final Intent intent = new Intent(this, UserProfileActivity.class);
+        intent.putExtra(USER_ID, user.getId());
         startActivity(intent);
       }
     }

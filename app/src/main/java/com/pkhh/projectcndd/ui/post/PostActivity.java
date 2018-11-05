@@ -259,7 +259,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     dialog.setMessage("Please wait...");
     dialog.show();
 
-    firestore.collection(Constants.MOTEL_ROOM_NAME_COLLECION)
+    firestore.collection(Constants.ROOMS_NAME_COLLECION)
         .add(getRoomAsMap(firestore, uid))
         .addOnSuccessListener(this, documentReference -> {
           AtomicInteger count = new AtomicInteger();
@@ -306,7 +306,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     MotelRoom room = new MotelRoom();
 
     // category
-    room.setCategory(firestore.document(Constants.CATEGORY_NAME_COLLECION + "/" + requireNonNull(mSelectCategoryFragment.getDataOutput()).getSelectedCategoryId()));
+    room.setCategory(firestore.document(Constants.CATEGORIES_NAME_COLLECION + "/" + requireNonNull(mSelectCategoryFragment.getDataOutput()).getSelectedCategoryId()));
 
     // address
     room.setAddress(mSelectAddressLocationFragment.getDataOutput().getAddress());
@@ -322,7 +322,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     room.setApprove(false);
     room.setCountView(0);
     room.setUpdatedAt(null);
-    room.setOwner(false);
+    room.setActive(true);
 
 
     room.setSize(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getSize());
@@ -333,7 +333,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
     room.setUtilities(new HashMap<>());
     room.setUserIdsSaved(Collections.emptyList());
-    room.setUser(firestore.document(Constants.USER_NAME_COLLECION + "/" + uid));
+    room.setUser(firestore.document(Constants.USERS_NAME_COLLECION + "/" + uid));
     room.setImages(Collections.emptyList());
 
     room.setDistrictName(mSelectAddressLocationFragment.getDataOutput().getDistrictName());

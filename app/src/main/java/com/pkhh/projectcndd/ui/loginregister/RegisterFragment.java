@@ -192,7 +192,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
   }
 
   private void insertUserToFirestore(String uid, Map<String, Object> user) {
-    mFirebaseFirestore.document(Constants.USER_NAME_COLLECION + "/" + uid)
+    mFirebaseFirestore.document(Constants.USERS_NAME_COLLECION + "/" + uid)
         .set(user)
         .addOnSuccessListener(documentReference -> {
           mProgressDialog.dismiss();

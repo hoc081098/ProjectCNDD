@@ -29,7 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import static com.pkhh.projectcndd.utils.Constants.USER_NAME_COLLECION;
+import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity
       loginOrLogoutMenuItem.setTitle("Login");
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_person_add_black_24dp);
     } else {
-      firebaseFirestore.document(USER_NAME_COLLECION + "/" + currentUser.getUid())
+      firebaseFirestore.document(USERS_NAME_COLLECION + "/" + currentUser.getUid())
           .addSnapshotListener(this, (documentSnapshot, e) -> {
             if (documentSnapshot != null) {
               final User user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);

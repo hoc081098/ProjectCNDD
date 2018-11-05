@@ -7,7 +7,7 @@
     android:background="#fafafa"
     android:fillViewport="true"
     android:orientation="vertical"
-    android:scrollbars="none">
+    android:scrollbars="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
