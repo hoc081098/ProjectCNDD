@@ -81,8 +81,12 @@
         <activity android:name=".ui.saved.SavedRoomsActivity" />
 
         <activity android:name=".ui.nearby.NearbyActivity" />
+
         <activity android:name=".ui.home.TestActivity" />
-        <activity android:name=".ui.profile.UserProfileActivity" />
+
+        <activity
+            android:name=".ui.profile.UserProfileActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

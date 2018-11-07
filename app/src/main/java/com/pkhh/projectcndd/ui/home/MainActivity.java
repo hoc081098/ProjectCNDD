@@ -18,6 +18,7 @@ import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.ui.loginregister.LoginRegisterActivity;
 import com.pkhh.projectcndd.ui.nearby.NearbyActivity;
 import com.pkhh.projectcndd.ui.post.PostActivity;
+import com.pkhh.projectcndd.ui.profile.UserProfileActivity;
 import com.pkhh.projectcndd.ui.saved.SavedRoomsActivity;
 import com.squareup.picasso.Picasso;
 
@@ -29,6 +30,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import static com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity.EXTRA_USER_FULL_NAME;
+import static com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity.EXTRA_USER_ID;
 import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
 public class MainActivity extends AppCompatActivity
@@ -43,6 +46,9 @@ public class MainActivity extends AppCompatActivity
   private TextView textEmail;
   private ImageView imageAvatar;
   private NavigationView navigationView;
+
+  @Nullable
+  private User user;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +83,15 @@ public class MainActivity extends AppCompatActivity
           .add(R.id.main_content, new MotelRoomsListFragment(), MotelRoomsListFragment.TAG)
           .commit();
     }
+
+    findViewById(R.id.nav_header).setOnClickListener(__ -> {
+      final Intent intent = new Intent(this, UserProfileActivity.class);
+      if (user != null) {
+        intent.putExtra(EXTRA_USER_ID, user.getId());
+        intent.putExtra(EXTRA_USER_FULL_NAME, user.getFullName());
+        startActivity(intent);
+      }
+    });
   }
 
   private void setupNavigationView() {
@@ -255,7 +270,7 @@ public class MainActivity extends AppCompatActivity
       firebaseFirestore.document(USERS_NAME_COLLECION + "/" + currentUser.getUid())
           .addSnapshotListener(this, (documentSnapshot, e) -> {
             if (documentSnapshot != null) {
-              final User user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);
+              user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);
               textName.setText(user.getFullName());
               textEmail.setText(user.getEmail());
 

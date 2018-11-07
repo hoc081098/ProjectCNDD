@@ -6,10 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.firebase.ui.firestore.paging.LoadingState;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,7 +24,6 @@ import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.ui.saved.SavedViewHolder;
-import com.pkhh.projectcndd.utils.BlurTransformation;
 import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
@@ -33,6 +36,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.firebase.ui.firestore.paging.LoadingState.ERROR;
+import static com.firebase.ui.firestore.paging.LoadingState.FINISHED;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADED;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADING_INITIAL;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADING_MORE;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
@@ -40,23 +48,51 @@ import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 public class UserProfileActivity extends AppCompatActivity {
 
   public static final int PAGE_SIZE = 15;
+
   @BindView(R.id.root_user_profile) CoordinatorLayout root;
   @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
+  @BindView(R.id.appbar) AppBarLayout appBarLayout;
   @BindView(R.id.image_avatar) ImageView imageAvatar;
   @BindView(R.id.recycler_post_profile) RecyclerView recyclerView;
   @BindView(R.id.app_bar_image) ImageView appBarImage;
+  @BindView(R.id.progress_bar) ProgressBar progressBar;
+  @BindView(R.id.text_email) TextView textEmail;
+  @BindView(R.id.text_name) TextView textName;
+  @BindView(R.id.text_address) TextView textAddress;
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private FirestorePagingAdapter<MotelRoom, SavedViewHolder> adapter;
+  private String userName = " ";
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_user_profile);
-
     ButterKnife.bind(this, this);
 
-    final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.USER_ID);
+    final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_ID);
+    userName = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_FULL_NAME);
+    textName.setText(userName);
+
+    appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+      private boolean isShow = true;
+      private int scrollRange = -1;
+
+      @Override
+      public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (scrollRange == -1) {
+          scrollRange = appBarLayout.getTotalScrollRange();
+        }
+        if (scrollRange + verticalOffset == 0) {
+          collapsingToolbarLayout.setTitle(userName);
+          isShow = true;
+        } else if (isShow) {
+          collapsingToolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
+          isShow = false;
+        }
+      }
+    });
+
     firestore.document(USERS_NAME_COLLECION + "/" + userId)
         .addSnapshotListener(this, (snapshot, e) -> {
           if (e != null) {
@@ -66,6 +102,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
           if (snapshot != null) {
             final User user = FirebaseModel.documentSnapshotToObject(snapshot, User.class);
+            userName = user.getFullName();
+
             Picasso.get()
                 .load(user.getAvatar())
                 .fit()
@@ -73,13 +111,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 .noFade()
                 .into(imageAvatar);
 
-            Picasso.get()
-                .load(user.getAvatar())
-                .transform(new BlurTransformation(UserProfileActivity.this, 20f))
-                .into(appBarImage);
-
-            collapsingToolbarLayout.setTitle(user.getFullName());
-            //textPhone.setText(user.getPhone());
+            textEmail.setText(user.getEmail());
+            textName.setText(user.getFullName());
+            textAddress.setText(user.getAddress());
           }
         });
 
@@ -119,6 +153,18 @@ public class UserProfileActivity extends AppCompatActivity {
       @Override
       protected void onBindViewHolder(@NonNull SavedViewHolder savedViewHolder, int i, @NonNull MotelRoom motelRoom) {
         savedViewHolder.bind(motelRoom);
+      }
+
+      @Override
+      protected void onLoadingStateChanged(@NonNull LoadingState state) {
+        super.onLoadingStateChanged(state);
+        if (state == LOADED || state == FINISHED || state == ERROR) {
+          progressBar.setVisibility(View.INVISIBLE);
+        }
+
+        if (state == LOADING_INITIAL || state == LOADING_MORE) {
+          progressBar.setVisibility(View.VISIBLE);
+        }
       }
     };
 

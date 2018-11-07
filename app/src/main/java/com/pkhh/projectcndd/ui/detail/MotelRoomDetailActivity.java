@@ -46,7 +46,9 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   public static final String TAG = MotelRoomDetailActivity.class.getSimpleName();
   @SuppressLint("SimpleDateFormat")
   public static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-  public static final String USER_ID = "user_id";
+
+  public static final String EXTRA_USER_ID = "user_id";
+  public static final String EXTRA_USER_FULL_NAME = "user_name";
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
@@ -197,7 +199,8 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
     if (id == R.id.image_avatar) {
       if (user != null) {
         final Intent intent = new Intent(this, UserProfileActivity.class);
-        intent.putExtra(USER_ID, user.getId());
+        intent.putExtra(EXTRA_USER_ID, user.getId());
+        intent.putExtra(EXTRA_USER_FULL_NAME, user.getFullName());
         startActivity(intent);
       }
     }
