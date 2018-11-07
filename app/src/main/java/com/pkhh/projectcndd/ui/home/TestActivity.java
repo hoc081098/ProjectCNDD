@@ -14,7 +14,6 @@ public class TestActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_test);
 
-    Toast.makeText(this, getIntent().getSerializableExtra(HomeAdapter.QUERY_DIRECTION).toString()
-        , Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, getIntent().getIntExtra(HomeAdapter.QUERY_DIRECTION, 0) + "", Toast.LENGTH_SHORT).show();
   }
 }

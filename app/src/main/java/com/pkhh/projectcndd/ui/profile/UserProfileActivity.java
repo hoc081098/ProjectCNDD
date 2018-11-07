@@ -3,6 +3,7 @@ package com.pkhh.projectcndd.ui.profile;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -26,9 +27,12 @@ import com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.ui.saved.SavedViewHolder;
 import com.squareup.picasso.Picasso;
 
+import java.util.Objects;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -52,6 +56,7 @@ public class UserProfileActivity extends AppCompatActivity {
   @BindView(R.id.root_user_profile) CoordinatorLayout root;
   @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
+  @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.image_avatar) ImageView imageAvatar;
   @BindView(R.id.recycler_post_profile) RecyclerView recyclerView;
   @BindView(R.id.app_bar_image) ImageView appBarImage;
@@ -73,6 +78,9 @@ public class UserProfileActivity extends AppCompatActivity {
     final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_ID);
     userName = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_FULL_NAME);
     textName.setText(userName);
+
+    setSupportActionBar(toolbar);
+    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
       private boolean isShow = true;
@@ -174,6 +182,14 @@ public class UserProfileActivity extends AppCompatActivity {
     adapter.startListening();
   }
 
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == android.R.id.home) {
+      onBackPressed();
+      return true;
+    }
+    return super.onOptionsItemSelected(item);
+  }
 
   @Override
   protected void onDestroy() {

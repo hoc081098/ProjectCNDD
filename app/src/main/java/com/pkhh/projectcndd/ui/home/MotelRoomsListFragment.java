@@ -13,11 +13,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
+import com.pkhh.projectcndd.utils.SharedPrefUtil;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import kotlin.collections.CollectionsKt;
 
 import static com.pkhh.projectcndd.utils.Constants.PROVINCES_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
@@ -54,10 +57,10 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
   private Unbinder unbinder;
 
-  private List<HomeListItem> createdAtDes;
-  private List<HomeListItem> countViewDes;
-  private ListenerRegistration registration1;
-  private ListenerRegistration registration2;
+  @NonNull
+  private List<MotelRoom> listRoomCreatedDes = emptyList();
+  @NonNull
+  private List<MotelRoom> listRoomCountViewDes = emptyList();
 
   @Nullable
   @Override
@@ -70,16 +73,10 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     super.onViewCreated(view, savedInstanceState);
     unbinder = ButterKnife.bind(this, view);
 
-    createdAtDes = new ArrayList<>();
-    createdAtDes.add(new HeaderItem("Mới nhất"));
-    createdAtDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
-
-    countViewDes = new ArrayList<>();
-    countViewDes.add(new HeaderItem("Xem nhiều"));
-    countViewDes.add(new SeeAll(QueryDirection.VIEW_COUNT_DESCENDING));
+    final String selectedProvinceId = SharedPrefUtil.getInstance(requireContext()).getSelectedProvinceId();
 
     setupRecyclerViewAndAdapter(view);
-    updateRecycler(createdAtDes, countViewDes);
+    updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
   }
 
   @Override
@@ -92,50 +89,54 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   private void subscribe() {
     final DocumentReference selectedProvinceRef = firestore.document(PROVINCES_NAME_COLLECION + "/" + selectedProvinceId);
 
-    registration1 = firestore.collection(ROOMS_NAME_COLLECION)
+    firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("created_at", Query.Direction.DESCENDING)
         .limit(LIMIT_CREATED_DES)
-        .addSnapshotListener((queryDocumentSnapshots, e) -> {
+        .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
           if (e != null) return;
 
-          final List<RoomItem> newRooms = queryDocumentSnapshots != null ? Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
-              .map(RoomItem::new)
-              .toList() : emptyList();
-
-          createdAtDes = new ArrayList<>(newRooms.size() + 2);
-          createdAtDes.add(new HeaderItem("Mới nhất"));
-          createdAtDes.addAll(newRooms);
-          createdAtDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
-
-          updateRecycler(createdAtDes, countViewDes);
+          listRoomCreatedDes = queryDocumentSnapshots != null ? FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
+          updateRecycler(listRoomCreatedDes, listRoomCreatedDes);
         });
 
 
-    registration2 = firestore.collection(ROOMS_NAME_COLLECION)
+    firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("count_view", Query.Direction.DESCENDING)
         .limit(LIMIT_COUNT_VIEW_DES)
-        .addSnapshotListener((queryDocumentSnapshots, e) -> {
+        .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
           if (e != null) return;
 
-          final List<RoomItem> newRooms = queryDocumentSnapshots != null ? Stream.of(FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class))
-              .map(RoomItem::new)
-              .toList() : emptyList();
-
-          countViewDes = new ArrayList<>(newRooms.size() + 2);
-          countViewDes.add(new HeaderItem("Xem nhiều"));
-          countViewDes.addAll(newRooms);
-          countViewDes.add(new SeeAll(QueryDirection.CREATED_AT_DESCENDING));
-
-          updateRecycler(createdAtDes, countViewDes);
+          listRoomCountViewDes = queryDocumentSnapshots != null ? FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
+          updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
         });
   }
 
-  private void updateRecycler(List<HomeListItem> createdAtDes, List<HomeListItem> countViewDes) {
-    final List<HomeListItem> homeListItems = new ArrayList<>(1 + createdAtDes.size() + countViewDes.size());
+  @NonNull
+  @Contract("_ -> new")
+  private RoomItem toRoomItem(MotelRoom room) {
+    final int bookmarkIconState;
+    final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+    if (currentUser == null) bookmarkIconState = RoomItem.HIDE;
+    else
+      bookmarkIconState = room.getUserIdsSaved().contains(currentUser.getUid()) ? RoomItem.SHOW_SAVED : RoomItem.SHOW_NOT_SAVED;
+
+    return new RoomItem(
+        room.getId(),
+        room.getTitle(),
+        room.getPrice(),
+        room.getAddress(),
+        room.getDistrictName(),
+        CollectionsKt.firstOrNull(room.getImages()),
+        bookmarkIconState
+    );
+  }
+
+  private void updateRecycler(List<MotelRoom> createdAtDes, List<MotelRoom> countViewDes) {
+    List<HomeListItem> homeListItems = new ArrayList<>(1 + createdAtDes.size() + countViewDes.size());
     homeListItems.add(
         new BannerItem(
             Arrays.asList(
@@ -145,8 +146,16 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
             )
         )
     );
-    homeListItems.addAll(createdAtDes);
-    homeListItems.addAll(countViewDes);
+
+    homeListItems.add(new HeaderItem("Mới nhất"));
+    homeListItems.addAll(Stream.of(createdAtDes).map(this::toRoomItem).toList());
+    homeListItems.add(new SeeAll(SeeAll.CREATED_AT_DESCENDING));
+
+
+    homeListItems.add(new HeaderItem("Xem nhiều"));
+    homeListItems.addAll(Stream.of(countViewDes).map(this::toRoomItem).toList());
+    homeListItems.add(new SeeAll(SeeAll.COUNT_VIEW_DESCENDING));
+
     adapter.submitList(homeListItems);
   }
 
@@ -155,8 +164,6 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     super.onPause();
 
     firebaseAuth.removeAuthStateListener(this);
-    registration1.remove();
-    registration2.remove();
   }
 
   @Override
@@ -199,7 +206,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     });
   }
 
-  private Void onAddToOrRemoveFromSavedRooms(MotelRoom motelRoom) {
+  private Void onAddToOrRemoveFromSavedRooms(String id) {
     firestore.runTransaction(transaction -> {
       final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
       if (currentUser == null) {
@@ -207,7 +214,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
       }
 
       final String uid = currentUser.getUid();
-      final DocumentReference document = firestore.collection(ROOMS_NAME_COLLECION).document(motelRoom.getId());
+      final DocumentReference document = firestore.collection(ROOMS_NAME_COLLECION).document(id);
 
       List<?> userIdsSaved = (List) transaction.get(document).get("user_ids_saved");
       userIdsSaved = userIdsSaved == null ? emptyList() : userIdsSaved;
@@ -223,16 +230,22 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         return "Thêm vào danh sach đã lưu thành công";
 
       }
-    }).addOnSuccessListener(Objects.requireNonNull(getActivity()), message -> Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT).show())
-        .addOnFailureListener(Objects.requireNonNull(getActivity()), e -> Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show());
+    }).continueWithTask(task -> {
+      if (!task.isSuccessful()) throw Objects.requireNonNull(task.getException());
+      Snackbar.make(rootLayout, task.getResult(), Snackbar.LENGTH_SHORT).show();
+      return firestore.collection(ROOMS_NAME_COLLECION).document(id).get();
+    }).addOnSuccessListener(requireActivity(), documentSnapshot -> {
+      final MotelRoom room = FirebaseModel.documentSnapshotToObject(documentSnapshot, MotelRoom.class);
+      listRoomCreatedDes = Stream.of(listRoomCreatedDes).map(r -> Objects.equals(r.getId(), id) ? room : r).toList();
+      listRoomCountViewDes = Stream.of(listRoomCountViewDes).map(r -> Objects.equals(r.getId(), id) ? room : r).toList();
+      updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
+    }).addOnFailureListener(Objects.requireNonNull(getActivity()), e -> Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show());
 
     return null;
   }
 
   @Override
   public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-    if (firebaseAuth.getCurrentUser() == null) {
-      adapter.notifyDataSetChanged();
-    }
+    updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
   }
 }

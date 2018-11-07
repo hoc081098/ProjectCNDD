@@ -19,20 +19,21 @@ import com.daimajia.slider.library.Transformers.BaseTransformer;
 import com.daimajia.slider.library.Transformers.CubeInTransformer;
 import com.daimajia.slider.library.Transformers.FlipHorizontalTransformer;
 import com.daimajia.slider.library.Transformers.RotateDownTransformer;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.pkhh.projectcndd.R;
-import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.ui.detail.MotelRoomDetailActivity;
 import com.squareup.picasso.Picasso;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,11 +45,6 @@ import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
 
 interface HomeListItem {
-}
-
-enum QueryDirection {
-  VIEW_COUNT_DESCENDING,
-  CREATED_AT_DESCENDING
 }
 
 class ImageAndDescriptionBanner {
@@ -97,22 +93,49 @@ class HeaderItem implements HomeListItem {
 }
 
 class RoomItem implements HomeListItem {
-  @NonNull
-  final MotelRoom room;
+  final String id;
+  final String title;
+  final long price;
+  final String address;
+  final String districtName;
+  @Nullable final String image;
+  @BookMarkIconState final int bookMarkIconState;
 
-  RoomItem(@NonNull MotelRoom room) {this.room = room;}
+  RoomItem(String id, String title, long price, String address, String districtName, @Nullable String image, int bookMarkIconState) {
+    this.id = id;
+    this.title = title;
+    this.price = price;
+    this.address = address;
+    this.districtName = districtName;
+    this.image = image;
+    this.bookMarkIconState = bookMarkIconState;
+  }
+
+  @IntDef(value = {HIDE, SHOW_NOT_SAVED, SHOW_SAVED})
+  @Retention(RetentionPolicy.SOURCE)
+  @interface BookMarkIconState {}
+
+  public static final int HIDE = 2;
+  public static final int SHOW_NOT_SAVED = 3;
+  public static final int SHOW_SAVED = 4;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     RoomItem roomItem = (RoomItem) o;
-    return Objects.equals(room, roomItem.room);
+    return bookMarkIconState == roomItem.bookMarkIconState &&
+        Objects.equals(id, roomItem.id) &&
+        Objects.equals(title, roomItem.title) &&
+        Objects.equals(price, roomItem.price) &&
+        Objects.equals(address, roomItem.address) &&
+        Objects.equals(districtName, roomItem.districtName) &&
+        Objects.equals(image, roomItem.image);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(room);
+    return Objects.hash(id, title, price, address, districtName, image, bookMarkIconState);
   }
 }
 
@@ -138,9 +161,15 @@ class BannerItem implements HomeListItem {
 }
 
 class SeeAll implements HomeListItem {
-  final QueryDirection queryDirection;
+  public static final int COUNT_VIEW_DESCENDING = 2;
+  public static final int CREATED_AT_DESCENDING = 3;
 
-  SeeAll(QueryDirection queryDirection) {
+  @IntDef(value = {CREATED_AT_DESCENDING, COUNT_VIEW_DESCENDING})
+  @interface  QueryDirection {}
+
+  @QueryDirection final int queryDirection;
+
+  SeeAll(@QueryDirection int queryDirection) {
     this.queryDirection = queryDirection;
   }
 
@@ -163,25 +192,25 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
   static final String QUERY_DIRECTION = "QUERY_DIRECTION";
 
   @NonNull
-  private final Function1<MotelRoom, Void> onAddToOrRemoveFromSavedRooms;
+  private final Function1<String, Void> onAddToOrRemoveFromSavedRooms;
 
-  HomeAdapter(@NonNull Function1<MotelRoom, Void> onAddToOrRemoveFromSavedRooms) {
+  HomeAdapter(@NonNull Function1<String, Void> onAddToOrRemoveFromSavedRooms) {
     super(new DiffUtil.ItemCallback<HomeListItem>() {
       @Override
       public boolean areItemsTheSame(@NonNull HomeListItem oldItem, @NonNull HomeListItem newItem) {
         if (oldItem instanceof RoomItem && newItem instanceof RoomItem) {
-          return ((RoomItem) oldItem).room.getId().equals(((RoomItem) newItem).room.getId());
+          return Objects.equals(((RoomItem) oldItem).id, ((RoomItem) newItem).id);
         }
         if (oldItem instanceof HeaderItem && newItem instanceof HeaderItem) {
           return Objects.equals(((HeaderItem) oldItem).title, ((HeaderItem) newItem).title);
         }
         if (oldItem instanceof BannerItem && newItem instanceof BannerItem) {
-          return ((BannerItem) oldItem).images.equals(((BannerItem) newItem).images);
+          return Objects.equals(((BannerItem) oldItem).images, ((BannerItem) newItem).images);
         }
         if (oldItem instanceof SeeAll && newItem instanceof SeeAll) {
-          return ((SeeAll) oldItem).queryDirection.equals(((SeeAll) newItem).queryDirection);
+          return Objects.equals(((SeeAll) oldItem).queryDirection, ((SeeAll) newItem).queryDirection);
         }
-        return oldItem.equals(newItem);
+        return Objects.equals(oldItem, newItem);
       }
 
       @Override
@@ -310,42 +339,39 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
 
     @Override
     public void bind(HomeListItem item) {
-      if (item instanceof RoomItem) {
-        final MotelRoom roomItem = ((RoomItem) item).room;
-
-        textDistrict.setText(roomItem.getDistrictName());
-        textAddress.setText(roomItem.getAddress());
-        textPrice.setText(PRICE_FORMAT.format(roomItem.getPrice()) + "đ/tháng");
-        textTitle.setText(roomItem.getTitle());
-
-        if (roomItem.getImages() == null || roomItem.getImages().isEmpty()) {
-          image.setImageResource(R.drawable.ic_home_primary_dark_24dp);
-        } else {
-          Picasso.get()
-              .load(roomItem.getImages().get(0))
-              .fit()
-              .centerCrop()
-              .placeholder(R.drawable.ic_home_primary_dark_24dp)
-              .error(R.drawable.ic_home_primary_dark_24dp)
-              .into(image);
-        }
-
-
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-          imageSave.setVisibility(View.VISIBLE);
-          if (roomItem.getUserIdsSaved().contains(currentUser.getUid())) {
-            imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
-          } else {
-            imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);
-          }
-        } else {
-          imageSave.setVisibility(View.INVISIBLE);
-        }
-
-      } else {
+      if (!(item instanceof RoomItem)) {
         throw new IllegalStateException("RoomItemVH::bind only accept parameters type RoomItem");
       }
+
+      final RoomItem room = (RoomItem) item;
+
+      textDistrict.setText(room.districtName);
+      textAddress.setText(room.address);
+      textPrice.setText(PRICE_FORMAT.format(room.price) + "đ/tháng");
+      textTitle.setText(room.title);
+
+      Picasso.get()
+          .load(room.image)
+          .fit()
+          .centerCrop()
+          .placeholder(R.drawable.ic_home_primary_dark_24dp)
+          .error(R.drawable.ic_home_primary_dark_24dp)
+          .into(image);
+
+      switch (room.bookMarkIconState) {
+        case RoomItem.HIDE:
+          imageSave.setVisibility(View.INVISIBLE);
+          break;
+        case RoomItem.SHOW_SAVED:
+          imageSave.setVisibility(View.VISIBLE);
+          imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
+          break;
+        case RoomItem.SHOW_NOT_SAVED:
+          imageSave.setVisibility(View.VISIBLE);
+          imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);
+          break;
+      }
+
     }
 
     @Override
@@ -354,14 +380,12 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
       if (adapterPosition != NO_POSITION) {
         final HomeListItem item = getItem(adapterPosition);
         if (item instanceof RoomItem) {
+          final String id = ((RoomItem) item).id;
 
           if (v.getId() == R.id.image_saved_room_bookmark) {
-
-            onAddToOrRemoveFromSavedRooms.invoke(((RoomItem) item).room);
-
+            onAddToOrRemoveFromSavedRooms.invoke(id);
           } else {
 
-            final String id = ((RoomItem) item).room.getId();
             final Context context = itemView.getContext();
             final Intent intent = new Intent(context, MotelRoomDetailActivity.class);
             intent.putExtra(MOTEL_ROOM_ID, id);
@@ -408,7 +432,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
       if (adapterPosition != NO_POSITION) {
         final HomeListItem item = getItem(adapterPosition);
         if (item instanceof SeeAll) {
-          final QueryDirection queryDirection = ((SeeAll) item).queryDirection;
+          final int queryDirection = ((SeeAll) item).queryDirection;
           final Context context = itemView.getContext();
           final Intent intent = new Intent(context, TestActivity.class);
           intent.putExtra(QUERY_DIRECTION, queryDirection);

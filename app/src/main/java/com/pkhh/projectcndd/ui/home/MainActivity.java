@@ -7,11 +7,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.User;
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity
 
   @Nullable
   private User user;
+  @Nullable
+  private ListenerRegistration listenerRegistration;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,15 +87,6 @@ public class MainActivity extends AppCompatActivity
           .add(R.id.main_content, new MotelRoomsListFragment(), MotelRoomsListFragment.TAG)
           .commit();
     }
-
-    findViewById(R.id.nav_header).setOnClickListener(__ -> {
-      final Intent intent = new Intent(this, UserProfileActivity.class);
-      if (user != null) {
-        intent.putExtra(EXTRA_USER_ID, user.getId());
-        intent.putExtra(EXTRA_USER_FULL_NAME, user.getFullName());
-        startActivity(intent);
-      }
-    });
   }
 
   private void setupNavigationView() {
@@ -102,6 +97,16 @@ public class MainActivity extends AppCompatActivity
     textName = headerView.findViewById(R.id.text_name);
     textEmail = headerView.findViewById(R.id.text_email);
     imageAvatar = headerView.findViewById(R.id.image_avatar);
+    headerView.findViewById(R.id.nav_header).setOnClickListener(__ -> {
+      final Intent intent = new Intent(this, UserProfileActivity.class);
+      if (user != null && firebaseAuth.getCurrentUser() != null) {
+        intent.putExtra(EXTRA_USER_ID, user.getId());
+        intent.putExtra(EXTRA_USER_FULL_NAME, user.getFullName());
+        startActivity(intent);
+      } else {
+        Toast.makeText(this, "Bạn phải đăng nhập trước", Toast.LENGTH_SHORT).show();
+      }
+    });
 
     navigationView.getMenu().findItem(R.id.nav_home).setCheckable(true);
     navigationView.getMenu().findItem(R.id.nav_post).setCheckable(false);
@@ -119,6 +124,14 @@ public class MainActivity extends AppCompatActivity
   protected void onStop() {
     super.onStop();
     firebaseAuth.removeAuthStateListener(this);
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    if (listenerRegistration != null) {
+      listenerRegistration.remove();
+    }
   }
 
   @Override
@@ -266,9 +279,14 @@ public class MainActivity extends AppCompatActivity
 
       loginOrLogoutMenuItem.setTitle("Login");
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_person_add_black_24dp);
+
+      user = null;
+      if (listenerRegistration != null) {
+        listenerRegistration.remove();
+      }
     } else {
-      firebaseFirestore.document(USERS_NAME_COLLECION + "/" + currentUser.getUid())
-          .addSnapshotListener(this, (documentSnapshot, e) -> {
+      listenerRegistration = firebaseFirestore.document(USERS_NAME_COLLECION + "/" + currentUser.getUid())
+          .addSnapshotListener((documentSnapshot, e) -> {
             if (documentSnapshot != null) {
               user = FirebaseModel.documentSnapshotToObject(documentSnapshot, User.class);
               textName.setText(user.getFullName());
