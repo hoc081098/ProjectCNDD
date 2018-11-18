@@ -51,149 +51,162 @@ import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-  public static final int PAGE_SIZE = 15;
+    public static final int PAGE_SIZE = 15;
 
-  @BindView(R.id.root_user_profile) CoordinatorLayout root;
-  @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
-  @BindView(R.id.appbar) AppBarLayout appBarLayout;
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.image_avatar) ImageView imageAvatar;
-  @BindView(R.id.recycler_post_profile) RecyclerView recyclerView;
-  @BindView(R.id.app_bar_image) ImageView appBarImage;
-  @BindView(R.id.progress_bar) ProgressBar progressBar;
-  @BindView(R.id.text_email) TextView textEmail;
-  @BindView(R.id.text_name) TextView textName;
-  @BindView(R.id.text_address) TextView textAddress;
+    @BindView(R.id.root_user_profile)
+    CoordinatorLayout root;
+    @BindView(R.id.collapsing_toolbar_layout)
+    CollapsingToolbarLayout collapsingToolbarLayout;
+    @BindView(R.id.appbar)
+    AppBarLayout appBarLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.image_avatar)
+    ImageView imageAvatar;
+    @BindView(R.id.recycler_post_profile)
+    RecyclerView recyclerView;
+    @BindView(R.id.app_bar_image)
+    ImageView appBarImage;
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
+    @BindView(R.id.text_email)
+    TextView textEmail;
+    @BindView(R.id.text_name)
+    TextView textName;
+    @BindView(R.id.text_address)
+    TextView textAddress;
 
-  private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-  private FirestorePagingAdapter<MotelRoom, SavedViewHolder> adapter;
-  private String userName = " ";
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    private FirestorePagingAdapter<MotelRoom, SavedViewHolder> adapter;
+    private String userName = " ";
 
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_user_profile);
-    ButterKnife.bind(this, this);
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_user_profile);
+        ButterKnife.bind(this, this);
 
-    final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_ID);
-    userName = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_FULL_NAME);
-    textName.setText(userName);
+        final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_ID);
+        userName = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_FULL_NAME);
+        textName.setText(userName);
 
-    setSupportActionBar(toolbar);
-    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-      private boolean isShow = true;
-      private int scrollRange = -1;
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            private boolean isShow = true;
+            private int scrollRange = -1;
 
-      @Override
-      public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-        if (scrollRange == -1) {
-          scrollRange = appBarLayout.getTotalScrollRange();
-        }
-        if (scrollRange + verticalOffset == 0) {
-          collapsingToolbarLayout.setTitle(userName);
-          isShow = true;
-        } else if (isShow) {
-          collapsingToolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
-          isShow = false;
-        }
-      }
-    });
-
-    firestore.document(USERS_NAME_COLLECION + "/" + userId)
-        .addSnapshotListener(this, (snapshot, e) -> {
-          if (e != null) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            return;
-          }
-
-          if (snapshot != null) {
-            final User user = FirebaseModel.documentSnapshotToObject(snapshot, User.class);
-            userName = user.getFullName();
-
-            Picasso.get()
-                .load(user.getAvatar())
-                .fit()
-                .centerCrop()
-                .noFade()
-                .into(imageAvatar);
-
-            textEmail.setText(user.getEmail());
-            textName.setText(user.getFullName());
-            textAddress.setText(user.getAddress());
-          }
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    collapsingToolbarLayout.setTitle(userName);
+                    isShow = true;
+                } else if (isShow) {
+                    collapsingToolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
+                    isShow = false;
+                }
+            }
         });
 
-    final Query query = firestore.collection(ROOMS_NAME_COLLECION)
-        .whereEqualTo("user", firestore.document(USERS_NAME_COLLECION + "/" + userId))
-        .orderBy("created_at", Query.Direction.DESCENDING);
+        firestore.document(USERS_NAME_COLLECION + "/" + userId)
+                .addSnapshotListener(this, (snapshot, e) -> {
+                    if (e != null) {
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-    final PagedList.Config config = new PagedList.Config.Builder()
-        .setEnablePlaceholders(false)
-        .setInitialLoadSizeHint(PAGE_SIZE)
-        .setPageSize(PAGE_SIZE)
-        .setPrefetchDistance(5)
-        .build();
+                    if (snapshot != null) {
+                        final User user = FirebaseModel.documentSnapshotToObject(snapshot, User.class);
+                        userName = user.getFullName();
 
-    final FirestorePagingOptions<MotelRoom> options = new FirestorePagingOptions.Builder<MotelRoom>()
-        .setQuery(query, config, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
-        .build();
+                        String avatar = user.getAvatar();
+                        if (!avatar.isEmpty())
+                            Picasso.get()
+                                    .load(avatar)
+                                    .fit()
+                                    .centerCrop()
+                                    .noFade()
+                                    .into(imageAvatar);
 
-    adapter = new FirestorePagingAdapter<MotelRoom, SavedViewHolder>(options) {
+                        textEmail.setText(user.getEmail());
+                        textName.setText(user.getFullName());
+                        textAddress.setText(user.getAddress());
+                    }
+                });
 
-      @NonNull
-      @Override
-      public SavedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.saved_room_item_layout, parent, false);
-        return new SavedViewHolder(itemView, this::onClick);
-      }
+        final Query query = firestore.collection(ROOMS_NAME_COLLECION)
+                .whereEqualTo("user", firestore.document(USERS_NAME_COLLECION + "/" + userId))
+                .orderBy("created_at", Query.Direction.DESCENDING);
 
-      private void onClick(View view, int position) {
-        final DocumentSnapshot snapshot = getItem(position);
-        if (snapshot != null) {
-          final Intent intent = new Intent(UserProfileActivity.this, MotelRoomDetailActivity.class);
-          intent.putExtra(MOTEL_ROOM_ID, snapshot.getId());
-          startActivity(intent);
-        }
-      }
+        final PagedList.Config config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setInitialLoadSizeHint(PAGE_SIZE)
+                .setPageSize(PAGE_SIZE)
+                .setPrefetchDistance(5)
+                .build();
 
-      @Override
-      protected void onBindViewHolder(@NonNull SavedViewHolder savedViewHolder, int i, @NonNull MotelRoom motelRoom) {
-        savedViewHolder.bind(motelRoom);
-      }
+        final FirestorePagingOptions<MotelRoom> options = new FirestorePagingOptions.Builder<MotelRoom>()
+                .setQuery(query, config, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
+                .build();
 
-      @Override
-      protected void onLoadingStateChanged(@NonNull LoadingState state) {
-        super.onLoadingStateChanged(state);
-        if (state == LOADED || state == FINISHED || state == ERROR) {
-          progressBar.setVisibility(View.INVISIBLE);
-        }
+        adapter = new FirestorePagingAdapter<MotelRoom, SavedViewHolder>(options) {
 
-        if (state == LOADING_INITIAL || state == LOADING_MORE) {
-          progressBar.setVisibility(View.VISIBLE);
-        }
-      }
-    };
+            @NonNull
+            @Override
+            public SavedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.saved_room_item_layout, parent, false);
+                return new SavedViewHolder(itemView, this::onClick);
+            }
 
-    recyclerView.setHasFixedSize(true);
-    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    recyclerView.setAdapter(adapter);
-    adapter.startListening();
-  }
+            private void onClick(View view, int position) {
+                final DocumentSnapshot snapshot = getItem(position);
+                if (snapshot != null) {
+                    final Intent intent = new Intent(UserProfileActivity.this, MotelRoomDetailActivity.class);
+                    intent.putExtra(MOTEL_ROOM_ID, snapshot.getId());
+                    startActivity(intent);
+                }
+            }
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == android.R.id.home) {
-      onBackPressed();
-      return true;
+            @Override
+            protected void onBindViewHolder(@NonNull SavedViewHolder savedViewHolder, int i, @NonNull MotelRoom motelRoom) {
+                savedViewHolder.bind(motelRoom);
+            }
+
+            @Override
+            protected void onLoadingStateChanged(@NonNull LoadingState state) {
+                super.onLoadingStateChanged(state);
+                if (state == LOADED || state == FINISHED || state == ERROR) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
+                if (state == LOADING_INITIAL || state == LOADING_MORE) {
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
     }
-    return super.onOptionsItemSelected(item);
-  }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    adapter.stopListening();
-  }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        adapter.stopListening();
+    }
 }
