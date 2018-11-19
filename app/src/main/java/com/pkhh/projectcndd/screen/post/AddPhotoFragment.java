@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import butterknife.BindView;
 
 public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> implements RecyclerOnClickListener, View.OnClickListener {
   private static final int REQUEST_CODE_SELECT_IMAGE = 1;
+  private static final int REQUEST_IMAGE_CAPTURE = 2;
+  private static final String CAPTURE_IMAGE_FILE_PROVIDER = "your.package.name.fileprovider";
 
   private ImageAdapter mAdapter;
 
@@ -59,9 +62,12 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
         }
 
         if (button.getId() == R.id.button_take_photo) {
-          Intent intentCamera = new Intent(requireContext(), Camera2Activity.class);
-          startActivityForResult(intentCamera, 1);
           dialog.dismiss();
+          final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+          intent.setType("image/*");
+          startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+          final Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+          startActivity(intentCamera);
           return;
         }
 
@@ -84,6 +90,15 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if (requestCode == REQUEST_CODE_SELECT_IMAGE
+        && resultCode == Activity.RESULT_OK
+        && data != null) {
+      final Uri uri = data.getData();
+      if (uri != null) {
+        getDataOutput().getUris().add(uri);
+        mAdapter.notifyItemInserted(getDataOutput().getUris().size() - 1);
+      }
+    }
+    if (requestCode == REQUEST_IMAGE_CAPTURE
         && resultCode == Activity.RESULT_OK
         && data != null) {
       final Uri uri = data.getData();
@@ -122,6 +137,8 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
   }
 
   @Override
-  public int getLayoutId() { return R.layout.fragment_add_photo; }
+  public int getLayoutId() {
+    return R.layout.fragment_add_photo;
+  }
 }
 

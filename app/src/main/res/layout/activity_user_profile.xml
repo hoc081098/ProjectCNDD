@@ -152,13 +152,13 @@
                 android:padding="8dp"
                 android:scrollbars="vertical"
                 app:fastScrollEnabled="true"
-                app:fastScrollHorizontalThumbDrawable="@drawable/fast_thumb"
-                app:fastScrollHorizontalTrackDrawable="@drawable/fast_thumb"
-                app:fastScrollVerticalThumbDrawable="@drawable/fast_thumb"
-                app:fastScrollVerticalTrackDrawable="@drawable/fast_thumb"
+                app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
+                app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
+                app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
+                app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_header_title"
-                tools:listitem="@layout/saved_room_item_layout">
+                tools:listitem="@layout/profile_room_item_layout">
 
 
             </androidx.recyclerview.widget.RecyclerView>
