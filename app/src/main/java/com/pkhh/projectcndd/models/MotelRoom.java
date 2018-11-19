@@ -1,6 +1,10 @@
 package com.pkhh.projectcndd.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
@@ -13,52 +17,102 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 
-public class MotelRoom extends FirebaseModel {
+public class MotelRoom extends FirebaseModel implements Parcelable {
   private String title;
-
   private String description;
-
   private long price;
-
   private long countView;
-
   private double size;
-
   private String address;
-
   private GeoPoint addressGeoPoint;
-
   private List<String> images;
-
   private String phone;
-
   private boolean isActive;
-
   private boolean approve;
-
   private Map<String, Object> utilities;
-
   private DocumentReference user;
-
   private DocumentReference category;
-
   private DocumentReference province;
-
   private DocumentReference ward;
-
   private DocumentReference district;
-
   private String districtName;
-
   private Date createdAt;
-
   private Date updatedAt;
-
   private List<String> userIdsSaved;
 
   // Firebase Firestore require empty constructor
   public MotelRoom() {
   }
+
+  protected MotelRoom(Parcel in) {
+    title = in.readString();
+    description = in.readString();
+    price = in.readLong();
+    countView = in.readLong();
+    size = in.readDouble();
+    address = in.readString();
+    addressGeoPoint = new GeoPoint(in.readDouble(), in.readDouble());
+    images = new ArrayList<>();
+    in.readStringList(images);
+    phone = in.readString();
+    isActive = in.readByte() == (byte) 1;
+    approve = in.readByte() == (byte) 1;
+    utilities = (HashMap<String, Object>) in.readSerializable();
+    user = FirebaseFirestore.getInstance().document(in.readString());
+    category = FirebaseFirestore.getInstance().document(in.readString());
+    province = FirebaseFirestore.getInstance().document(in.readString());
+    ward = FirebaseFirestore.getInstance().document(in.readString());
+    district = FirebaseFirestore.getInstance().document(in.readString());
+    createdAt = new Date(in.readLong());
+    final long aLong = in.readLong();
+    updatedAt = aLong >= 0 ? new Date(aLong) : null;
+    userIdsSaved = new ArrayList<>();
+    in.readStringList(userIdsSaved);
+    districtName = in.readString();
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(title);
+    dest.writeString(description);
+    dest.writeLong(price);
+    dest.writeLong(countView);
+    dest.writeDouble(size);
+    dest.writeString(address);
+    dest.writeDouble(addressGeoPoint.getLatitude());
+    dest.writeDouble(addressGeoPoint.getLongitude());
+    dest.writeStringList(images);
+    dest.writeString(phone);
+    dest.writeByte((byte) (isActive ? 1 : 0));
+    dest.writeByte((byte) (approve ? 1 : 0));
+    dest.writeSerializable(new HashMap<>(utilities));
+    dest.writeString(user.getPath());
+    dest.writeString(category.getPath());
+    dest.writeString(province.getPath());
+    dest.writeString(ward.getPath());
+    dest.writeString(district.getPath());
+    dest.writeLong(createdAt == null ? -1 : createdAt.getTime());
+    dest.writeLong(updatedAt == null ? -1 : updatedAt.getTime());
+    dest.writeStringList(userIdsSaved);
+    dest.writeString(districtName);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  public static final Creator<MotelRoom> CREATOR = new Creator<MotelRoom>() {
+    @Override
+    public MotelRoom createFromParcel(Parcel in) {
+      return new MotelRoom(in);
+    }
+
+    @Override
+    public MotelRoom[] newArray(int size) {
+      return new MotelRoom[size];
+    }
+  };
 
   public String getTitle() {
     return title;

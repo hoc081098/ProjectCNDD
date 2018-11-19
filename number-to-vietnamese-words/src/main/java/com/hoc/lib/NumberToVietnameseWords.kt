@@ -3,8 +3,7 @@
 package com.hoc.lib
 
 /**
- * @author Hoc
- * Created on Sunday, November 4, 2018
+ * @author Peter Hoc
  * Convert number [Long] to Vietnamese words [String]
  */
 
@@ -27,17 +26,18 @@ object NumberToVietnamese {
     "nghìn",
     "triệu",
     "tỷ",
-    "nghìn",
-    "triệu",
-    "tỷ"
+    "nghìn tỷ",
+    "triệu tỷ",
+    "tỷ tỷ"
   )
 
   private fun readTriple(triple: String, showZeroHundred: Boolean): String {
     val (a, b, c) = triple.map { it - '0' }
+
     return when {
       a == 0 && b == 0 && c == 0 -> ""
-      a == 0 && b == 0 -> digits[c]
       a == 0 && showZeroHundred -> "không trăm " + readPair(b, c)
+      a == 0 && b == 0 -> digits[c]
       a == 0 && b != 0 -> readPair(b, c)
       else -> digits[a] + " trăm " + readPair(b, c)
     }
@@ -72,13 +72,11 @@ object NumberToVietnamese {
       else -> {
         val s = n.toString()
         val groups = "${zeroLeftPadding[s.length % 3]}$s".chunked(3)
-
+        val showZeroHundred = groups.takeLastWhile { it == "000" }.size < groups.size - 1
         groups.foldIndexed("") { index, acc, e ->
-          val readTriple = readTriple(e, groups.size > 1)
+          val readTriple = readTriple(e, showZeroHundred && index > 0)
           "$acc $readTriple ${when {
-            readTriple.isNotBlank() || (groups.size >= 5 && groups.size - 1 - index == 3) -> multipleThousand.getOrNull(
-              groups.size - 1 - index
-            ).orEmpty()
+            readTriple.isNotBlank() -> multipleThousand.getOrNull(groups.size - 1 - index).orEmpty()
             else -> ""
           }} "
         }

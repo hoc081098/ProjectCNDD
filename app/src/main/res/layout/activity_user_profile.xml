@@ -38,8 +38,8 @@
                     android:id="@+id/image_avatar"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    android:layout_marginTop="32dp"
                     android:layout_gravity="center_horizontal|bottom"
+                    android:layout_marginTop="32dp"
                     app:layout_constraintBottom_toTopOf="@+id/text_name"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
@@ -97,14 +97,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Address..."
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="32dp"
+                    android:text="Address..."
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toEndOf="@+id/imageView7"
                     app:layout_constraintTop_toBottomOf="@+id/text_email"
-                    android:layout_marginBottom="32dp"
                     tools:text="Address" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -133,11 +133,11 @@
                 android:id="@+id/text_header_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:background="#fafafa"
                 android:fontFamily="@font/open_sans"
+                android:padding="8dp"
                 android:text="Các bài đã đăng"
                 android:textColor="#424242"
-                android:padding="8dp"
-                android:background="#fafafa"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -151,6 +151,11 @@
                 android:clipToPadding="false"
                 android:padding="8dp"
                 android:scrollbars="vertical"
+                app:fastScrollEnabled="true"
+                app:fastScrollHorizontalThumbDrawable="@drawable/fast_thumb"
+                app:fastScrollHorizontalTrackDrawable="@drawable/fast_thumb"
+                app:fastScrollVerticalThumbDrawable="@drawable/fast_thumb"
+                app:fastScrollVerticalTrackDrawable="@drawable/fast_thumb"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_header_title"
                 tools:listitem="@layout/saved_room_item_layout">
@@ -158,17 +163,23 @@
 
             </androidx.recyclerview.widget.RecyclerView>
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:indeterminate="true"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/recycler_post_profile" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        android:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

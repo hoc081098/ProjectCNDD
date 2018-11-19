@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-feature android:name="android.hardware.camera" />
 
@@ -22,7 +23,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.post.Camera2Activity"></activity>
+
+        <activity android:name=".screen.post.Camera2Activity" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -36,17 +39,17 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".ui.post.PickAddressActivity"
+            android:name=".screen.post.PickAddressActivity"
             android:label="@string/title_activity_pick_address"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.post.WardActivity"
+            android:name=".screen.post.WardActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.post.DistrictActivity"
+            android:name=".screen.post.DistrictActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.post.ProvinceActivity"
+            android:name=".screen.post.ProvinceActivity"
             android:screenOrientation="portrait" />
 
         <meta-data
@@ -54,7 +57,7 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".ui.home.MainActivity"
+            android:name=".screen.home.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -65,28 +68,30 @@
         </activity>
 
         <activity
-            android:name=".ui.detail.MotelRoomDetailActivity"
+            android:name=".screen.detail.MotelRoomDetailActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".ui.post.PostActivity"
+            android:name=".screen.post.PostActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name=".ui.loginregister.LoginRegisterActivity"
+            android:name=".screen.loginregister.LoginRegisterActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.saved.SavedRoomsActivity" />
+        <activity android:name=".screen.saved.SavedRoomsActivity" />
 
-        <activity android:name=".ui.nearby.NearbyActivity" />
+        <activity android:name=".screen.nearby.NearbyActivity" />
 
-        <activity android:name=".ui.home.TestActivity" />
+        <activity android:name=".screen.home.TestActivity" />
 
         <activity
-            android:name=".ui.profile.UserProfileActivity"
+            android:name=".screen.profile.UserProfileActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <service android:name=".service.PostIntentService" />
     </application>
 
 </manifest>

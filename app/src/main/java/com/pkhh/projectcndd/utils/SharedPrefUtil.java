@@ -30,9 +30,9 @@ public final class SharedPrefUtil {
 
   @NonNull
   public static SharedPrefUtil getInstance(Context context) {
-    if (sInstance != null) {
+    if (sInstance == null) {
       synchronized (SharedPrefUtil.class) {
-        if (sInstance != null) {
+        if (sInstance == null) {
           sInstance = new SharedPrefUtil(context);
         }
       }

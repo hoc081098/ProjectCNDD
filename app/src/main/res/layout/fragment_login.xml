@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     tools:background="#fafafa"
-    tools:context=".ui.loginregister.LoginRegisterActivity">
+    tools:context=".screen.loginregister.LoginRegisterActivity">
 
     <EditText
         android:id="@+id/edit_email"
