@@ -2,6 +2,7 @@ package com.pkhh.projectcndd.screen.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -292,10 +293,9 @@ public class MainActivity extends AppCompatActivity
               textName.setText(user.getFullName());
               textEmail.setText(user.getEmail());
 
-              final String avatar = user.getAvatar();
-              if (avatar != null && !avatar.isEmpty()) {
+              if (!TextUtils.isEmpty(user.getAvatar())) {
                 Picasso.get()
-                    .load(avatar)
+                    .load(user.getAvatar())
                     .fit()
                     .centerCrop()
                     .noFade()

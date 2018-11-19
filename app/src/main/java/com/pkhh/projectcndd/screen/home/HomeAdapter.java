@@ -434,7 +434,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
         if (item instanceof SeeAll) {
           final int queryDirection = ((SeeAll) item).queryDirection;
           final Context context = itemView.getContext();
-          final Intent intent = new Intent(context, TestActivity.class);
+          final Intent intent = new Intent(context, ShowMoreActivity.class);
           intent.putExtra(QUERY_DIRECTION, queryDirection);
           context.startActivity(intent);
         }

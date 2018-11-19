@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -129,12 +130,14 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   }
 
   private void updateUserInformation(@NonNull User user) {
-    Picasso.get()
-        .load(user.getAvatar())
-        .fit()
-        .centerCrop()
-        .noFade()
-        .into(imageAvatar);
+    if (!TextUtils.isEmpty(user.getAvatar())) {
+      Picasso.get()
+          .load(user.getAvatar())
+          .fit()
+          .centerCrop()
+          .noFade()
+          .into(imageAvatar);
+    }
     textName.setText(user.getFullName());
   }
 

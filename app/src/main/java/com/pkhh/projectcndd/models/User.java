@@ -7,19 +7,12 @@ import java.util.Objects;
 
 public class User extends FirebaseModel {
   private String email;
-
   private String phone;
-
   private String fullName;
-
   private String address;
-
   private String avatar;
-
   private boolean isActive;
-
   private Date createdAt;
-
   private Date updatedAt;
 
   public User() {

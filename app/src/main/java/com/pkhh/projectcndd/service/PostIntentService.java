@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.widget.Toast;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.tasks.Task;
@@ -93,12 +92,13 @@ public class PostIntentService extends JobIntentService {
           });
 
       Tasks.await(total);
-      Toast.makeText(getApplicationContext(), "Đăng bài thành công", Toast.LENGTH_SHORT).show();
+
+
 
       final Notification notification1 = new NotificationCompat.Builder(getApplicationContext(), "???")
           .setAutoCancel(true)
           .setWhen(System.currentTimeMillis())
-          .setContentTitle("Post done")
+          .setContentTitle("Đăng bài thành công")
           .setContentText("...")
           .setSmallIcon(R.mipmap.ic_launcher_round)
           .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -108,8 +108,19 @@ public class PostIntentService extends JobIntentService {
           .notify(0, notification1);
     } catch (ExecutionException | InterruptedException e) {
       e.printStackTrace();
-      Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-      ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
+
+
+      final Notification notification1 = new NotificationCompat.Builder(getApplicationContext(), "???")
+          .setAutoCancel(true)
+          .setWhen(System.currentTimeMillis())
+          .setContentTitle("Đăng bài thất bại")
+          .setContentText("...")
+          .setSmallIcon(R.mipmap.ic_launcher_round)
+          .setPriority(NotificationCompat.PRIORITY_HIGH)
+          .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+          .build();
+      ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE))
+          .notify(0, notification1);
     }
   }
 }

@@ -86,7 +86,7 @@
 
         <activity android:name=".screen.nearby.NearbyActivity" />
 
-        <activity android:name=".screen.home.TestActivity" />
+        <activity android:name=".screen.home.ShowMoreActivity" />
 
         <activity
             android:name=".screen.profile.UserProfileActivity"

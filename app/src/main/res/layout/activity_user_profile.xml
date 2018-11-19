@@ -158,7 +158,7 @@
                 app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_header_title"
-                tools:listitem="@layout/profile_room_item_layout">
+                tools:listitem="@layout/common_room_item_layout">
 
 
             </androidx.recyclerview.widget.RecyclerView>

@@ -2,6 +2,7 @@ package com.pkhh.projectcndd.screen.profile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,12 +20,12 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.pkhh.projectcndd.CommonRoomVH;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
-import com.pkhh.projectcndd.screen.saved.SavedViewHolder;
 import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
@@ -34,7 +35,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.view.ViewCompat;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -67,7 +67,7 @@ public class UserProfileActivity extends AppCompatActivity {
   @BindView(R.id.text_address) TextView textAddress;
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-  private FirestorePagingAdapter<MotelRoom, SavedViewHolder> adapter;
+  private FirestorePagingAdapter<MotelRoom, CommonRoomVH> adapter;
   private String userName = " ";
 
   @Override
@@ -99,12 +99,14 @@ public class UserProfileActivity extends AppCompatActivity {
             final User user = FirebaseModel.documentSnapshotToObject(snapshot, User.class);
             userName = user.getFullName();
 
-            Picasso.get()
-                .load(user.getAvatar())
-                .fit()
-                .centerCrop()
-                .noFade()
-                .into(imageAvatar);
+            if (!TextUtils.isEmpty(user.getAvatar())) {
+              Picasso.get()
+                  .load(user.getAvatar())
+                  .fit()
+                  .centerCrop()
+                  .noFade()
+                  .into(imageAvatar);
+            }
 
             textEmail.setText(user.getEmail());
             textName.setText(user.getFullName());
@@ -129,13 +131,13 @@ public class UserProfileActivity extends AppCompatActivity {
         .setQuery(query, config, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
         .build();
 
-    adapter = new FirestorePagingAdapter<MotelRoom, SavedViewHolder>(options) {
+    adapter = new FirestorePagingAdapter<MotelRoom, CommonRoomVH>(options) {
 
       @NonNull
       @Override
-      public SavedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.saved_room_item_layout, parent, false);
-        return new SavedViewHolder(itemView, this::onItemClick);
+      public CommonRoomVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.common_room_item_layout, parent, false);
+        return new CommonRoomVH(itemView, this::onItemClick);
       }
 
       private void onItemClick(View __, int position) {
@@ -148,8 +150,8 @@ public class UserProfileActivity extends AppCompatActivity {
       }
 
       @Override
-      protected void onBindViewHolder(@NonNull SavedViewHolder savedViewHolder, int i, @NonNull MotelRoom motelRoom) {
-        savedViewHolder.bind(motelRoom);
+      protected void onBindViewHolder(@NonNull CommonRoomVH VH, int i, @NonNull MotelRoom motelRoom) {
+        VH.bind(motelRoom);
       }
 
       @Override
@@ -207,4 +209,6 @@ public class UserProfileActivity extends AppCompatActivity {
     super.onDestroy();
     adapter.stopListening();
   }
+
+
 }
