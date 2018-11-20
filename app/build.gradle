@@ -55,10 +55,10 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha3'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.4.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
-    implementation 'com.squareup.moshi:moshi-adapters:1.6.0'
+//    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+//    implementation 'com.squareup.retrofit2:converter-moshi:2.4.0'
+//    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+//    implementation 'com.squareup.moshi:moshi-adapters:1.6.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     // firebase
@@ -74,8 +74,6 @@ dependencies {
 
     // image slider
     implementation project(':image-slider')
-    // view pager indicator
-    implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:2.1.2'
     // search view
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'
     // circle imageview

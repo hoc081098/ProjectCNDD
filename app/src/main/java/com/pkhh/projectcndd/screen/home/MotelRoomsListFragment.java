@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
@@ -52,15 +53,14 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
   private HomeAdapter adapter;
 
-  @BindView(R.id.root_motel_rooms_list_fragment)
-  ViewGroup rootLayout;
+  @BindView(R.id.root_motel_rooms_list_fragment) ViewGroup rootLayout;
 
   private Unbinder unbinder;
 
-  @NonNull
-  private List<MotelRoom> listRoomCreatedDes = emptyList();
-  @NonNull
-  private List<MotelRoom> listRoomCountViewDes = emptyList();
+  @NonNull private List<MotelRoom> listRoomCreatedDes = emptyList();
+  @NonNull private List<MotelRoom> listRoomCountViewDes = emptyList();
+  private ListenerRegistration registration1;
+  private ListenerRegistration registration2;
 
   @Nullable
   @Override
@@ -82,6 +82,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   @Override
   public void onResume() {
     super.onResume();
+
     subscribe();
     firebaseAuth.addAuthStateListener(this);
   }
@@ -89,12 +90,12 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   private void subscribe() {
     final DocumentReference selectedProvinceRef = firestore.document(PROVINCES_NAME_COLLECION + "/" + selectedProvinceId);
 
-    firestore.collection(ROOMS_NAME_COLLECION)
+    registration1 = firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("created_at", Query.Direction.DESCENDING)
         .limit(LIMIT_CREATED_DES)
-        .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
           if (e != null) return;
 
           listRoomCreatedDes = queryDocumentSnapshots != null ? FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
@@ -102,12 +103,12 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         });
 
 
-    firestore.collection(ROOMS_NAME_COLLECION)
+    registration2 = firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("count_view", Query.Direction.DESCENDING)
         .limit(LIMIT_COUNT_VIEW_DES)
-        .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
           if (e != null) return;
 
           listRoomCountViewDes = queryDocumentSnapshots != null ? FirebaseModel.querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
@@ -163,6 +164,8 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   public void onPause() {
     super.onPause();
 
+    registration1.remove();
+    registration2.remove();
     firebaseAuth.removeAuthStateListener(this);
   }
 

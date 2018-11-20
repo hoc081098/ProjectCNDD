@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.util.Log;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.tasks.Task;
@@ -40,87 +41,79 @@ public class PostIntentService extends JobIntentService {
 
   @Override
   protected void onHandleWork(@NonNull Intent intent) {
+    final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    final StorageReference storageImage = FirebaseStorage.getInstance().getReference();
+
+    final MotelRoom room = intent.getParcelableExtra("room");
+    final Map<String, Object> map = room.toMap();
+    map.put("created_at", FieldValue.serverTimestamp());
+    final List<Uri> imageUris = intent.getParcelableArrayListExtra("uris");
+
+    try {
+      showNotification("Đang đăng bài", "Xin chờ...");
+
+      //*******************************************************************************************
+      final DocumentReference documentReference = Tasks.await(
+          FirebaseFirestore
+              .getInstance()
+              .collection(Constants.ROOMS_NAME_COLLECION).add(map)
+      );
+      showNotification("Đăng bài thành công", "1/3");
+      Log.d("@@@", "documentReference=" + documentReference);
+      //*******************************************************************************************
+
+
+      //*******************************************************************************************
+      List<Task<Uri>> uploadImagesTasks = Stream.of(imageUris)
+          .map(uri -> {
+            final StorageReference storageReference = storageImage
+                .child("room_images/" + uid + "/" + documentReference.getId() + "/image_" + System.currentTimeMillis());
+
+            return storageReference
+                .putFile(uri)
+                .continueWithTask(t -> {
+                  if (!t.isSuccessful()) throw requireNonNull(t.getException());
+                  return storageReference.getDownloadUrl();
+                });
+          })
+          .toList();
+      final List<Object> uris = Tasks.await(
+          Tasks.whenAllSuccess(uploadImagesTasks)
+      );
+      showNotification("Upload xong hình ảnh", "2/3");
+      Log.d("@@@", "uris=" + uris);
+      //*******************************************************************************************
+
+
+      //*******************************************************************************************
+      final Object[] downloadUrls = Stream.ofNullable(uris)
+          .map(Object::toString)
+          .toArray();
+      Tasks.await(
+          documentReference.update("images", FieldValue.arrayUnion(downloadUrls))
+      );
+      showNotification("Đăng bài thành công", "3/3, kiểm tra trong phần quản lý bài đã đăng");
+      Log.d("@@@", "Post done");
+      //*******************************************************************************************
+
+
+    } catch (ExecutionException | InterruptedException e) {
+      Log.d("@@@", e.getMessage(), e);
+      showNotification("Đăng bài thất bại", e.getMessage());
+    }
+  }
+
+  private void showNotification(CharSequence title, CharSequence content) {
     final Notification notification = new NotificationCompat.Builder(getApplicationContext(), "???")
         .setAutoCancel(true)
         .setWhen(System.currentTimeMillis())
-        .setContentTitle("Posting...")
+        .setContentTitle(title)
+        .setContentText(content)
         .setSmallIcon(R.mipmap.ic_launcher_round)
-        .setContentText("Please wait...")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
         .build();
     ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE))
         .notify(0, notification);
-
-
-    final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-    final FirebaseStorage storage = FirebaseStorage.getInstance();
-    final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-    final StorageReference storageImage = storage.getReference();
-
-    MotelRoom room = intent.getParcelableExtra("room");
-    final Map<String, Object> map = room.toMap();
-    map.put("created_at", FieldValue.serverTimestamp());
-    List<Uri> imageUris = intent.getParcelableArrayListExtra("uris");
-
-    try {
-      final Task<Void> total = firestore.collection(Constants.ROOMS_NAME_COLLECION)
-          .add(map)
-          .continueWithTask(addTask -> {
-            if (!addTask.isSuccessful()) throw requireNonNull(addTask.getException());
-            final DocumentReference documentReference = addTask.getResult();
-
-            List<Task<Uri>> uploadImagesTasks = Stream.of(imageUris)
-                .map(uri -> {
-                  StorageReference storageReference = storageImage
-                      .child("room_images/" + uid + "/" + documentReference.getId() + "/image_" + System.currentTimeMillis());
-
-                  return storageReference
-                      .putFile(uri)
-                      .continueWithTask(t -> {
-                        if (!t.isSuccessful()) throw requireNonNull(t.getException());
-                        return storageReference.getDownloadUrl();
-                      });
-                })
-                .toList();
-            return Tasks
-                .whenAllSuccess(uploadImagesTasks)
-                .continueWithTask(uploadTasks -> {
-                  Object[] uris = uploadTasks.getResult().toArray();
-                  return documentReference.update("images", FieldValue.arrayUnion(uris));
-                });
-          });
-
-      Tasks.await(total);
-
-
-
-      final Notification notification1 = new NotificationCompat.Builder(getApplicationContext(), "???")
-          .setAutoCancel(true)
-          .setWhen(System.currentTimeMillis())
-          .setContentTitle("Đăng bài thành công")
-          .setContentText("...")
-          .setSmallIcon(R.mipmap.ic_launcher_round)
-          .setPriority(NotificationCompat.PRIORITY_HIGH)
-          .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-          .build();
-      ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE))
-          .notify(0, notification1);
-    } catch (ExecutionException | InterruptedException e) {
-      e.printStackTrace();
-
-
-      final Notification notification1 = new NotificationCompat.Builder(getApplicationContext(), "???")
-          .setAutoCancel(true)
-          .setWhen(System.currentTimeMillis())
-          .setContentTitle("Đăng bài thất bại")
-          .setContentText("...")
-          .setSmallIcon(R.mipmap.ic_launcher_round)
-          .setPriority(NotificationCompat.PRIORITY_HIGH)
-          .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-          .build();
-      ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE))
-          .notify(0, notification1);
-    }
   }
 }

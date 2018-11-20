@@ -150,7 +150,7 @@
                 android:background="#fafafa"
                 android:clipToPadding="false"
                 android:padding="8dp"
-                android:scrollbars="vertical"
+                android:scrollbars="none"
                 app:fastScrollEnabled="true"
                 app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
                 app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"

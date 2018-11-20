@@ -15,12 +15,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.Source;
 import com.pkhh.projectcndd.CommonRoomVH;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.utils.Constants;
+
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +34,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.firebase.ui.firestore.paging.LoadingState.ERROR;
+import static com.firebase.ui.firestore.paging.LoadingState.FINISHED;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADED;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADING_INITIAL;
+import static com.firebase.ui.firestore.paging.LoadingState.LOADING_MORE;
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
 import static com.pkhh.projectcndd.utils.Constants.PROVINCES_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
@@ -52,7 +60,7 @@ public class ShowMoreActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_show_more);
     ButterKnife.bind(this, this);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     final int queryDir = getIntent().getIntExtra(HomeAdapter.QUERY_DIRECTION, 0);
 
@@ -72,7 +80,6 @@ public class ShowMoreActivity extends AppCompatActivity {
 
       getSupportActionBar().setTitle("Xem nhiều");
     }
-
     setupRecyclerView(query);
   }
 
@@ -81,11 +88,11 @@ public class ShowMoreActivity extends AppCompatActivity {
         .setEnablePlaceholders(false)
         .setInitialLoadSizeHint(PAGE_SIZE)
         .setPageSize(PAGE_SIZE)
-        .setPrefetchDistance(2)
+        .setPrefetchDistance(PAGE_SIZE)
         .build();
 
     final FirestorePagingOptions<MotelRoom> options = new FirestorePagingOptions.Builder<MotelRoom>()
-        .setQuery(query, config, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
+        .setQuery(query, Source.SERVER, config, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
         .build();
 
     adapter = new FirestorePagingAdapter<MotelRoom, CommonRoomVH>(options) {
@@ -114,8 +121,12 @@ public class ShowMoreActivity extends AppCompatActivity {
       @Override
       protected void onLoadingStateChanged(@NonNull LoadingState state) {
         super.onLoadingStateChanged(state);
-        if (state == LoadingState.LOADED) {
-          progressBar.setVisibility(View.GONE);
+        if (state == LOADED || state == FINISHED || state == ERROR) {
+          progressBar.setVisibility(View.INVISIBLE);
+        }
+
+        if (state == LOADING_INITIAL || state == LOADING_MORE) {
+          progressBar.setVisibility(View.VISIBLE);
         }
       }
     };
@@ -123,6 +134,7 @@ public class ShowMoreActivity extends AppCompatActivity {
     recyclerView.setHasFixedSize(true);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setAdapter(adapter);
+
     adapter.startListening();
   }
 

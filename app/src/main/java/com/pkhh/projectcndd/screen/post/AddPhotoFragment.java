@@ -74,7 +74,7 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
         if (button.getId() == R.id.button_select_image) {
           dialog.dismiss();
 
-          final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+          final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
           intent.setType("image/*");
 
           startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE);
