@@ -1,6 +1,5 @@
 package com.pkhh.projectcndd.screen.detail;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +19,7 @@ import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
@@ -28,6 +28,9 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,14 +47,12 @@ import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 
 public class MotelRoomDetailActivity extends AppCompatActivity {
-  public static final String TAG = MotelRoomDetailActivity.class.getSimpleName();
-  @SuppressLint("SimpleDateFormat")
-  public static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+  public final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
 
   public static final String EXTRA_USER_ID = "user_id";
   public static final String EXTRA_USER_FULL_NAME = "user_name";
-
-  private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+  public static final String EXTRA_IMAGES = "images";
+  public static final String EXTRA_INDEX = "index";
 
   @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
   @BindView(R.id.sliderLayout) SliderLayout sliderLayout;
@@ -64,8 +65,11 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   @BindView(R.id.text_phone) TextView textPhone;
   @BindView(R.id.image_avatar) ImageView imageAvatar;
 
-  @Nullable
-  private User user;
+  private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+  @Nullable private User user;
+  @Nullable private ListenerRegistration registration;
+  private String id;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,13 +80,19 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
     );
     setContentView(R.layout.activity_motel_room_detail);
 
+
     ButterKnife.bind(this, this);
     collapsingToolbarLayout.setTitle(null);
 
-    String id = getIntent().getStringExtra(MOTEL_ROOM_ID);
+
+    id = getIntent().getStringExtra(MOTEL_ROOM_ID);
     increaseViewCount(id);
-    firestore.document(ROOMS_NAME_COLLECION + "/" + id)
-        .addSnapshotListener(this, (queryDocumentSnapshots, e) -> {
+    getDetail(id);
+  }
+
+  private void getDetail(String id) {
+    registration = firestore.document(ROOMS_NAME_COLLECION + "/" + id)
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
           if (e != null) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return;
@@ -96,20 +106,17 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   private void increaseViewCount(final String id) {
     firestore.runTransaction(transaction -> {
       final DocumentReference documentRef = firestore.document(ROOMS_NAME_COLLECION + "/" + id);
+
       Long viewCount = (Long) transaction.get(documentRef).get("count_view");
       if (viewCount == null) viewCount = 0L;
 
       transaction.update(documentRef, "count_view", viewCount + 1);
       return viewCount + 1;
-    }).addOnSuccessListener(newVal -> {
-      Log.d("@@@", "update newVal=" + newVal + " count_view successfully");
-    }).addOnFailureListener(e -> {
-      Log.d("@@@", "update count_view error: " + e.getMessage(), e);
-    });
+    }).addOnSuccessListener(newVal -> Log.d("@@@", "update newVal=" + newVal + " count_view successfully"))
+        .addOnFailureListener(e -> Log.d("@@@", "update count_view error: " + e.getMessage(), e));
   }
 
   private void updateUi(@NonNull MotelRoom motelRoom) {
-    Log.d(TAG, motelRoom.toString());
     updateImageSlider(motelRoom);
 
     textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");
@@ -119,7 +126,8 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
         FROM_HTML_SEPARATOR_LINE_BREAK_DIV));
     //imageMap.setImageResource(R.drawable.ic_home_black_24dp); // TODO
 
-    motelRoom.getUser().get()
+    motelRoom.getUser()
+        .get()
         .addOnSuccessListener(documentSnapshot -> {
           user = documentSnapshotToObject(documentSnapshot, User.class);
           updateUserInformation(user);
@@ -144,31 +152,42 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   private void updateImageSlider(@NonNull MotelRoom motelRoom) {
     sliderLayout.removeAllSliders();
 
-    int index = 0;
-    for (String e : motelRoom.getImages()) {
-      BaseSliderView sliderView = new TextSliderView(this)
-          .description("Ảnh " + ++index)
+    List<String> images = motelRoom.getImages();
+    for (int i = 0; i < images.size(); i++) {
+      final int index = i;
+      final String e = images.get(i);
+
+      final BaseSliderView sliderView = new TextSliderView(this)
+          .description("Ảnh " + (i + 1))
           .image(e)
-          .setOnSliderClickListener(slider -> setOnSliderClickListener(slider.getUrl()))
-          .setScaleType(BaseSliderView.ScaleType.Fit);
+          .setOnSliderClickListener(__ -> onSliderClick(index, motelRoom.getImages()))
+          .setScaleType(BaseSliderView.ScaleType.FitCenterCrop);
       sliderLayout.addSlider(sliderView);
     }
   }
 
-  private void setOnSliderClickListener(String url) {
-    // TODO PhotoView
-    Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
+  private void onSliderClick(int index, List<String> images) {
+    final Intent intent = new Intent(this, PhotoSlideActivity.class);
+    intent.putStringArrayListExtra(EXTRA_IMAGES, new ArrayList<>(images));
+    intent.putExtra(EXTRA_INDEX, index);
+    startActivity(intent);
   }
 
   @Override
   protected void onStart() {
     super.onStart();
+
+    getDetail(id);
     sliderLayout.startAutoCycle();
   }
 
   @Override
   protected void onStop() {
     super.onStop();
+
+    if (registration != null) {
+      registration.remove();
+    }
     sliderLayout.stopAutoCycle();
   }
 

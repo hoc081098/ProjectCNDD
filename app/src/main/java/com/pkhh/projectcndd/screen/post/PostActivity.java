@@ -246,7 +246,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
-    final Intent intent = new Intent();
+    final Intent intent = new Intent(this, PostIntentService.class);
     intent.putExtra("room", getRoom(firestore, uid));
     intent.putExtra("uris", new ArrayList<>(mAddPhotoFragment.getDataOutput().getUris()));
     PostIntentService.enqueue(this, intent);

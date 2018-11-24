@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,10 +18,22 @@ import com.daimajia.slider.library.Transformers.AccordionTransformer;
 import com.daimajia.slider.library.Transformers.BackgroundToForegroundTransformer;
 import com.daimajia.slider.library.Transformers.BaseTransformer;
 import com.daimajia.slider.library.Transformers.CubeInTransformer;
+import com.daimajia.slider.library.Transformers.DefaultTransformer;
+import com.daimajia.slider.library.Transformers.DepthPageTransformer;
+import com.daimajia.slider.library.Transformers.FadeTransformer;
 import com.daimajia.slider.library.Transformers.FlipHorizontalTransformer;
+import com.daimajia.slider.library.Transformers.FlipPageViewTransformer;
 import com.daimajia.slider.library.Transformers.RotateDownTransformer;
+import com.daimajia.slider.library.Transformers.RotateUpTransformer;
+import com.daimajia.slider.library.Transformers.StackTransformer;
+import com.daimajia.slider.library.Transformers.TabletTransformer;
+import com.daimajia.slider.library.Transformers.ZoomInTransformer;
+import com.daimajia.slider.library.Transformers.ZoomOutSlideTransformer;
+import com.daimajia.slider.library.Transformers.ZoomOutTransformer;
+import com.google.android.material.textfield.TextInputLayout;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
+import com.pkhh.projectcndd.screen.search.SearchActivity;
 import com.squareup.picasso.Picasso;
 
 import java.lang.annotation.Retention;
@@ -39,6 +52,8 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
@@ -141,9 +156,11 @@ class RoomItem implements HomeListItem {
 
 class BannerItem implements HomeListItem {
   final List<ImageAndDescriptionBanner> images;
+  final CharSequence selectedProvinceName;
 
-  BannerItem(List<ImageAndDescriptionBanner> images) {
+  BannerItem(List<ImageAndDescriptionBanner> images, CharSequence selectedProvinceName) {
     this.images = images;
+    this.selectedProvinceName = selectedProvinceName;
   }
 
   @Override
@@ -151,12 +168,12 @@ class BannerItem implements HomeListItem {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     BannerItem that = (BannerItem) o;
-    return Objects.equals(images, that.images);
+    return Objects.equals(images, that.images) && Objects.equals(selectedProvinceName, that.selectedProvinceName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(images);
+    return Objects.hash(images, selectedProvinceName);
   }
 }
 
@@ -165,7 +182,7 @@ class SeeAll implements HomeListItem {
   public static final int CREATED_AT_DESCENDING = 3;
 
   @IntDef(value = {CREATED_AT_DESCENDING, COUNT_VIEW_DESCENDING})
-  @interface  QueryDirection {}
+  @interface QueryDirection {}
 
   @QueryDirection final int queryDirection;
 
@@ -194,7 +211,10 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
   @NonNull
   private final Function1<String, Void> onAddToOrRemoveFromSavedRooms;
 
-  HomeAdapter(@NonNull Function1<String, Void> onAddToOrRemoveFromSavedRooms) {
+  @NonNull
+  private final Function0<Void> onChangeLocationClick;
+
+  HomeAdapter(@NonNull Function1<String, Void> onAddToOrRemoveFromSavedRooms, @NonNull Function0<Void> onChangeLocationClick) {
     super(new DiffUtil.ItemCallback<HomeListItem>() {
       @Override
       public boolean areItemsTheSame(@NonNull HomeListItem oldItem, @NonNull HomeListItem newItem) {
@@ -205,7 +225,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
           return Objects.equals(((HeaderItem) oldItem).title, ((HeaderItem) newItem).title);
         }
         if (oldItem instanceof BannerItem && newItem instanceof BannerItem) {
-          return Objects.equals(((BannerItem) oldItem).images, ((BannerItem) newItem).images);
+          return oldItem.equals(newItem);
         }
         if (oldItem instanceof SeeAll && newItem instanceof SeeAll) {
           return Objects.equals(((SeeAll) oldItem).queryDirection, ((SeeAll) newItem).queryDirection);
@@ -219,6 +239,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
       }
     });
     this.onAddToOrRemoveFromSavedRooms = onAddToOrRemoveFromSavedRooms;
+    this.onChangeLocationClick = onChangeLocationClick;
   }
 
   @Override
@@ -272,21 +293,49 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     public abstract void bind(HomeListItem item);
   }
 
-  static class HomeBannerVH extends VH {
-    private static final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
+  class HomeBannerVH extends VH {
+    private final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
         new AccordionTransformer(),
         new BackgroundToForegroundTransformer(),
         new CubeInTransformer(),
         new FlipHorizontalTransformer(),
-        new RotateDownTransformer()
+        new FlipPageViewTransformer(),
+        new FadeTransformer(),
+        new DepthPageTransformer(),
+        new DefaultTransformer(),
+        new CubeInTransformer(),
+        new RotateDownTransformer(),
+        new RotateUpTransformer(),
+        new StackTransformer(),
+        new TabletTransformer(),
+        new ZoomInTransformer(),
+        new ZoomOutSlideTransformer(),
+        new ZoomOutTransformer()
     };
+    private final Random random = new Random();
 
-    @BindView(R.id.slider_layout)
-    SliderLayout sliderLayout;
+    @BindView(R.id.slider_layout) SliderLayout sliderLayout;
+    @BindView(R.id.button_change_loc) Button buttonChangeLocation;
+    @BindView(R.id.edit_text_search) TextInputLayout textInputLayout;
 
     public HomeBannerVH(@NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
+      textInputLayout.getEditText().setKeyListener(null);
+    }
+
+    @OnClick({R.id.button_change_loc, R.id.edit_text_search})
+    public void onClick(View v) {
+      if (v.getId() == R.id.edit_text_search) {
+
+        final Context context = v.getContext();
+        context.startActivity(new Intent(context, SearchActivity.class));
+
+      } else if (v.getId() == R.id.button_change_loc) {
+
+        onChangeLocationClick.invoke();
+
+      }
     }
 
     @Override
@@ -295,9 +344,12 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
         throw new IllegalStateException("HomeBannerVH::bind only accept parameters type BannerItem");
       }
       Log.d("@@@", "HomeBannerVH::bind");
+      final BannerItem bannerItem = (BannerItem) item;
+
+      buttonChangeLocation.setText(bannerItem.selectedProvinceName);
+
       sliderLayout.removeAllSliders();
-      sliderLayout.setPagerTransformer(true, TRANSFORMERS[new Random().nextInt(TRANSFORMERS.length)]);
-      Stream.of(((BannerItem) item).images)
+      Stream.of(bannerItem.images)
           .map((imageAndDescription) -> new TextSliderView(itemView.getContext())
               .description(imageAndDescription.description)
               .image(imageAndDescription.image)
@@ -306,6 +358,8 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
               })
               .setScaleType(BaseSliderView.ScaleType.Fit))
           .forEach(sliderLayout::addSlider);
+
+      sliderLayout.setPagerTransformer(true, TRANSFORMERS[random.nextInt(TRANSFORMERS.length)]);
     }
   }
 

@@ -232,20 +232,20 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
 
   private void resetWardText() {
     getDataOutput().setWardId(null);
-    mTextViewWardName.setText(getString(R.string.selecte_ward));
+    mTextViewWardName.setText(getString(R.string.select_ward));
     mTextViewWardName.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorError));
   }
 
   private void resetProvinceText() {
     getDataOutput().setProvinceId(null);
-    mTextViewProvinceName.setText(getString(R.string.selecte_ward));
+    mTextViewProvinceName.setText(getString(R.string.select_ward));
     mTextViewProvinceName.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorError));
   }
 
   private void resetDistrictText() {
     getDataOutput().setDistrictName(null);
     getDataOutput().setDistrictId(null);
-    mTextViewDistrictName.setText(getString(R.string.selecte_ward));
+    mTextViewDistrictName.setText(getString(R.string.select_ward));
     mTextViewDistrictName.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorError));
   }
 

@@ -13,39 +13,42 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static com.annimon.stream.Stream.of;
 
-public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-  static final int TYPE_LOAD_MORE = 1;
-  static final int TYPE_FIREBASE_MODEL_ITEM = 2;
+
+public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
+  protected static final int TYPE_LOAD_MORE = 1;
+  protected static final int TYPE_FIREBASE_MODEL_ITEM = 2;
   private static final Object LOAD_MORE_ITEM = new Object();
-  private final int pageSize;
+
   private final Query query;
   private final Class<T> tClass;
+  private SnapshotParser<T> snapshotParser;
 
-  private @Nullable
-  DocumentSnapshot lastVisible;
-  private @NonNull
-  List<Object> list = new ArrayList<>();
+  @Nullable private DocumentSnapshot lastVisible;
+  @NonNull private List<Object> list = new ArrayList<>();
 
   private boolean isLoading = false;
   private boolean isLastItemReached = false;
   private boolean hasError = false;
+
+  private final int pageSize;
   private double visibleThreshold;
-  private SnapshotParser<T> snapshotParser;
 
 
-  MyFirebaseLoadMoreAdapter(@NonNull Query query, int pageSize, @NonNull RecyclerView recyclerView,
-                            @NonNull Class<T> tClass) {
-    this(query, pageSize, recyclerView, tClass, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, tClass));
-  }
-
-  MyFirebaseLoadMoreAdapter(@NonNull Query query, int pageSize, @NonNull RecyclerView recyclerView,
-                            @NonNull Class<T> tClass, @NonNull SnapshotParser<T> snapshotParser) {
+  public MyFirebaseLoadMoreAdapter(
+      @NonNull Query query,
+      @NonNull Class<T> tClass,
+      @NonNull SnapshotParser<T> snapshotParser,
+      int pageSize,
+      int visibleThreshold,
+      @NonNull RecyclerView recyclerView
+  ) {
 
     this.pageSize = pageSize;
     this.query = query;
     this.tClass = tClass;
-    this.visibleThreshold = pageSize;
+    this.visibleThreshold = visibleThreshold;
     this.snapshotParser = snapshotParser;
 
     final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
@@ -53,12 +56,16 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
       throw new IllegalStateException("Not implementation");
     }
     final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+
+
     recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
       @Override
       public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
         int itemCount = linearLayoutManager.getItemCount();
-        if (lastVisible != null && !isLoading
+
+        if (lastVisible != null &&
+            !isLoading
             && lastVisibleItemPosition + visibleThreshold >= itemCount
             && !hasError && !isLastItemReached) {
           loadMore();
@@ -92,7 +99,7 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
         .limit(pageSize)
         .get()
         .addOnSuccessListener(queryDocumentSnapshots -> {
-          final List<T> firebaseModels = com.annimon.stream.Stream.of(queryDocumentSnapshots.getDocuments())
+          final List<T> firebaseModels = of(queryDocumentSnapshots.getDocuments())
               .map(snapshotParser::parseSnapshot)
               .toList();
 
@@ -159,5 +166,13 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel> extends
   @Override
   public int getItemCount() {
     return list.size();
+  }
+
+  public double getVisibleThreshold() {
+    return visibleThreshold;
+  }
+
+  public void setVisibleThreshold(double visibleThreshold) {
+    this.visibleThreshold = visibleThreshold;
   }
 }

@@ -1,8 +1,14 @@
 package com.pkhh.projectcndd.screen.home;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +31,9 @@ import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.screen.saved.SavedRoomsActivity;
 import com.squareup.picasso.Picasso;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -37,7 +46,8 @@ import static com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity.EXTRA_U
 import static com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity.EXTRA_USER_ID;
 import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
-public class MainActivity extends AppCompatActivity
+public class
+MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
   public static final int REQUEST_CODE_POST = 1;
   public static final int REQUEST_CODE_LOGIN_SAVED = 2;
@@ -87,6 +97,24 @@ public class MainActivity extends AppCompatActivity
               R.anim.slide_in_left, R.anim.slide_out_right)
           .add(R.id.main_content, new MotelRoomsListFragment(), MotelRoomsListFragment.TAG)
           .commit();
+    }
+
+    printHashKey(this);
+  }
+
+  public static void printHashKey(Context pContext) {
+    try {
+      PackageInfo info = pContext.getPackageManager().getPackageInfo("com.pkhh.projectcndd", PackageManager.GET_SIGNATURES);
+      for (Signature signature : info.signatures) {
+        MessageDigest md = MessageDigest.getInstance("SHA");
+        md.update(signature.toByteArray());
+        String hashKey = new String(Base64.encode(md.digest(), 0));
+        Log.i("##printHashKey", "printHashKey() Hash Key: " + hashKey);
+      }
+    } catch (NoSuchAlgorithmException e) {
+      Log.e("##printHashKey", "printHashKey()", e);
+    } catch (Exception e) {
+      Log.e("##printHashKey", "printHashKey()", e);
     }
   }
 
