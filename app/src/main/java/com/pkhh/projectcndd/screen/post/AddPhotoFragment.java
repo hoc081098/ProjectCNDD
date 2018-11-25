@@ -31,11 +31,8 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
 
   private ImageAdapter mAdapter;
 
-  @BindView(R.id.button_select_take_photo)
-  View mSelectTakeImage;
-
-  @BindView(R.id.recycler_img)
-  RecyclerView mRecyclerViewImages;
+  @BindView(R.id.button_select_take_photo) View mSelectTakeImage;
+  @BindView(R.id.recycler_img) RecyclerView mRecyclerViewImages;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

@@ -74,8 +74,8 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   private static final int INTERVAL = 3_000;
   private static final int FASTEST_INTERVAL = 1_000;
   private static final float SMALLEST_DISPLACEMENT = 10f;
-  @Nullable
-  private GoogleMap mMap;
+
+  @Nullable private GoogleMap mMap;
   private EditText mEditTextSearchBox;
   private View mImageCurrentLocation;
   private View mLayoutRelativePosition;

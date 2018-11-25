@@ -24,8 +24,7 @@ public class CommonRoomVH extends RecyclerView.ViewHolder {
   @BindView(R.id.text_room_price) TextView textPrice;
   @BindView(R.id.text_room_address) TextView textAddress;
 
-
-  public CommonRoomVH(@NonNull View itemView, RecyclerOnClickListener onItemClick) {
+  public CommonRoomVH(@NonNull View itemView, final RecyclerOnClickListener onItemClick) {
     super(itemView);
     ButterKnife.bind(this, itemView);
     itemView.setOnClickListener(v -> {
@@ -52,6 +51,9 @@ public class CommonRoomVH extends RecyclerView.ViewHolder {
 
     textTitle.setText(item.getTitle());
     textAddress.setText(item.getAddress());
-    textPrice.setText(PRICE_FORMAT.format(item.getPrice()) + "đ/tháng");
+    textPrice.setText(
+        itemView.getContext()
+            .getString(R.string.price_vnd_per_month, PRICE_FORMAT.format(item.getPrice()))
+    );
   }
 }

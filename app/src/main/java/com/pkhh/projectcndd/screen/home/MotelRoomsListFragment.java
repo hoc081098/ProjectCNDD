@@ -100,12 +100,16 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
 
     firestore.collection(PROVINCES_NAME_COLLECION)
-        .get()
-        .addOnSuccessListener(requireActivity(), queryDocumentSnapshots -> {
-          provinces = querySnapshotToObjects(queryDocumentSnapshots, Province.class);
-          provinceMap = of(provinces).collect(toMap(FirebaseModel::getId, i -> i));
-          provinceNames = of(provinces).map(Province::getName).collect(toList());
-          provinceIds = of(provinces).map(FirebaseModel::getId).toList();
+        .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
+          if (e != null) {
+            return;
+          }
+          if (queryDocumentSnapshots != null) {
+            provinces = querySnapshotToObjects(queryDocumentSnapshots, Province.class);
+            provinceMap = of(provinces).collect(toMap(FirebaseModel::getId, i -> i));
+            provinceNames = of(provinces).map(Province::getName).collect(toList());
+            provinceIds = of(provinces).map(FirebaseModel::getId).toList();
+          }
         });
   }
 
@@ -275,7 +279,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
           final SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance(requireContext());
           sharedPrefUtil.saveSelectedProvinceId(selectedProvinceId);
-          sharedPrefUtil.saveSelectedProvinceName(selectedProvinceId);
+          sharedPrefUtil.saveSelectedProvinceName(selectedProvinceName);
         })
         .setNegativeButton("Cancel", (dialog, __) -> dialog.dismiss())
         .show();

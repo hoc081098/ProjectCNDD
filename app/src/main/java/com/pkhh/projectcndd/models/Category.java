@@ -7,9 +7,7 @@ import java.util.Objects;
 
 public class Category extends FirebaseModel {
   private String name;
-
   private Date createdAt;
-
   private Date updatedAt;
 
   public Category() {

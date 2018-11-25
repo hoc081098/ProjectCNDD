@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/D:/Admin/Other/android-studio-ide-183.5081642-windows/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_home_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/D:/Admin/Other/android-studio-ide-183.5081642-windows/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_bookmark_border_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_home_primary_dark_24dp" />
+                            <entry key="color" value="424242" />
+                            <entry key="outputName" value="ic_bookmark_border_grey_24dp" />
                             <entry key="sourceFile" value="C:\Users\PeterHoc" />
                           </map>
                         </option>

@@ -21,7 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
-import com.pkhh.projectcndd.service.PostIntentService;
+import com.pkhh.projectcndd.service.PostRoomJobIntentService;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.DepthPageTransformer;
 
@@ -246,10 +246,10 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     final String uid = requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
-    final Intent intent = new Intent(this, PostIntentService.class);
+    final Intent intent = new Intent(this, PostRoomJobIntentService.class);
     intent.putExtra("room", getRoom(firestore, uid));
     intent.putExtra("uris", new ArrayList<>(mAddPhotoFragment.getDataOutput().getUris()));
-    PostIntentService.enqueue(this, intent);
+    PostRoomJobIntentService.enqueue(this, intent);
 
     finish();
   }

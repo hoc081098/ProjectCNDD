@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.tasks.Task;
@@ -31,12 +33,16 @@ import androidx.core.app.NotificationCompat;
 
 import static java.util.Objects.requireNonNull;
 
-public class PostIntentService extends JobIntentService {
-
+public class PostRoomJobIntentService extends JobIntentService {
   public static final int JOB_ID = 10;
+  private final Handler mHandler = new Handler();
+
+  private void toast(final CharSequence text) {
+    mHandler.post(() -> Toast.makeText(PostRoomJobIntentService.this, text, Toast.LENGTH_SHORT).show());
+  }
 
   public static void enqueue(Context context, Intent intent) {
-    enqueueWork(context, PostIntentService.class, JOB_ID, intent);
+    enqueueWork(context, PostRoomJobIntentService.class, JOB_ID, intent);
   }
 
   @Override
@@ -50,7 +56,7 @@ public class PostIntentService extends JobIntentService {
     final List<Uri> imageUris = intent.getParcelableArrayListExtra("uris");
 
     try {
-      showNotification("Đang đăng bài", "Xin chờ...");
+      showNotification(getString(R.string.posting_room), getString(R.string.please_wait), 0);
 
       //*******************************************************************************************
       final DocumentReference documentReference = Tasks.await(
@@ -58,7 +64,7 @@ public class PostIntentService extends JobIntentService {
               .getInstance()
               .collection(Constants.ROOMS_NAME_COLLECION).add(map)
       );
-      showNotification("Đăng bài thành công", "1/3");
+      showNotification(getString(R.string.post_room_successfully), "1/3", 20);
       Log.d("@@@", "documentReference=" + documentReference);
       //*******************************************************************************************
 
@@ -80,7 +86,7 @@ public class PostIntentService extends JobIntentService {
       final List<Object> uris = Tasks.await(
           Tasks.whenAllSuccess(uploadImagesTasks)
       );
-      showNotification("Upload xong hình ảnh", "2/3");
+      showNotification(getString(R.string.upload_image_done), "2/3", 80);
       Log.d("@@@", "uris=" + uris);
       //*******************************************************************************************
 
@@ -92,18 +98,23 @@ public class PostIntentService extends JobIntentService {
       Tasks.await(
           documentReference.update("images", FieldValue.arrayUnion(downloadUrls))
       );
-      showNotification("Đăng bài thành công", "3/3, kiểm tra trong phần quản lý bài đã đăng");
+      showNotification(getString(R.string.post_room_successfully),
+          "3/3, kiểm tra trong phần quản lý bài đã đăng", 100);
       Log.d("@@@", "Post done");
       //*******************************************************************************************
 
-
+      // toast
+      toast(getString(R.string.post_room_successfully));
     } catch (ExecutionException | InterruptedException e) {
       Log.d("@@@", e.getMessage(), e);
-      showNotification("Đăng bài thất bại", e.getMessage());
+      showNotification(getString(R.string.post_room_failed), e.getMessage(), 100);
+
+      // toast
+      toast(getString(R.string.post_room_failed));
     }
   }
 
-  private void showNotification(CharSequence title, CharSequence content) {
+  private void showNotification(CharSequence title, CharSequence content, int progress) {
     final Notification notification = new NotificationCompat.Builder(getApplicationContext(), "???")
         .setAutoCancel(true)
         .setWhen(System.currentTimeMillis())
@@ -111,6 +122,7 @@ public class PostIntentService extends JobIntentService {
         .setContentText(content)
         .setSmallIcon(R.mipmap.ic_launcher_round)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setProgress(100, progress, false)
         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
         .build();
     ((NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE))

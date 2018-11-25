@@ -29,29 +29,14 @@ import static androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY;
 public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitleSizeDescriptionFragmentOutput> {
   private static final int MIN_LENGTH_OF_TITLE = 10;
 
-  @BindView(R.id.text_input_price)
-  TextInputLayout textInputPrice;
-
-  @BindView(R.id.text_price)
-  TextView textPrice;
-
-  @BindView(R.id.text_input_size)
-  TextInputLayout textInputSize;
-
-  @BindView(R.id.text_square_meter)
-  TextView textSquareMeter;
-
-  @BindView(R.id.text_input_title)
-  TextInputLayout textInputTitle;
-
-  @BindView(R.id.chip_suggest_title)
-  Chip chipSuggestTitle;
-
-  @BindView(R.id.text_input_description)
-  TextInputLayout textInputDescription;
-
-  @BindView(R.id.text_input_phone)
-  TextInputLayout textInputPhone;
+  @BindView(R.id.text_input_price) TextInputLayout textInputPrice;
+  @BindView(R.id.text_price) TextView textPrice;
+  @BindView(R.id.text_input_size) TextInputLayout textInputSize;
+  @BindView(R.id.text_square_meter) TextView textSquareMeter;
+  @BindView(R.id.text_input_title) TextInputLayout textInputTitle;
+  @BindView(R.id.chip_suggest_title) Chip chipSuggestTitle;
+  @BindView(R.id.text_input_description) TextInputLayout textInputDescription;
+  @BindView(R.id.text_input_phone) TextInputLayout textInputPhone;
 
   private EditText priceEditText;
   private boolean isPriceValid;

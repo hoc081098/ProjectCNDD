@@ -30,7 +30,7 @@
         app:cardElevation="12dp"
         app:cardPreventCornerOverlap="false"
         app:cardUseCompatPadding="true"
-        app:contentPadding="4dp"
+        app:contentPadding="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,33 +41,23 @@
             android:layout_height="match_parent">
 
 
-            <com.google.android.material.textfield.TextInputLayout
+            <TextView
                 android:id="@+id/edit_text_search"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                app:boxBackgroundMode="filled"
-                app:boxStrokeColor="@color/colorAccent"
-                app:boxStrokeWidth="1dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_search_round_shape"
+                android:fontFamily="@font/nunito_sans"
+                android:padding="16dp"
+                android:text="@string/search_ellipsis"
+                android:textColor="#424242"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/button_change_loc"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_change_loc">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_sans"
-                    android:padding="12dp"
-                    android:text="Tim kiếm ..."
-                    android:textColor="#424242"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
+                app:layout_constraintTop_toBottomOf="@+id/button_change_loc" />
 
 
             <com.google.android.material.button.MaterialButton

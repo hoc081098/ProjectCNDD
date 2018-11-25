@@ -30,20 +30,26 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <!-- Facebook -->
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"
+            tools:replace="android:value" />
+
         <activity
             android:name="com.facebook.FacebookActivity"
-            android:configChanges= "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
-        <activity 
+        <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
-                <intent-filter>
-                    <action android:name="android.intent.action.VIEW" />
-                    <category android:name="android.intent.category.DEFAULT" />
-                    <category android:name="android.intent.category.BROWSABLE" />
-                    <data android:scheme="@string/fb_login_protocol_scheme" />
-                </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
         </activity>
 
 
@@ -86,9 +92,8 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".screen.home.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".screen.SplashScreen"
+            android:theme="@style/AppTheme.SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -132,10 +137,19 @@
             android:name=".screen.detail.PhotoSlideActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Dialog" />
-        <activity android:name=".screen.search.SearchActivity" />
+
+        <activity
+            android:name=".screen.search.SearchActivity"
+            android:label="@string/search"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".screen.home.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".service.PostIntentService"
+            android:name=".service.PostRoomJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>

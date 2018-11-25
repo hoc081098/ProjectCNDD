@@ -5,15 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.firestore.FieldValue;
@@ -26,25 +28,28 @@ import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 import static com.pkhh.projectcndd.utils.FirebaseUtil.getMessageFromFirebaseAuthExceptionErrorCode;
+import static java.util.Objects.requireNonNull;
 
-public class RegisterFragment extends Fragment implements View.OnClickListener {
+public class RegisterFragment extends Fragment {
   private static final int CHOOSE_AVATAR_IMAGE_REQUEST_CODE = 1;
 
-  private ImageView mImageAvatar;
-  private EditText mEditName;
-  private EditText mEditEmail;
-  private EditText mEditPassword;
-  private Button mButtonRegister;
-  private View mButtonBackToLogin;
+  @BindView(R.id.image_avatar) ImageView mImageAvatar;
+  @BindView(R.id.edit_full_name) TextInputLayout mEditName;
+  @BindView(R.id.edit_email) TextInputLayout mEditEmail;
+  @BindView(R.id.edit_password) TextInputLayout mEditPassword;
+  @BindView(R.id.button_register) Button mButtonRegister;
   private ProgressDialog mProgressDialog;
 
   private FirebaseAuth mFirebaseAuth;
@@ -52,8 +57,8 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
   private FirebaseStorage mFirebaseStorage;
 
   private Listener mListener;
-  @Nullable
-  private Uri mSelectedImageUri;
+  @Nullable private Uri mSelectedImageUri;
+  private Unbinder unbinder;
 
   @Override
   public void onAttach(Context context) {
@@ -70,29 +75,81 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    unbinder = ButterKnife.bind(this, view);
 
-    Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Đăng kí");
-    initViews(view);
+    initView();
 
     mFirebaseAuth = FirebaseAuth.getInstance();
     mFirebaseFirestore = FirebaseFirestore.getInstance();
     mFirebaseStorage = FirebaseStorage.getInstance();
-
-    mButtonRegister.setOnClickListener(this);
-    mButtonBackToLogin.setOnClickListener(this);
-    mImageAvatar.setOnClickListener(this);
   }
 
-  private void initViews(@NonNull View view) {
-    mEditName = view.findViewById(R.id.edit_full_name);
-    mEditEmail = view.findViewById(R.id.edit_email);
-    mEditPassword = view.findViewById(R.id.edit_password);
-    mButtonRegister = view.findViewById(R.id.button_register);
-    mButtonBackToLogin = view.findViewById(R.id.button_back_to_login);
-    mImageAvatar = view.findViewById(R.id.image_avatar);
+  private void initView() {
+    requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Đăng kí");
+
+    requireNonNull(mEditName.getEditText()).addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        final String name = s.toString();
+        if (name.length() < 3) {
+          mEditName.setError(getString(R.string.min_length_name_is_3));
+        } else {
+          mEditName.setError(null);
+        }
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) { }
+    });
+    requireNonNull(mEditEmail.getEditText()).addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        final String email = s.toString();
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+          mEditEmail.setError(getString(R.string.invalid_email_address));
+        } else {
+          mEditEmail.setError(null);
+        }
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) { }
+    });
+    requireNonNull(mEditPassword.getEditText()).addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        final String password = s.toString();
+        if (password.length() < 6) {
+          mEditPassword.setError(getString(R.string.min_length_password_is_6));
+        } else {
+          mEditPassword.setError(null);
+        }
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) { }
+    });
+
+    requireNonNull(mEditName.getEditText()).setText("");
+    requireNonNull(mEditEmail.getEditText()).setText("");
+    requireNonNull(mEditPassword.getEditText()).setText("");
   }
 
-  @Override
+
+  @OnClick({
+      R.id.button_register,
+      R.id.button_back_to_login,
+      R.id.image_avatar
+  })
   public void onClick(@NonNull View v) {
     switch (v.getId()) {
       case R.id.button_register:
@@ -112,21 +169,18 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
   private void onRegister() {
     boolean isValid = true;
 
-    final String email = mEditEmail.getText().toString();
+    final String email = requireNonNull(mEditEmail.getEditText()).getText().toString();
     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-      mEditEmail.setError("Địa chỉ email không hợp lệ!");
       isValid = false;
     }
 
-    final String password = mEditPassword.getText().toString();
+    final String password = requireNonNull(mEditPassword.getEditText()).getText().toString();
     if (password.length() < 6) {
-      mEditPassword.setError("Mật khẩu ít nhất 6 kí tự!");
       isValid = false;
     }
 
-    final String name = mEditName.getText().toString();
+    final String name = requireNonNull(mEditName.getEditText()).getText().toString();
     if (name.length() < 3) {
-      mEditName.setError("Tên tối thiểu 3 kí tự!");
       isValid = false;
     }
 
@@ -135,13 +189,14 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     }
 
     mProgressDialog = new ProgressDialog(requireContext());
-    mProgressDialog.setTitle("Đang xử lý");
-    mProgressDialog.setMessage("Vui lòng chờ...");
+    mProgressDialog.setTitle(getString(R.string.processing));
+    mProgressDialog.setMessage(getString(R.string.please_wait));
     mProgressDialog.show();
+    mProgressDialog.setCancelable(false);
     mButtonRegister.setEnabled(false);
 
     mFirebaseAuth.createUserWithEmailAndPassword(email, password)
-        .addOnSuccessListener(authResult -> {
+        .addOnSuccessListener(requireActivity(), authResult -> {
           final String uid = authResult.getUser().getUid();
 
           final Map<String, Object> user = new HashMap<>();
@@ -159,7 +214,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
             uploadAvatarToStorage(uid, user, mSelectedImageUri);
           }
         })
-        .addOnFailureListener(this::onError);
+        .addOnFailureListener(requireActivity(), this::onError);
   }
 
   private void uploadAvatarToStorage(String uid, Map<String, Object> user, Uri uri) {
@@ -167,13 +222,13 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     reference.putFile(uri)
         .continueWithTask(task -> {
           if (!task.isSuccessful()) {
-            throw Objects.requireNonNull(task.getException());
+            throw requireNonNull(task.getException());
           }
           return reference.getDownloadUrl();
         })
-        .addOnCompleteListener(task -> {
+        .addOnCompleteListener(requireActivity(), task -> {
           if (task.isSuccessful()) {
-            user.put("avatar", task.getResult().toString());
+            user.put("avatar", requireNonNull(task.getResult()).toString());
             insertUserToFirestore(uid, user);
           } else {
             onError(task.getException());
@@ -187,19 +242,19 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
     String message = e instanceof FirebaseAuthException
         ? getMessageFromFirebaseAuthExceptionErrorCode(((FirebaseAuthException) e).getErrorCode())
-        : e != null ? e.getMessage() : "Lỗi chưa xác định";
+        : e != null ? e.getMessage() : getString(R.string.undefined_error);
     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
   }
 
   private void insertUserToFirestore(String uid, Map<String, Object> user) {
     mFirebaseFirestore.document(Constants.USERS_NAME_COLLECION + "/" + uid)
         .set(user)
-        .addOnSuccessListener(documentReference -> {
+        .addOnSuccessListener(requireActivity(), documentReference -> {
           mProgressDialog.dismiss();
           mButtonRegister.setEnabled(true);
           mListener.onRegisterSuccessfully();
         })
-        .addOnFailureListener(this::onError);
+        .addOnFailureListener(requireActivity(), this::onError);
   }
 
   @Override
@@ -221,6 +276,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
   @Override
   public void onDestroyView() {
     super.onDestroyView();
+    unbinder.unbind();
     if (mProgressDialog != null && mProgressDialog.isShowing()) {
       mProgressDialog.dismiss();
     }

@@ -58,7 +58,7 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
   @Override
   public void onLoginSuccessfully() {
     isSuccessfully = true;
-    Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, getString(R.string.login_successfully), Toast.LENGTH_SHORT).show();
     finish();
   }
 
@@ -70,7 +70,7 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
   @Override
   public void onRegisterSuccessfully() {
     isSuccessfully = true;
-    Toast.makeText(this, "Đăng kí thành công", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, getString(R.string.register_successfully), Toast.LENGTH_SHORT).show();
     finish();
   }
 

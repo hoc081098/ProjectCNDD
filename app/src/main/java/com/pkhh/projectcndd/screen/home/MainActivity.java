@@ -16,9 +16,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.login.LoginManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.pkhh.projectcndd.R;
@@ -51,6 +53,7 @@ MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
   public static final int REQUEST_CODE_POST = 1;
   public static final int REQUEST_CODE_LOGIN_SAVED = 2;
+
   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
   private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -60,10 +63,8 @@ MainActivity extends AppCompatActivity
   private ImageView imageAvatar;
   private NavigationView navigationView;
 
-  @Nullable
-  private User user;
-  @Nullable
-  private ListenerRegistration listenerRegistration;
+  @Nullable private User user;
+  @Nullable private ListenerRegistration listenerRegistration;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,10 +128,10 @@ MainActivity extends AppCompatActivity
     textEmail = headerView.findViewById(R.id.text_email);
     imageAvatar = headerView.findViewById(R.id.image_avatar);
     headerView.findViewById(R.id.nav_header).setOnClickListener(__ -> {
-      final Intent intent = new Intent(this, UserProfileActivity.class);
-      if (user != null && firebaseAuth.getCurrentUser() != null) {
-        intent.putExtra(EXTRA_USER_ID, user.getId());
-        intent.putExtra(EXTRA_USER_FULL_NAME, user.getFullName());
+      if (firebaseAuth.getCurrentUser() != null) {
+        final Intent intent = new Intent(this, UserProfileActivity.class);
+        intent.putExtra(EXTRA_USER_ID, user != null ? user.getId() : null);
+        intent.putExtra(EXTRA_USER_FULL_NAME, user != null ? user.getFullName() : null);
         startActivity(intent);
       } else {
         Toast.makeText(this, "Bạn phải đăng nhập trước", Toast.LENGTH_SHORT).show();
@@ -141,6 +142,9 @@ MainActivity extends AppCompatActivity
     navigationView.getMenu().findItem(R.id.nav_post).setCheckable(false);
     navigationView.getMenu().findItem(R.id.nav_saved).setCheckable(false);
     navigationView.getMenu().findItem(R.id.nav_login).setCheckable(false);
+
+    textName.setText(getString(R.string.loading));
+    textEmail.setText(getString(R.string.loading));
   }
 
   @Override
@@ -221,11 +225,11 @@ MainActivity extends AppCompatActivity
 
     if (firebaseAuth.getCurrentUser() == null) {
       new AlertDialog.Builder(this)
-          .setTitle("Yêu cầu đăng nhập")
+          .setTitle(getString(R.string.require_login))
           .setIcon(R.drawable.ic_exit_to_app_black_24dp)
-          .setMessage("Để có thể xem các nhà trọ đã lưu, yêu cầu bạn phải đăng nhập!")
-          .setNegativeButton("Hủy", (dialog, __) -> dialog.dismiss())
-          .setPositiveButton("Ok", (dialog, __) -> {
+          .setMessage(getString(R.string.require_login_to_see_saved_room))
+          .setNegativeButton(getString(R.string.cancel), (dialog, __) -> dialog.dismiss())
+          .setPositiveButton(getString(R.string.ok), (dialog, __) -> {
             dialog.dismiss();
 
             final Intent intent = new Intent(this, LoginRegisterActivity.class);
@@ -242,12 +246,20 @@ MainActivity extends AppCompatActivity
       startActivity(new Intent(this, LoginRegisterActivity.class));
     } else {
       new AlertDialog.Builder(this)
-          .setTitle("Đăng xuất")
+          .setTitle(getString(R.string.logout))
           .setIcon(R.drawable.ic_exit_to_app_black_24dp)
-          .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
-          .setNegativeButton("Không", (dialog, __) -> dialog.dismiss())
-          .setPositiveButton("Có", (dialog, __) -> {
+          .setMessage(getString(R.string.sure_logout))
+          .setNegativeButton(getString(R.string.no), (dialog, __) -> dialog.dismiss())
+          .setPositiveButton(getString(R.string.yes), (dialog, __) -> {
             dialog.dismiss();
+
+            final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            for (UserInfo userInfo : currentUser.getProviderData()) {
+              if ("facebook.com".equals(userInfo.getProviderId())) {
+                LoginManager.getInstance().logOut();
+              }
+            }
+
             firebaseAuth.signOut();
           })
           .show();
@@ -258,11 +270,11 @@ MainActivity extends AppCompatActivity
     if (firebaseAuth.getCurrentUser() == null) {
 
       new AlertDialog.Builder(this)
-          .setTitle("Yêu cầu đăng nhập")
+          .setTitle(getString(R.string.require_login))
           .setIcon(R.drawable.ic_exit_to_app_black_24dp)
-          .setMessage("Để hạn chế spam, lừa đảo, chức năng này yêu cầu bạn phải đăng nhập!")
-          .setNegativeButton("Hủy", (dialog, __) -> dialog.dismiss())
-          .setPositiveButton("Ok", (dialog, __) -> {
+          .setMessage(getString(R.string.require_login_description))
+          .setNegativeButton(getString(R.string.cancel), (dialog, __) -> dialog.dismiss())
+          .setPositiveButton(getString(R.string.ok), (dialog, __) -> {
             dialog.dismiss();
 
             final Intent intent = new Intent(this, LoginRegisterActivity.class);
@@ -303,10 +315,10 @@ MainActivity extends AppCompatActivity
           .centerCrop()
           .noFade()
           .into(imageAvatar);
-      textName.setText("Chưa đăng nhập");
-      textEmail.setText("Chưa đăng nhập");
+      textName.setText(getString(R.string.not_sign_in));
+      textEmail.setText(getString(R.string.not_sign_in));
 
-      loginOrLogoutMenuItem.setTitle("Login");
+      loginOrLogoutMenuItem.setTitle(getString(R.string.login));
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_person_add_black_24dp);
 
       user = null;
@@ -331,7 +343,7 @@ MainActivity extends AppCompatActivity
               }
             }
           });
-      loginOrLogoutMenuItem.setTitle("Logout");
+      loginOrLogoutMenuItem.setTitle(getString(R.string.logout));
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_exit_to_app_black_24dp);
     }
   }

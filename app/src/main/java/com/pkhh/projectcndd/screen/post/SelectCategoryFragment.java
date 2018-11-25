@@ -219,8 +219,7 @@ public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput>
     return null;
   }
 
-  @BindView(R.id.recycler_category)
-  RecyclerView recyclerView;
+  @BindView(R.id.recycler_category) RecyclerView recyclerView;
   private ListenerRegistration registration;
 
   @Override

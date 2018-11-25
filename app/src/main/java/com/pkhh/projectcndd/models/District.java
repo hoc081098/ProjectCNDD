@@ -7,9 +7,7 @@ import java.util.Objects;
 
 public class District extends FirebaseModel {
   private String name;
-
   private Date createdAt;
-
   private Date updatedAt;
 
   public District() {

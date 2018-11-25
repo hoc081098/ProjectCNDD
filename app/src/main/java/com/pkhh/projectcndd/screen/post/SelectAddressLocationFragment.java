@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.pkhh.projectcndd.R;
 
@@ -247,6 +248,12 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
     getDataOutput().setDistrictId(null);
     mTextViewDistrictName.setText(getString(R.string.select_ward));
     mTextViewDistrictName.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorError));
+  }
+
+  @Override
+  public void onInvalid() {
+    super.onInvalid();
+    Snackbar.make(Objects.requireNonNull(getView()), "Hãy cung cấp đầy đủ địa chỉ", Snackbar.LENGTH_SHORT).show();
   }
 
   @NotNull

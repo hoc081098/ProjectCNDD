@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-    android:repeatCount="10"
+    android:repeatCount="12"
     android:repeatMode="reverse"
     android:shareInterpolator="true">
 
     <rotate
-        android:duration="100"
+        android:duration="150"
         android:fromDegrees="-5"
         android:pivotX="50%"
         android:pivotY="50%"
@@ -14,7 +14,7 @@
 
 
     <translate
-        android:duration="100"
+        android:duration="150"
         android:fromXDelta="-5"
         android:pivotX="50%"
         android:pivotY="50%"

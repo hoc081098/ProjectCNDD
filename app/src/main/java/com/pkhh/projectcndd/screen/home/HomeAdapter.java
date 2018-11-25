@@ -30,7 +30,6 @@ import com.daimajia.slider.library.Transformers.TabletTransformer;
 import com.daimajia.slider.library.Transformers.ZoomInTransformer;
 import com.daimajia.slider.library.Transformers.ZoomOutSlideTransformer;
 import com.daimajia.slider.library.Transformers.ZoomOutTransformer;
-import com.google.android.material.textfield.TextInputLayout;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.screen.search.SearchActivity;
@@ -293,7 +292,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     public abstract void bind(HomeListItem item);
   }
 
-  class HomeBannerVH extends VH {
+  class HomeBannerVH extends VH implements View.OnClickListener {
     private final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
         new AccordionTransformer(),
         new BackgroundToForegroundTransformer(),
@@ -316,26 +315,22 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
 
     @BindView(R.id.slider_layout) SliderLayout sliderLayout;
     @BindView(R.id.button_change_loc) Button buttonChangeLocation;
-    @BindView(R.id.edit_text_search) TextInputLayout textInputLayout;
 
     public HomeBannerVH(@NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
-      textInputLayout.getEditText().setKeyListener(null);
     }
 
+    @Override
     @OnClick({R.id.button_change_loc, R.id.edit_text_search})
     public void onClick(View v) {
-      if (v.getId() == R.id.edit_text_search) {
-
-        final Context context = v.getContext();
-        context.startActivity(new Intent(context, SearchActivity.class));
-
-      } else if (v.getId() == R.id.button_change_loc) {
-
+      if (v.getId() == R.id.button_change_loc) {
         onChangeLocationClick.invoke();
-
+        return;
       }
+
+      final Context context = v.getContext();
+      context.startActivity(new Intent(context, SearchActivity.class));
     }
 
     @Override
@@ -401,7 +396,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
 
       textDistrict.setText(room.districtName);
       textAddress.setText(room.address);
-      textPrice.setText(PRICE_FORMAT.format(room.price) + "đ/tháng");
+      textPrice.setText(itemView.getContext().getString(R.string.price_vnd_per_month, PRICE_FORMAT.format(room.price)));
       textTitle.setText(room.title);
 
       Picasso.get()

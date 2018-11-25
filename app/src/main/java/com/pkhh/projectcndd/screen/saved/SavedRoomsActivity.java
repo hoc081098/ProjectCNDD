@@ -2,13 +2,12 @@ package com.pkhh.projectcndd.screen.saved;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.annimon.stream.function.Consumer;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,49 +22,30 @@ import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static java.util.Objects.requireNonNull;
 
-class SavedRoomAdapter extends FirestoreRecyclerAdapter<MotelRoom, SavedViewHolder> {
-
-  private final RecyclerOnClickListener onClickListener;
-
-  SavedRoomAdapter(@NonNull FirestoreRecyclerOptions<MotelRoom> options, RecyclerOnClickListener onClickListener) {
-    super(options);
-    this.onClickListener = onClickListener;
-  }
-
-  @NonNull
-  @Override
-  public SavedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.saved_room_item_layout, parent, false);
-    return new SavedViewHolder(itemView, onClickListener);
-  }
-
-  @Override
-  protected void onBindViewHolder(@NonNull SavedViewHolder viewHolder, int i, @NonNull MotelRoom motelRoom) {
-    viewHolder.bind(motelRoom);
-  }
-}
-
-public final class SavedRoomsActivity extends AppCompatActivity implements RecyclerOnClickListener {
+public final class SavedRoomsActivity extends AppCompatActivity implements RecyclerOnClickListener, Consumer<Integer> {
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private final FirebaseAuth auth = FirebaseAuth.getInstance();
 
   private SavedRoomAdapter adapter;
 
-  @BindView(R.id.recycler_saved_room)
-  RecyclerView recyclerView;
+  @BindView(R.id.recycler_saved_room) RecyclerView recyclerView;
+  @BindView(R.id.progressbar) ProgressBar progressBar;
+  @BindView(R.id.empty_layout) ConstraintLayout emptyLayout;
+  @BindView(R.id.root_layout) ConstraintLayout rootLayout;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,7 +53,10 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
     setContentView(R.layout.activity_saved_room);
 
     ButterKnife.bind(this, this);
-    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+    progressBar.setIndeterminate(true);
+    progressBar.setVisibility(View.VISIBLE);
 
     setupRecyclerView();
   }
@@ -85,13 +68,13 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
 
     final Query query = firestore
         .collection(Constants.ROOMS_NAME_COLLECION)
-        .whereArrayContains("user_ids_saved", Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+        .whereArrayContains("user_ids_saved", requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
 
     final FirestoreRecyclerOptions<MotelRoom> motelRoomFirestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<MotelRoom>()
         .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
         .build();
 
-    adapter = new SavedRoomAdapter(motelRoomFirestoreRecyclerOptions, this);
+    adapter = new SavedRoomAdapter(motelRoomFirestoreRecyclerOptions, this, this);
     recyclerView.setAdapter(adapter);
     adapter.startListening();
   }
@@ -138,5 +121,19 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
         .addOnFailureListener(this, e -> {
           Snackbar.make(recyclerView.getRootView(), e.getMessage(), Snackbar.LENGTH_SHORT).show();
         });
+  }
+
+  @Override
+  public void accept(Integer count) {
+    TransitionManager.beginDelayedTransition(rootLayout);
+
+    progressBar.setVisibility(View.INVISIBLE);
+    if (count == 0) {
+      emptyLayout.setVisibility(View.VISIBLE);
+      recyclerView.setVisibility(View.INVISIBLE);
+    } else {
+      recyclerView.setVisibility(View.VISIBLE);
+      emptyLayout.setVisibility(View.INVISIBLE);
+    }
   }
 }

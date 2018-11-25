@@ -12,8 +12,7 @@ public class App extends Application {
     super.onCreate();
     if (BuildConfig.DEBUG) {
       Timber.plant(new Timber.DebugTree());
+      FirebaseFirestore.setLoggingEnabled(true);
     }
-
-    FirebaseFirestore.setLoggingEnabled(true);
   }
 }
