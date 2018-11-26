@@ -60,9 +60,10 @@ public class LoginFragment extends Fragment {
   @BindView(R.id.edit_email) TextInputLayout mEditEmail;
   @BindView(R.id.edit_password) TextInputLayout mEditPassword;
   @BindView(R.id.button_login) Button mButtonLogin;
-  @BindView(R.id.progress_bar) ProgressBar mProgressBar;
+  @BindView(R.id.progress_bar) ProgressBar mProgressBarLogin;
   @BindView(R.id.root_login_frag) ViewGroup mRootLayout;
   @BindView(R.id.fb_login_button) LoginButton fbLoginButton;
+  @BindView(R.id.progress_bar_fb) ProgressBar mProgressBarFb;
 
   private Listener mListener;
   private FirebaseAuth mFirebaseAuth;
@@ -128,7 +129,7 @@ public class LoginFragment extends Fragment {
         final String password = s.toString();
         if (password.length() < 6) {
           mEditPassword.setError(getString(R.string.min_length_password_is_6));
-        }else {
+        } else {
           mEditPassword.setError(null);
         }
       }
@@ -176,7 +177,7 @@ public class LoginFragment extends Fragment {
 
   private void handleFacebookAccessToken(AccessToken accessToken) {
     final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
-    beginTransition();
+    beginTransition(fbLoginButton, mProgressBarLogin);
 
     mFirebaseAuth.signInWithCredential(credential)
         .addOnSuccessListener(requireActivity(), authResult -> {
@@ -220,7 +221,7 @@ public class LoginFragment extends Fragment {
                           public void onTransitionEnd(@NonNull Transition transition) {
                             mListener.onLoginSuccessfully();
                           }
-                        }))
+                        }, fbLoginButton, mProgressBarLogin))
                     .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show());
               });
         })
@@ -263,7 +264,7 @@ public class LoginFragment extends Fragment {
       return;
     }
 
-    beginTransition();
+    beginTransition(mButtonLogin, mProgressBarLogin);
 
     mFirebaseAuth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener(requireActivity(), task -> {
@@ -273,7 +274,7 @@ public class LoginFragment extends Fragment {
               public void onTransitionEnd(@NonNull Transition transition) {
                 mListener.onLoginSuccessfully();
               }
-            });
+            }, mButtonLogin, mProgressBarLogin);
           } else {
             LoginFragment.this.onComplete(new TransitionListenerAdapter() {
               @Override
@@ -286,52 +287,52 @@ public class LoginFragment extends Fragment {
                   Toast.makeText(requireContext(), e != null ? e.getMessage() : "", Toast.LENGTH_SHORT).show();
                 }
               }
-            });
+            }, mButtonLogin, mProgressBarLogin);
           }
         });
   }
 
-  private void beginTransition() {
+  private void beginTransition(Button button, ProgressBar progressBar) {
     TransitionManager.beginDelayedTransition(mRootLayout, new TransitionSet()
         .addTransition(
             new ChangeBounds()
-                .addTarget(mButtonLogin)
+                .addTarget(button)
                 .setDuration(ANIM_DURATION)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
         )
         .addTransition(
             new Fade()
-                .addTarget(mButtonLogin)
+                .addTarget(button)
                 .setDuration(ANIM_DURATION)
         )
         .addTransition(
-            new Fade().addTarget(mProgressBar)
+            new Fade().addTarget(progressBar)
                 .setDuration(ANIM_DURATION)
         )
         .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
     );
 
-    final ConstraintLayout.LayoutParams lp1 = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
+    final ConstraintLayout.LayoutParams lp1 = (ConstraintLayout.LayoutParams) button.getLayoutParams();
     lp1.width = lp1.height;
-    mButtonLogin.setLayoutParams(lp1);
-    mButtonLogin.setVisibility(View.INVISIBLE);
-    mProgressBar.setVisibility(View.VISIBLE);
+    button.setLayoutParams(lp1);
+    button.setVisibility(View.INVISIBLE);
+    progressBar.setVisibility(View.VISIBLE);
   }
 
-  private void onComplete(Transition.TransitionListener listener) {
+  private void onComplete(Transition.TransitionListener listener, Button button, ProgressBar progressBar) {
     final TransitionSet transition = new TransitionSet()
         .addTransition(
-            new Fade().addTarget(mProgressBar)
+            new Fade().addTarget(progressBar)
                 .setDuration(ANIM_DURATION)
         )
         .addTransition(
             new Fade()
-                .addTarget(mButtonLogin)
+                .addTarget(button)
                 .setDuration(ANIM_DURATION)
         )
         .addTransition(
             new ChangeBounds()
-                .addTarget(mButtonLogin)
+                .addTarget(button)
                 .setDuration(ANIM_DURATION)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
         ).setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
@@ -339,11 +340,11 @@ public class LoginFragment extends Fragment {
 
     TransitionManager.beginDelayedTransition(mRootLayout, transition);
 
-    mProgressBar.setVisibility(View.INVISIBLE);
-    mButtonLogin.setVisibility(View.VISIBLE);
+    progressBar.setVisibility(View.INVISIBLE);
+    button.setVisibility(View.VISIBLE);
     final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
     params.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
-    mButtonLogin.setLayoutParams(params);
+    button.setLayoutParams(params);
   }
 
   interface Listener {

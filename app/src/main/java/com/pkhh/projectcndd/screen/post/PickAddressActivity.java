@@ -413,14 +413,15 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
 
   @Nullable
   private String getAddressFromLatLng(double lat, double lng) {
-    Geocoder geocoder = new Geocoder(PickAddressActivity.this, Locale.getDefault());
-    try {
-      List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-      return addresses.get(0).getAddressLine(0);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    }
+//    Geocoder geocoder = new Geocoder(PickAddressActivity.this, Locale.getDefault());
+//    try {
+//      List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+//      return addresses.get(0).getAddressLine(0);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      return null;
+//    }
+    return "TODO";
   }
 
   @MainThread

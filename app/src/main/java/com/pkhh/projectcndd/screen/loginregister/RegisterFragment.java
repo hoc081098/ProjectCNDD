@@ -142,6 +142,12 @@ public class RegisterFragment extends Fragment {
     requireNonNull(mEditName.getEditText()).setText("");
     requireNonNull(mEditEmail.getEditText()).setText("");
     requireNonNull(mEditPassword.getEditText()).setText("");
+
+    Picasso.get()
+        .load(R.drawable.avatar_default_icon)
+        .fit()
+        .centerCrop()
+        .into(mImageAvatar);
   }
 
 

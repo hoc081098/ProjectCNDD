@@ -4,9 +4,10 @@ import android.app.Application;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import androidx.multidex.MultiDexApplication;
 import timber.log.Timber;
 
-public class App extends Application {
+public class App extends MultiDexApplication {
   @Override
   public void onCreate() {
     super.onCreate();
