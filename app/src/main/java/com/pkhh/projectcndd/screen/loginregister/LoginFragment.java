@@ -177,7 +177,7 @@ public class LoginFragment extends Fragment {
 
   private void handleFacebookAccessToken(AccessToken accessToken) {
     final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
-    beginTransition(fbLoginButton, mProgressBarLogin);
+    beginTransition(fbLoginButton, mProgressBarFb);
 
     mFirebaseAuth.signInWithCredential(credential)
         .addOnSuccessListener(requireActivity(), authResult -> {
@@ -221,7 +221,7 @@ public class LoginFragment extends Fragment {
                           public void onTransitionEnd(@NonNull Transition transition) {
                             mListener.onLoginSuccessfully();
                           }
-                        }, fbLoginButton, mProgressBarLogin))
+                        }, fbLoginButton, mProgressBarFb))
                     .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show());
               });
         })
@@ -342,7 +342,7 @@ public class LoginFragment extends Fragment {
 
     progressBar.setVisibility(View.INVISIBLE);
     button.setVisibility(View.VISIBLE);
-    final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mButtonLogin.getLayoutParams();
+    final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) button.getLayoutParams();
     params.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
     button.setLayoutParams(params);
   }
