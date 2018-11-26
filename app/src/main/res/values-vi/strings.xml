@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Phòng trọ tốt</string>
+
+
+    <!-- Facebook -->
+    <string name="facebook_app_id" translatable="false">498821270638471</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb498821270638471</string>
+
+
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <string name="action_settings">Cài đặt</string>
+
+    <string name="pick_address">Chọn vị trí</string>
+    <string name="hint_location">Tim vị trí của bạn</string>
+
+    <string name="user_location_permission_explanation" />
+    <string name="user_location_permission_not_granted">Quyền vị tri không được cho phép</string>
+
+
+    <string name="mapbox_access_token" translatable="false">pk.eyJ1IjoicGV0cnVzdGhhaWhvYyIsImEiOiJjampycW1uY2s4bTRnM3BwMXo0M2Q3OTduIn0.dRqQsp8tc1SictvFyOP7tQ</string>
+    <string name="da_nang_id" translatable="false">NtHjwobYdIi0YwTUHz05</string>
+    <string name="da_nang_name" translatable="false">TP.Đà Nẵng</string>
+
+
+    <string name="select_province_city">Chọn tỉnh, thành phố</string>
+    <string name="select_district">Chọn quận, huyện</string>
+    <string name="select_ward">Chọn xã, phường, thị trấn</string>
+    <string name="images">Hình ảnh</string>
+    <string name="saved">Đã lưu</string>
+
+    <string name="login_with_facebook">Login bằng Facebook</string>
+    <string name="login">Đăng nhập</string>
+    <string name="register_account">Đăng kí tài khoản</string>
+    <string name="password">Mật khẩu</string>
+    <string name="email">Email</string>
+    <string name="user_name">Tên người dùng</string>
+    <string name="register_successfully">Đăng kí thành công</string>
+    <string name="back_to_login">Quay lại đăng nhập</string>
+    <string name="register">Đăng kí</string>
+    <string name="min_length_name_is_3">Tên tối thiểu 3 kí tự!</string>
+    <string name="min_length_password_is_6">Mật khẩu ít nhất 6 kí tự!</string>
+    <string name="invalid_email_address">Địa chỉ email không hợp lệ!</string>
+    <string name="processing">Đang xử lý</string>
+    <string name="please_wait">Vui lòng chờ…</string>
+    <string name="undefined_error">Lỗi chưa xác định</string>
+    <string name="login_successfully">Đăng nhập thành công</string>
+    <string name="loading">Loading…</string>
+    <string name="require_login">Yêu cầu đăng nhập</string>
+    <string name="require_login_to_see_saved_room">Để có thể xem các nhà trọ đã lưu, yêu cầu bạn phải đăng nhập!</string>
+    <string name="ok">OK</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="sure_logout">Bạn có chắc chắn muốn đăng xuất không?</string>
+    <string name="no">Không</string>
+    <string name="yes">Có</string>
+    <string name="require_login_description">Để hạn chế spam, lừa đảo, chức năng này yêu cầu bạn phải đăng nhập!</string>
+    <string name="cancel">Hủy</string>
+    <string name="not_sign_in">Chưa đăng nhập</string>
+    <string name="price_vnd_per_month">%s đ/tháng</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="post_room_failed">Đăng bài thất bại</string>
+    <string name="post_room_successfully">Đăng bài thành công</string>
+    <string name="upload_image_done">Upload xong hình ảnh</string>
+    <string name="posting_room">Đang đăng bài</string>
+    <string name="search_ellipsis">Tìm kiếm…</string>
+    <string name="geocode_no_results">Không tìm thấy vị trí</string>
+    <string name="must_login">Bạn phải đăng nhập trước</string>
+    <string name="notification_cannot_upload_image">2/3, không thể upload hình ảnh</string>
+    <string name="notification_channel_description">%s notification channel</string>
+</resources>

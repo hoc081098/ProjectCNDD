@@ -33,7 +33,7 @@ import androidx.transition.TransitionManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
 import static java.util.Objects.requireNonNull;
 
 public final class SavedRoomsActivity extends AppCompatActivity implements RecyclerOnClickListener, Consumer<Integer> {
@@ -101,7 +101,7 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
       removeSaved(item);
     } else {
       final Intent intent = new Intent(this, MotelRoomDetailActivity.class);
-      intent.putExtra(MOTEL_ROOM_ID, item.getId());
+      intent.putExtra(EXTRA_MOTEL_ROOM_ID, item.getId());
       startActivity(intent);
     }
   }

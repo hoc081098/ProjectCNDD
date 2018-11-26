@@ -56,7 +56,8 @@ import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_QUERY_DIRECTION;
 
 interface HomeListItem {
 }
@@ -205,7 +206,6 @@ class SeeAll implements HomeListItem {
 
 class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
   private static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
-  static final String QUERY_DIRECTION = "QUERY_DIRECTION";
 
   @NonNull
   private final Function1<String, Void> onAddToOrRemoveFromSavedRooms;
@@ -360,23 +360,12 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
 
   class RoomItemVH extends VH implements View.OnClickListener {
 
-    @BindView(R.id.text_saved_room_address)
-    TextView textAddress;
-
-    @BindView(R.id.text_saved_room_price)
-    TextView textPrice;
-
-    @BindView(R.id.text_saved_room_title)
-    TextView textTitle;
-
-    @BindView(R.id.image_saved_room)
-    ImageView image;
-
-    @BindView(R.id.text_home_room_district)
-    TextView textDistrict;
-
-    @BindView(R.id.image_saved_room_bookmark)
-    ImageView imageSave;
+    @BindView(R.id.text_saved_room_address) TextView textAddress;
+    @BindView(R.id.text_saved_room_price) TextView textPrice;
+    @BindView(R.id.text_saved_room_title) TextView textTitle;
+    @BindView(R.id.image_saved_room) ImageView image;
+    @BindView(R.id.text_home_room_district) TextView textDistrict;
+    @BindView(R.id.image_saved_room_bookmark) ImageView imageSave;
 
     RoomItemVH(@NonNull View itemView) {
       super(itemView);
@@ -399,13 +388,18 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
       textPrice.setText(itemView.getContext().getString(R.string.price_vnd_per_month, PRICE_FORMAT.format(room.price)));
       textTitle.setText(room.title);
 
-      Picasso.get()
-          .load(room.image)
-          .fit()
-          .centerCrop()
-          .placeholder(R.drawable.ic_home_primary_dark_24dp)
-          .error(R.drawable.ic_home_primary_dark_24dp)
-          .into(image);
+
+      if (room.image == null) {
+        image.setImageResource(R.drawable.ic_home_primary_dark_24dp);
+      } else {
+        Picasso.get()
+            .load(room.image)
+            .fit()
+            .centerCrop()
+            .placeholder(R.drawable.ic_home_primary_dark_24dp)
+            .error(R.drawable.ic_home_primary_dark_24dp)
+            .into(image);
+      }
 
       switch (room.bookMarkIconState) {
         case RoomItem.HIDE:
@@ -437,7 +431,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
 
             final Context context = itemView.getContext();
             final Intent intent = new Intent(context, MotelRoomDetailActivity.class);
-            intent.putExtra(MOTEL_ROOM_ID, id);
+            intent.putExtra(EXTRA_MOTEL_ROOM_ID, id);
             context.startActivity(intent);
 
           }
@@ -484,7 +478,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
           final int queryDirection = ((SeeAll) item).queryDirection;
           final Context context = itemView.getContext();
           final Intent intent = new Intent(context, ShowMoreActivity.class);
-          intent.putExtra(QUERY_DIRECTION, queryDirection);
+          intent.putExtra(EXTRA_QUERY_DIRECTION, queryDirection);
           context.startActivity(intent);
         }
       }

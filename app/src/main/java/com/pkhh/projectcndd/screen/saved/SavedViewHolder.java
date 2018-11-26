@@ -54,7 +54,10 @@ public class SavedViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     textTitle.setText(item.getTitle());
     textAddress.setText(item.getAddress());
-    textPrice.setText(PRICE_FORMAT.format(item.getPrice()) + "đ/tháng");
+    textPrice.setText(
+        itemView.getContext()
+            .getString(R.string.price_vnd_per_month, PRICE_FORMAT.format(item.getPrice()))
+    );
   }
 
   @Override

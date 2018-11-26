@@ -46,7 +46,9 @@ import static com.firebase.ui.firestore.paging.LoadingState.FINISHED;
 import static com.firebase.ui.firestore.paging.LoadingState.LOADED;
 import static com.firebase.ui.firestore.paging.LoadingState.LOADING_INITIAL;
 import static com.firebase.ui.firestore.paging.LoadingState.LOADING_MORE;
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_FULL_NAME;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_ID;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
@@ -76,8 +78,8 @@ public class UserProfileActivity extends AppCompatActivity {
     setContentView(R.layout.activity_user_profile);
     ButterKnife.bind(this, this);
 
-    final String userId = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_ID);
-    userName = getIntent().getStringExtra(MotelRoomDetailActivity.EXTRA_USER_FULL_NAME);
+    final String userId = getIntent().getStringExtra(EXTRA_USER_ID);
+    userName = getIntent().getStringExtra(EXTRA_USER_FULL_NAME);
     textName.setText(userName);
 
     setupAppBar();
@@ -144,7 +146,7 @@ public class UserProfileActivity extends AppCompatActivity {
         final DocumentSnapshot snapshot = getItem(position);
         if (snapshot != null) {
           final Intent intent = new Intent(UserProfileActivity.this, MotelRoomDetailActivity.class);
-          intent.putExtra(MOTEL_ROOM_ID, snapshot.getId());
+          intent.putExtra(EXTRA_MOTEL_ROOM_ID, snapshot.getId());
           startActivity(intent);
         }
       }

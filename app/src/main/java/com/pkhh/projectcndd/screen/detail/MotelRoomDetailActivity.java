@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,10 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.mapbox.api.staticmap.v1.MapboxStaticMap;
+import com.mapbox.api.staticmap.v1.StaticMapCriteria;
+import com.mapbox.api.staticmap.v1.models.StaticMarkerAnnotation;
+import com.mapbox.geojson.Point;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
@@ -29,6 +34,7 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,19 +47,18 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static androidx.core.text.HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_DIV;
+import static com.mapbox.api.staticmap.v1.StaticMapCriteria.MEDIUM_PIN;
 import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject;
-import static com.pkhh.projectcndd.screen.home.MotelRoomVH.decimalFormat;
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.screen.home.MotelRoomVH.PRICE_FORMAT;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_IMAGES;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_INDEX;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_FULL_NAME;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_ID;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 
 public class MotelRoomDetailActivity extends AppCompatActivity {
   public final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
-
-  public static final String EXTRA_USER_ID = "user_id";
-  public static final String EXTRA_USER_FULL_NAME = "user_name";
-  public static final String EXTRA_IMAGES = "images";
-  public static final String EXTRA_INDEX = "index";
-
   @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
   @BindView(R.id.sliderLayout) SliderLayout sliderLayout;
   @BindView(R.id.text_price) TextView textPrice;
@@ -85,7 +90,7 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
     collapsingToolbarLayout.setTitle(null);
 
 
-    id = getIntent().getStringExtra(MOTEL_ROOM_ID);
+    id = getIntent().getStringExtra(EXTRA_MOTEL_ROOM_ID);
     increaseViewCount(id);
     getDetail(id);
   }
@@ -119,12 +124,36 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   private void updateUi(@NonNull MotelRoom motelRoom) {
     updateImageSlider(motelRoom);
 
-    textPrice.setText("$ " + decimalFormat.format(motelRoom.getPrice()) + " đ");
+    textPrice.setText("$ " + PRICE_FORMAT.format(motelRoom.getPrice()) + " đ");
     textAddress.setText(motelRoom.getAddress());
     textTimePost.setText("Ngày đăng: " + dateFormat.format(motelRoom.getCreatedAt()));
     textArea.setText(HtmlCompat.fromHtml(motelRoom.getSize() + " m<sup><small>2</small></sup>",
         FROM_HTML_SEPARATOR_LINE_BREAK_DIV));
-    //imageMap.setImageResource(R.drawable.ic_home_black_24dp); // TODO
+
+
+    final Point point = Point.fromLngLat(motelRoom.getAddressGeoPoint().getLongitude(), motelRoom.getAddressGeoPoint().getLatitude());
+    final MapboxStaticMap staticImage = MapboxStaticMap.builder()
+        .accessToken(getString(R.string.mapbox_access_token))
+        .styleId(StaticMapCriteria.LIGHT_STYLE)
+        .cameraPoint(point) // Image's centerpoint on map
+        .cameraZoom(13)
+        .width(dpToPx(92)) // Image width
+        .height(dpToPx(92)) // Image height
+        .retina(false) // Retina 2x image will be returned
+        .staticMarkerAnnotations(
+            Collections.singletonList(
+                StaticMarkerAnnotation.builder()
+                    .color("ef5350")
+                    .name(MEDIUM_PIN)
+                    .label("a")
+                    .lnglat(point)
+                    .build()
+            )
+        )
+        .build();
+    Picasso.get()
+        .load(staticImage.url().toString())
+        .into(imageMap);
 
     motelRoom.getUser()
         .get()
@@ -240,5 +269,10 @@ public class MotelRoomDetailActivity extends AppCompatActivity {
   private boolean isTelephonyEnabled() {
     TelephonyManager manager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     return manager != null && manager.getSimState() == TelephonyManager.SIM_STATE_READY;
+  }
+
+  public int dpToPx(int dp) {
+    DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+    return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
   }
 }

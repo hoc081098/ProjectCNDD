@@ -22,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_PROVINCE_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_PROVINCE_NAME;
 import static java.util.Objects.requireNonNull;
 
 
@@ -89,8 +91,8 @@ public class ProvinceActivity extends AppCompatActivity implements RecyclerOnCli
     String name = item.getName();
 
     Intent intent = new Intent();
-    intent.putExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_NAME, name);
-    intent.putExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_ID, id);
+    intent.putExtra(EXTRA_PROVINCE_NAME, name);
+    intent.putExtra(EXTRA_PROVINCE_ID, id);
 
     setResult(Activity.RESULT_OK, intent);
     finish(); // quay dau man hinh truoc

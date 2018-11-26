@@ -19,6 +19,9 @@ import androidx.viewpager.widget.ViewPager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_IMAGES;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_INDEX;
+
 public class PhotoSlideActivity extends AppCompatActivity {
 
   @BindView(R.id.view_pager) ViewPager viewPager;
@@ -30,8 +33,8 @@ public class PhotoSlideActivity extends AppCompatActivity {
     ButterKnife.bind(this, this);
 
     final Intent intent = getIntent();
-    final ArrayList<String> images = intent.getStringArrayListExtra(MotelRoomDetailActivity.EXTRA_IMAGES);
-    final int index = intent.getIntExtra(MotelRoomDetailActivity.EXTRA_INDEX, 0);
+    final ArrayList<String> images = intent.getStringArrayListExtra(EXTRA_IMAGES);
+    final int index = intent.getIntExtra(EXTRA_INDEX, 0);
 
     viewPager.setAdapter(new PagerAdapter() {
       @Override

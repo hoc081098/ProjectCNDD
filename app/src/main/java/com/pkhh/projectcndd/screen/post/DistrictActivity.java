@@ -22,6 +22,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static com.pkhh.projectcndd.models.FirebaseModel.documentSnapshotToObject;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_DISTRICT_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_DISTRICT_NAME;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_PROVINCE_ID;
 import static java.util.Objects.requireNonNull;
 
 public class DistrictActivity extends AppCompatActivity implements RecyclerOnClickListener {
@@ -50,7 +53,7 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
   }
 
   private void setupAdapter() {
-    String id = getIntent().getStringExtra(SelectAddressLocationFragment.EXTRA_PROVINCE_ID);
+    String id = getIntent().getStringExtra(EXTRA_PROVINCE_ID);
     Query query = FirebaseFirestore.getInstance()
         .document("provinces" + "/" + id)
         .collection("districts")
@@ -87,8 +90,8 @@ public class DistrictActivity extends AppCompatActivity implements RecyclerOnCli
     District item = mFirestoreRecyclerAdapter.getItem(position);
 
     Intent intent = new Intent();
-    intent.putExtra(SelectAddressLocationFragment.EXTRA_DISTRICT_ID, item.getId());
-    intent.putExtra(SelectAddressLocationFragment.EXTRA_DISTRICT_NAME, item.getName());
+    intent.putExtra(EXTRA_DISTRICT_ID, item.getId());
+    intent.putExtra(EXTRA_DISTRICT_NAME, item.getName());
 
     setResult(Activity.RESULT_OK, intent);
     finish();

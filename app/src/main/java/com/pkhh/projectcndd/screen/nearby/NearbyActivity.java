@@ -85,7 +85,6 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Mapbox.getInstance(this, getString(R.string.access_token));
     setContentView(R.layout.activity_nearby);
 
     mapView = findViewById(R.id.map_view);

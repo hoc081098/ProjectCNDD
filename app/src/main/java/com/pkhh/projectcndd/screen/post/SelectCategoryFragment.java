@@ -175,10 +175,8 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
   }
 
   class CategoryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    @BindView(R.id.radio_button)
-    RadioButton radioButton;
-    @BindView(R.id.text_category_name)
-    TextView textCategoryName;
+    @BindView(R.id.radio_button) RadioButton radioButton;
+    @BindView(R.id.text_category_name) TextView textCategoryName;
 
     CategoryViewHolder(@NonNull View itemView) {
       super(itemView);

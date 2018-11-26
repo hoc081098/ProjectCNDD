@@ -3,8 +3,6 @@ package com.pkhh.projectcndd.screen.post;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.drawable.ColorDrawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,6 +15,7 @@ import android.widget.Toast;
 
 import com.annimon.stream.IntStream;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Consumer;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -39,10 +38,15 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mapbox.api.geocoding.v5.GeocodingCriteria;
+import com.mapbox.api.geocoding.v5.MapboxGeocoding;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
+import com.mapbox.core.exceptions.ServicesException;
+import com.mapbox.geojson.Point;
 import com.pkhh.projectcndd.R;
 
 import java.util.List;
-import java.util.Locale;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -51,10 +55,16 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import timber.log.Timber;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_ADDRESS;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_LATLNG;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -65,11 +75,11 @@ import static java.util.Objects.requireNonNull;
 
 public class PickAddressActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
   public static final String TAG = PickAddressActivity.class.getSimpleName();
-  public static final String EXTRA_ADDRESS = "EXTRA_ADDRESS";
-  public static final String EXTRA_LATLNG = "EXTRA_LATLNG";
+
   private static final String[] LOCATIONS_PERMISSION = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION};
   private static final int REQUEST_CODE_LOCATION_PERMISSION = 2;
   private static final int REQUEST_CHECK_SETTINGS = 3;
+
   private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
   private static final int INTERVAL = 3_000;
   private static final int FASTEST_INTERVAL = 1_000;
@@ -83,12 +93,9 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
 
 
   // keep track reference, we should initialize them once
-  @Nullable
-  private FusedLocationProviderClient _fusedLocationProviderClient;
-  @Nullable
-  private LocationCallback _locationCallback;
-  @Nullable
-  private LocationRequest _locationRequest;
+  @Nullable private FusedLocationProviderClient _fusedLocationProviderClient;
+  @Nullable private LocationCallback _locationCallback;
+  @Nullable private LocationRequest _locationRequest;
 
 
   private boolean shouldRequestLocationUpdate;
@@ -96,19 +103,14 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   private String mLatestMarkerTitle;
 
   // keep current location
-  @Nullable
-  private Marker mMarker;
-  @Nullable
-  private Circle mCircle;
-  @Nullable
-  private LatLng mLatLng;
+  @Nullable private Marker mMarker;
+  @Nullable private Circle mCircle;
+  @Nullable private LatLng mLatLng;
 
 
   // input nhận từ SelectAddressLocationFragment
-  @Nullable
-  private LatLng mInputLatLng;
-  @Nullable
-  private CharSequence mInputAddress;
+  @Nullable private LatLng mInputLatLng;
+  @Nullable private CharSequence mInputAddress;
 
 
   @Override
@@ -214,8 +216,8 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
       shouldRequestLocationUpdate = false;
       getFusedLocationProviderClient().removeLocationUpdates(getLocationCallback());
 
-      CharSequence charSequence = getAddressFromLatLng(latLng.latitude, latLng.longitude);
-      updateSearchEditTextAndMap(charSequence, latLng, "Vị trí bạn chọn");
+      makeGeocodeSearch(new com.mapbox.mapboxsdk.geometry.LatLng(latLng.latitude, latLng.longitude),
+          address -> updateSearchEditTextAndMap(address, latLng, "Vị trí bạn chọn"));
     });
 
     if (mInputAddress != null && mInputLatLng != null) {
@@ -403,25 +405,51 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
           Log.d(TAG, "onLocationResult: " + lastLocation);
 
           final LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-          CharSequence address = getAddressFromLatLng(latLng.latitude, latLng.longitude);
-
-          updateSearchEditTextAndMap(address, latLng, "Vị trí hiện tại");
+          makeGeocodeSearch(new com.mapbox.mapboxsdk.geometry.LatLng(latLng.latitude, latLng.longitude),
+              address -> updateSearchEditTextAndMap(address, latLng, "Vị trí hiện tại"));
         }
       }
     };
   }
 
-  @Nullable
-  private String getAddressFromLatLng(double lat, double lng) {
-//    Geocoder geocoder = new Geocoder(PickAddressActivity.this, Locale.getDefault());
-//    try {
-//      List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-//      return addresses.get(0).getAddressLine(0);
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//      return null;
-//    }
-    return "TODO";
+  private void makeGeocodeSearch(final com.mapbox.mapboxsdk.geometry.LatLng latLng, final Consumer<String> callback) {
+    try {
+      // Build a Mapbox geocoding request
+      final MapboxGeocoding client = MapboxGeocoding.builder()
+          .accessToken(getString(R.string.mapbox_access_token))
+          .query(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
+          .geocodingTypes(GeocodingCriteria.TYPE_PLACE)
+          .mode(GeocodingCriteria.MODE_PLACES)
+          .build();
+      client.enqueueCall(new Callback<GeocodingResponse>() {
+        @Override
+        public void onResponse(@NonNull Call<GeocodingResponse> call, @NonNull Response<GeocodingResponse> response) {
+          if (response.body() != null) {
+            final List<CarmenFeature> results = response.body().features();
+            if (results.size() > 0) {
+              // Get the first Feature from the successful geocoding response
+              final CarmenFeature feature = results.get(0);
+              callback.accept(feature.address());
+            } else {
+              Toast.makeText(PickAddressActivity.this, R.string.geocode_no_results, Toast.LENGTH_SHORT).show();
+            }
+          } else {
+            Timber.e("Response body is null");
+            Toast.makeText(PickAddressActivity.this, "Response body is null", Toast.LENGTH_SHORT).show();
+          }
+        }
+
+        @Override
+        public void onFailure(@NonNull Call<GeocodingResponse> call, @NonNull Throwable throwable) {
+          Timber.e("Geocoding Failure: " + throwable.getMessage());
+          Toast.makeText(PickAddressActivity.this, "Geocoding Failure: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+      });
+    } catch (ServicesException servicesException) {
+      Timber.e("Error geocoding: " + servicesException.toString());
+      servicesException.printStackTrace();
+      Toast.makeText(PickAddressActivity.this, "Error geocoding: " + servicesException.getMessage(), Toast.LENGTH_SHORT).show();
+    }
   }
 
   @MainThread
@@ -456,7 +484,6 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
       final Intent data = new Intent();
       data.putExtra(EXTRA_ADDRESS, address);
       data.putExtra(EXTRA_LATLNG, mLatLng);
-
       setResult(RESULT_OK, data);
     }
     super.finish();

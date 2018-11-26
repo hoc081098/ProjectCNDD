@@ -27,10 +27,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.pkhh.projectcndd.screen.home.HomeAdapter.QUERY_DIRECTION;
 import static com.pkhh.projectcndd.screen.home.SeeAll.COUNT_VIEW_DESCENDING;
 import static com.pkhh.projectcndd.screen.home.SeeAll.CREATED_AT_DESCENDING;
-import static com.pkhh.projectcndd.utils.Constants.MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_QUERY_DIRECTION;
 import static com.pkhh.projectcndd.utils.Constants.PROVINCES_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 import static java.util.Objects.requireNonNull;
@@ -57,7 +57,7 @@ public class ShowMoreActivity extends AppCompatActivity {
       if (adapter != null) adapter.refresh();
     });
 
-    final int queryDir = getIntent().getIntExtra(QUERY_DIRECTION, 0);
+    final int queryDir = getIntent().getIntExtra(EXTRA_QUERY_DIRECTION, 0);
     final String selectedProvinceId = SharedPrefUtil.getInstance(this).getSelectedProvinceId(getString(R.string.da_nang_id));
     final DocumentReference selectedProvinceRef = firestore.document(PROVINCES_NAME_COLLECION + "/" + selectedProvinceId);
 
@@ -126,7 +126,7 @@ public class ShowMoreActivity extends AppCompatActivity {
           final MotelRoom room = (MotelRoom) item;
 
           final Intent intent = new Intent(ShowMoreActivity.this, MotelRoomDetailActivity.class);
-          intent.putExtra(MOTEL_ROOM_ID, room.getId());
+          intent.putExtra(EXTRA_MOTEL_ROOM_ID, room.getId());
 
           startActivity(intent);
         }

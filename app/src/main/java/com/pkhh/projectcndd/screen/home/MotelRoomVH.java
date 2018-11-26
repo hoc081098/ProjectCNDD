@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClickListener {
-  public static final DecimalFormat decimalFormat = new DecimalFormat("###,###");
+  public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
 
   private final ImageView imagePreview;
   private final TextView textPrice;
@@ -47,7 +47,7 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
   }
 
   void bind(MotelRoom item) {
-    textPrice.setText("$ " + decimalFormat.format(item.getPrice()) + " đ");
+    textPrice.setText("$ " + PRICE_FORMAT.format(item.getPrice()) + " đ");
     textAddress.setText(item.getAddress());
 
     textPostBy.setText("đăng bởi ...loading...");

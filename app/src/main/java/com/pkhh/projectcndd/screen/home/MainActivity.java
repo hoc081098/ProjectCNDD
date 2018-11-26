@@ -44,8 +44,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import static com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity.EXTRA_USER_FULL_NAME;
-import static com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity.EXTRA_USER_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_FULL_NAME;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_ID;
 import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 
 public class
@@ -127,6 +127,7 @@ MainActivity extends AppCompatActivity
     textName = headerView.findViewById(R.id.text_name);
     textEmail = headerView.findViewById(R.id.text_email);
     imageAvatar = headerView.findViewById(R.id.image_avatar);
+
     headerView.findViewById(R.id.nav_header).setOnClickListener(__ -> {
       if (firebaseAuth.getCurrentUser() != null) {
         final Intent intent = new Intent(this, UserProfileActivity.class);
@@ -134,7 +135,7 @@ MainActivity extends AppCompatActivity
         intent.putExtra(EXTRA_USER_FULL_NAME, user != null ? user.getFullName() : null);
         startActivity(intent);
       } else {
-        Toast.makeText(this, "Bạn phải đăng nhập trước", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.must_login, Toast.LENGTH_SHORT).show();
       }
     });
 
