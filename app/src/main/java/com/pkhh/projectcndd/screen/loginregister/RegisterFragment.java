@@ -85,7 +85,7 @@ public class RegisterFragment extends Fragment {
   }
 
   private void initView() {
-    requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Đăng kí");
+    requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(getString(R.string.register));
 
     requireNonNull(mEditName.getEditText()).addTextChangedListener(new TextWatcher() {
       @Override
@@ -167,7 +167,7 @@ public class RegisterFragment extends Fragment {
       case R.id.image_avatar:
         final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Chọn ảnh đại diện"), CHOOSE_AVATAR_IMAGE_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.choose_avatar)), CHOOSE_AVATAR_IMAGE_REQUEST_CODE);
         break;
     }
   }

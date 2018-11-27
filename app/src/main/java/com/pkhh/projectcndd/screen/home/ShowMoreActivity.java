@@ -14,7 +14,7 @@ import com.pkhh.projectcndd.CommonRoomVH;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
-import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
+import com.pkhh.projectcndd.screen.detail.DetailActivity;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.SharedPrefUtil;
 
@@ -38,11 +38,9 @@ import static java.util.Objects.requireNonNull;
 public class ShowMoreActivity extends AppCompatActivity {
   public static final int PAGE_SIZE = 20;
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
-  private MyFirebaseLoadMoreAdapter<MotelRoom, RecyclerView.ViewHolder> adapter;
-
   @BindView(R.id.recycler) RecyclerView recyclerView;
   @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
+  private MyFirebaseLoadMoreAdapter<MotelRoom, RecyclerView.ViewHolder> adapter;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,7 +65,7 @@ public class ShowMoreActivity extends AppCompatActivity {
           .whereEqualTo("is_active", true)
           .orderBy("created_at", Query.Direction.DESCENDING);
 
-      getSupportActionBar().setTitle("Mới nhất");
+      getSupportActionBar().setTitle(getString(R.string.newest));
       setupRecyclerView(query);
 
     } else if (queryDir == COUNT_VIEW_DESCENDING) {
@@ -76,7 +74,7 @@ public class ShowMoreActivity extends AppCompatActivity {
           .whereEqualTo("is_active", true)
           .orderBy("count_view", Query.Direction.DESCENDING);
 
-      getSupportActionBar().setTitle("Xem nhiều");
+      getSupportActionBar().setTitle(getString(R.string.watch_more));
       setupRecyclerView(query);
     }
   }
@@ -93,10 +91,6 @@ public class ShowMoreActivity extends AppCompatActivity {
         PAGE_SIZE / 2,
         recyclerView
     ) {
-
-      class LoadMoreVH extends RecyclerView.ViewHolder {
-        LoadMoreVH(@NonNull View itemView) { super(itemView); }
-      }
 
       @NonNull
       @Override
@@ -125,7 +119,7 @@ public class ShowMoreActivity extends AppCompatActivity {
         if (item instanceof MotelRoom) {
           final MotelRoom room = (MotelRoom) item;
 
-          final Intent intent = new Intent(ShowMoreActivity.this, MotelRoomDetailActivity.class);
+          final Intent intent = new Intent(ShowMoreActivity.this, DetailActivity.class);
           intent.putExtra(EXTRA_MOTEL_ROOM_ID, room.getId());
 
           startActivity(intent);
@@ -134,6 +128,10 @@ public class ShowMoreActivity extends AppCompatActivity {
 
       @Override
       protected void onFirstLoaded() { swipeRefreshLayout.setRefreshing(false); }
+
+      class LoadMoreVH extends RecyclerView.ViewHolder {
+        LoadMoreVH(@NonNull View itemView) { super(itemView); }
+      }
     };
 
     recyclerView.setAdapter(adapter);

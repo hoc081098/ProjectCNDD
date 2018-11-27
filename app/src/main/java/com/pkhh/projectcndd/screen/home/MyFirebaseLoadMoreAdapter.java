@@ -23,16 +23,13 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel, VH exte
 
   private final Query query;
   private final Class<T> tClass;
+  private final int pageSize;
   private SnapshotParser<T> snapshotParser;
-
   @Nullable private DocumentSnapshot lastVisible;
   @NonNull private List<Object> list = new ArrayList<>();
-
   private boolean isLoading = false;
   private boolean isLastItemReached = false;
   private boolean hasError = false;
-
-  private final int pageSize;
   private double visibleThreshold;
 
 

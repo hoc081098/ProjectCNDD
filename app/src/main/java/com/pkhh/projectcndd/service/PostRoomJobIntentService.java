@@ -39,12 +39,12 @@ public class PostRoomJobIntentService extends JobIntentService {
   private static final String TAG = "##PostService";
   private final Handler mHandler = new Handler();
 
-  private void toast(final CharSequence text) {
-    mHandler.post(() -> Toast.makeText(PostRoomJobIntentService.this, text, Toast.LENGTH_SHORT).show());
-  }
-
   public static void enqueue(Context context, Intent intent) {
     enqueueWork(context, PostRoomJobIntentService.class, JOB_ID, intent);
+  }
+
+  private void toast(final CharSequence text) {
+    mHandler.post(() -> Toast.makeText(PostRoomJobIntentService.this, text, Toast.LENGTH_SHORT).show());
   }
 
   @Override
@@ -84,7 +84,7 @@ public class PostRoomJobIntentService extends JobIntentService {
                   if (!t.isSuccessful()) throw requireNonNull(t.getException());
                   return storageReference.getDownloadUrl();
                 })
-                .continueWith(Object::toString);
+                .continueWith(uriTask -> requireNonNull(uriTask.getResult()).toString());
           })
           .toList();
       final List<String> downloadUrls = Tasks.await(
@@ -107,7 +107,7 @@ public class PostRoomJobIntentService extends JobIntentService {
           documentReference.update("images", FieldValue.arrayUnion(downloadUrlsArray))
       );
       showNotification(getString(R.string.post_room_successfully),
-          "3/3, kiểm tra trong phần quản lý bài đã đăng", 100);
+          getString(R.string.check_in_post_room_manager), 100);
       Timber.tag(TAG).d("Post done");
       //*******************************************************************************************
 

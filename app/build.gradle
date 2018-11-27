@@ -1,8 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-android'
-
-androidExtensions { experimental = true }
 
 android {
     compileSdkVersion 28
@@ -55,10 +51,6 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha3'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.4.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
-    implementation 'com.squareup.moshi:moshi-adapters:1.6.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     // firebase
@@ -96,8 +88,6 @@ dependencies {
     // butterknife
     implementation 'com.jakewharton:butterknife:9.0.0-rc1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     // number to Vietnamese words
     implementation project(':number-to-vietnamese-words')

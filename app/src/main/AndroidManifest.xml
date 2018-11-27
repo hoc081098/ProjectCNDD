@@ -52,9 +52,6 @@
             </intent-filter>
         </activity>
 
-
-        <activity android:name=".screen.post.Camera2Activity" />
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -102,11 +99,6 @@
         </activity>
 
         <activity
-            android:name=".screen.detail.MotelRoomDetailActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity
             android:name=".screen.post.PostActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
@@ -147,6 +139,10 @@
             android:name=".screen.home.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".screen.detail.DetailActivity"
+            android:label="@string/detail" />
 
         <service
             android:name=".service.PostRoomJobIntentService"

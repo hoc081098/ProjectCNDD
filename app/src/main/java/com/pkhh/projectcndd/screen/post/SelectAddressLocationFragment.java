@@ -51,12 +51,11 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
   @BindView(R.id.edit_text_address) TextInputLayout mEditTextAddress;
   @BindView(R.id.edit_lat) TextInputLayout mTextInputLat;
   @BindView(R.id.edit_lng) TextInputLayout mTextInputLng;
+  @Nullable private Double latInput = null;
+  @Nullable private Double lngInput = null;
 
   @Override
   public int getLayoutId() { return R.layout.fragment_select_address_location; }
-
-  @Nullable private Double latInput = null;
-  @Nullable private Double lngInput = null;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

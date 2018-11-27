@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:fontFamily="@font/nunito_sans"
-            android:text="Bạn chưa lưu nhà trọ nào"
+            android:text="@string/empty_saved_room"
             android:textAlignment="center"
             android:textColor="#212121"
             android:textSize="20sp"

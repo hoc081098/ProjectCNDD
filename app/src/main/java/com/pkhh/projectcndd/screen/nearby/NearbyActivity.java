@@ -63,20 +63,15 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
   private MapView mapView;
 
-
   private MapboxMap mMap;
   private PermissionsManager permissionsManager;
   private LocationLayerPlugin locationLayerPlugin;
 
-  @Nullable
-  private Location originLocation;
-  @Nullable
-  private LatLng originCoord;
+  @Nullable private Location originLocation;
+  @Nullable private LatLng originCoord;
 
-  @Nullable
-  private Marker destinationMarker;
-  @Nullable
-  private DirectionsRoute currentRoute;
+  @Nullable private Marker destinationMarker;
+  @Nullable private DirectionsRoute currentRoute;
   private NavigationMapRoute navigationMapRoute;
   private Button button;
   private LocationEngine locationEngine;
@@ -95,6 +90,17 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mMap = mapboxMap;
+    this.mMap.setOnMarkerClickListener((Marker marker) -> {
+      final LatLng point = marker.getPosition();
+      final Point destinationPosition = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+      if (originCoord != null) {
+        Point originPosition = Point.fromLngLat(originCoord.getLongitude(), originCoord.getLatitude());
+        getRoute(originPosition, destinationPosition);
+
+        button.setEnabled(true);
+      }
+      return false;
+    });
     enableLocationPlugin();
 
     mapboxMap.addOnMapClickListener(this);
@@ -116,8 +122,8 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    Toast.makeText(this, "Clicked: " + point, Toast.LENGTH_SHORT).show();
-    Toast.makeText(this, "OriginCoord: " + originCoord, Toast.LENGTH_SHORT).show();
+    // Toast.makeText(this, "Clicked: " + point, Toast.LENGTH_SHORT).show();
+    // Toast.makeText(this, "OriginCoord: " + originCoord, Toast.LENGTH_SHORT).show();
 
     if (destinationMarker != null) {
       mMap.removeMarker(destinationMarker);
@@ -133,9 +139,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
       getRoute(originPosition, destinationPosition);
 
       button.setEnabled(true);
-      button.setBackgroundResource(R.color.colorAccent);
     }
-
   }
 
   private void getRoute(@NonNull Point origin, @NonNull Point destination) {
@@ -207,7 +211,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      Toast.makeText(this, "Location permission is not granted", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_SHORT).show();
       return;
     }
     locationEngine.addLocationEngineListener(this);
@@ -215,7 +219,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      Toast.makeText(this, "Location permission is not granted", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_SHORT).show();
       return;
     }
 
@@ -258,7 +262,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
     if (locationEngine != null) {
       if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
           && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        Toast.makeText(this, "Location permission is not granted", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_SHORT).show();
         return;
       }
       locationEngine.addLocationEngineListener(this);
@@ -355,7 +359,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
         .whereLessThan("address_geopoint", greaterGeoPoint);
 
     query.get()
-        .addOnSuccessListener(queryDocumentSnapshots -> {
+        .addOnSuccessListener(this, queryDocumentSnapshots -> {
           if (this.markers != null) {
             for (Marker marker : this.markers) {
               mMap.removeMarker(marker);
@@ -367,7 +371,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
                   .title(room.getTitle())
                   .icon(
                       IconFactory.getInstance(this)
-                          .fromResource(R.drawable.map_marker_light)
+                          .fromResource(R.drawable.ic_location_on_black_24dp)
                   )
                   .snippet(room.getDescription())
               )
@@ -375,8 +379,6 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
           Toast.makeText(this, "getDocumentNearBy: {" + latitude + ", " + longitude + ", " + distance + "} --> " + markers.size(), Toast.LENGTH_SHORT).show();
           this.markers = mMap.addMarkers(markers);
         })
-        .addOnFailureListener(e -> {
-          Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        });
+        .addOnFailureListener(this, e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
   }
 }

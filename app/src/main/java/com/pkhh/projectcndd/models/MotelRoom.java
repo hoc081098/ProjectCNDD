@@ -18,6 +18,17 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 
 public class MotelRoom extends FirebaseModel implements Parcelable {
+  public static final Creator<MotelRoom> CREATOR = new Creator<MotelRoom>() {
+    @Override
+    public MotelRoom createFromParcel(Parcel in) {
+      return new MotelRoom(in);
+    }
+
+    @Override
+    public MotelRoom[] newArray(int size) {
+      return new MotelRoom[size];
+    }
+  };
   private String title;
   private String description;
   private long price;
@@ -101,18 +112,6 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
   public int describeContents() {
     return 0;
   }
-
-  public static final Creator<MotelRoom> CREATOR = new Creator<MotelRoom>() {
-    @Override
-    public MotelRoom createFromParcel(Parcel in) {
-      return new MotelRoom(in);
-    }
-
-    @Override
-    public MotelRoom[] newArray(int size) {
-      return new MotelRoom[size];
-    }
-  };
 
   public String getTitle() {
     return title;

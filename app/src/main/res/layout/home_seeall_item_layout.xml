@@ -16,7 +16,7 @@
         android:layout_marginBottom="12dp"
         android:fontFamily="@font/nunito_sans"
         android:padding="16dp"
-        android:text="Xem tất cả"
+        android:text="@string/view_all"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

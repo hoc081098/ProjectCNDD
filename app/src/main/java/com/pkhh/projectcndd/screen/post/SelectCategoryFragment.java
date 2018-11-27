@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Consumer;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -33,7 +34,6 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import kotlin.jvm.functions.Function1;
 
 import static androidx.recyclerview.widget.DividerItemDecoration.VERTICAL;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
@@ -62,13 +62,13 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
   };
 
   @Nullable
-  private final Function1<Category, Void> onSelectCategory;
+  private final Consumer<Category> onSelectCategory;
 
   @Nullable
   private Category selectedCategory;
   private List<Category> categories;
 
-  CategoryAdapter(@Nullable Function1<Category, Void> onSelectCategory) {
+  CategoryAdapter(@Nullable Consumer<Category> onSelectCategory) {
     super(DIFF_CALLBACK);
     this.onSelectCategory = onSelectCategory;
   }
@@ -199,7 +199,7 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
         if (item instanceof SelectionCategory) {
 
           selectedCategory = ((SelectionCategory) item).category;
-          if (onSelectCategory != null) onSelectCategory.invoke(selectedCategory);
+          if (onSelectCategory != null) onSelectCategory.accept(selectedCategory);
           submitListCategories(categories);
 
         }
@@ -211,14 +211,13 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
 public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput> {
   private final Query query = FirebaseFirestore.getInstance().collection(CATEGORIES_NAME_COLLECION);
   private final CategoryAdapter adapter = new CategoryAdapter(this::onSelectCategory);
+  @BindView(R.id.recycler_category) RecyclerView recyclerView;
+  private ListenerRegistration registration;
 
   private Void onSelectCategory(Category category) {
     getDataOutput().setSelectedCategoryId(category.getId());
     return null;
   }
-
-  @BindView(R.id.recycler_category) RecyclerView recyclerView;
-  private ListenerRegistration registration;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

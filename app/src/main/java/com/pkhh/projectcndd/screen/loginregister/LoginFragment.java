@@ -56,6 +56,7 @@ import static java.util.Objects.requireNonNull;
 
 public class LoginFragment extends Fragment {
   private static final int ANIM_DURATION = 300;
+  private final CallbackManager callbackManager = CallbackManager.Factory.create();
 
   @BindView(R.id.edit_email) TextInputLayout mEditEmail;
   @BindView(R.id.edit_password) TextInputLayout mEditPassword;
@@ -68,8 +69,6 @@ public class LoginFragment extends Fragment {
   private Listener mListener;
   private FirebaseAuth mFirebaseAuth;
   private FirebaseFirestore mFirestore;
-
-  private final CallbackManager callbackManager = CallbackManager.Factory.create();
   private Unbinder unbinder;
 
   @Override
@@ -98,7 +97,7 @@ public class LoginFragment extends Fragment {
   }
 
   private void initView() {
-    requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Đăng nhập");
+    requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(getString(R.string.login));
 
     requireNonNull(mEditEmail.getEditText()).addTextChangedListener(new TextWatcher() {
       @Override
@@ -164,13 +163,13 @@ public class LoginFragment extends Fragment {
       @Override
       public void onCancel() {
         // App code
-        Toast.makeText(requireContext(), "Facebook login cancelled", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.facebook_login_cancelled), Toast.LENGTH_SHORT).show();
       }
 
       @Override
       public void onError(FacebookException exception) {
         // App code
-        Toast.makeText(requireContext(), "Facebook login error: " + exception.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.facebook_login_errror, exception.toString()), Toast.LENGTH_SHORT).show();
       }
     });
   }
@@ -225,7 +224,7 @@ public class LoginFragment extends Fragment {
                     .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show());
               });
         })
-        .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), "Authentication failed.", Toast.LENGTH_SHORT).show());
+        .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), getString(R.string.authentication_failed), Toast.LENGTH_SHORT).show());
   }
 
   @Override
@@ -313,6 +312,7 @@ public class LoginFragment extends Fragment {
     );
 
     final ConstraintLayout.LayoutParams lp1 = (ConstraintLayout.LayoutParams) button.getLayoutParams();
+    //noinspection SuspiciousNameCombination
     lp1.width = lp1.height;
     button.setLayoutParams(lp1);
     button.setVisibility(View.INVISIBLE);

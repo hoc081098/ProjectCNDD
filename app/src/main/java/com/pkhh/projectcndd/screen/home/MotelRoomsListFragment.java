@@ -2,7 +2,6 @@ package com.pkhh.projectcndd.screen.home;
 
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import kotlin.collections.CollectionsKt;
+import timber.log.Timber;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.annimon.stream.Collectors.toList;
@@ -56,18 +55,16 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.AuthStateListener {
-  public static final String TAG = MotelRoomsListFragment.class.getSimpleName();
-  public static final int LIMIT_CREATED_DES = 14;
-  public static final int LIMIT_COUNT_VIEW_DES = 14;
+  static final String TAG = MotelRoomsListFragment.class.getSimpleName();
+  private static final int LIMIT_CREATED_DES = 14;
+  private static final int LIMIT_COUNT_VIEW_DES = 14;
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-
+  @BindView(R.id.root_motel_rooms_list_fragment) ViewGroup rootLayout;
   private HomeAdapter adapter;
   private String selectedProvinceId;
   private String selectedProvinceName;
-
-  @BindView(R.id.root_motel_rooms_list_fragment) ViewGroup rootLayout;
   private Unbinder unbinder;
   @Nullable private AlertDialog changeProvinceDialog;
 
@@ -167,9 +164,18 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         room.getPrice(),
         room.getAddress(),
         room.getDistrictName(),
-        CollectionsKt.firstOrNull(room.getImages()),
+        firstOrNull(room.getImages()),
         bookmarkIconState
     );
+  }
+
+  @Contract("null -> null")
+  @Nullable
+  private String firstOrNull(@Nullable List<String> strings) {
+    if (strings == null || strings.isEmpty()) {
+      return null;
+    }
+    return strings.get(0);
   }
 
   private void updateRecycler(List<MotelRoom> createdAtDes, List<MotelRoom> countViewDes) {
@@ -186,15 +192,15 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         )
     );
 
-    homeListItems.add(new HeaderItem("Mới nhất"));
+    homeListItems.add(new HeaderItem(getString(R.string.newest)));
     homeListItems.addAll(of(createdAtDes).map(this::toRoomItem).toList());
     homeListItems.add(new SeeAll(SeeAll.CREATED_AT_DESCENDING));
 
-    homeListItems.add(new HeaderItem("Xem nhiều"));
+    homeListItems.add(new HeaderItem(getString(R.string.watch_more)));
     homeListItems.addAll(of(countViewDes).map(this::toRoomItem).toList());
     homeListItems.add(new SeeAll(SeeAll.COUNT_VIEW_DESCENDING));
 
-    Log.d("@@@", "submit List " + homeListItems);
+    Timber.tag("@@@").d("submit List %s", homeListItems);
     adapter.submitList(homeListItems);
   }
 
@@ -262,7 +268,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         android.R.layout.simple_list_item_1, provinceNames);
 
     changeProvinceDialog = new AlertDialog.Builder(requireContext())
-        .setTitle("Thay đổi khu vực")
+        .setTitle(getString(R.string.change_province))
         .setSingleChoiceItems(adapter, provinceIds.indexOf(selectedProvinceId), (dialog, position) -> {
           if (registration1 != null) {
             registration1.remove();
@@ -281,7 +287,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
           sharedPrefUtil.saveSelectedProvinceId(selectedProvinceId);
           sharedPrefUtil.saveSelectedProvinceName(selectedProvinceName);
         })
-        .setNegativeButton("Cancel", (dialog, __) -> dialog.dismiss())
+        .setNegativeButton(getString(R.string.cancel), (dialog, __) -> dialog.dismiss())
         .show();
 
     return null;
@@ -291,7 +297,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     firestore.runTransaction(transaction -> {
       final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
       if (currentUser == null) {
-        throw new IllegalStateException("Bạn phải login mới thưc hiện được chức năng này!");
+        throw new IllegalStateException(getString(R.string.you_must_login_to_perform_this_function));
       }
 
       final String uid = currentUser.getUid();
@@ -303,12 +309,12 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
       if (userIdsSaved.contains(uid)) {
 
         transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
-        return "Xóa khỏi danh sach đã lưu thành công";
+        return getString(R.string.remove_from_saved_list_successfully);
 
       } else {
 
         transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
-        return "Thêm vào danh sach đã lưu thành công";
+        return getString(R.string.add_to_saved_list_successfully);
 
       }
     }).continueWithTask(task -> {

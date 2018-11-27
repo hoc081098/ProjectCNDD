@@ -2,7 +2,6 @@ package com.pkhh.projectcndd.screen.post;
 
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -71,7 +70,6 @@ import static java.util.Objects.requireNonNull;
  * @author Peter Hoc
  * Created on 9/24/2018
  */
-
 
 public class PickAddressActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
   public static final String TAG = PickAddressActivity.class.getSimpleName();
@@ -246,8 +244,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   private void onClickLayoutRelativePosition() {
     if (mLatLng != null && mLatestMarkerTitle != null) {
       isCheckedRelative = !isCheckedRelative;
-      final int color = ContextCompat.getColor(this, isCheckedRelative ? R.color.colorAccent : android.R.color.white);
-      mImageRelative.setImageDrawable(new ColorDrawable(color));
+      mImageRelative.setImageResource(isCheckedRelative ? R.drawable.relative_checked : R.drawable.relative_unchecked);
       updateSearchEditTextAndMap(mEditTextSearchBox.getText(), mLatLng, mLatestMarkerTitle);
     }
   }
@@ -345,6 +342,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
 
   private void updateSearchEditTextAndMap(@Nullable CharSequence address, LatLng latLng, String markerTitle) {
     mEditTextSearchBox.setText(address);
+    Timber.tag("%%%").d("updateSearchEditTextAndMap address = %s", address);
 
     if (mMarker != null) {
       mMarker.remove();
@@ -413,13 +411,13 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   }
 
   private void makeGeocodeSearch(final com.mapbox.mapboxsdk.geometry.LatLng latLng, final Consumer<String> callback) {
+    Timber.tag("%%%").d("makeGeocodeSearch %s", latLng);
     try {
       // Build a Mapbox geocoding request
       final MapboxGeocoding client = MapboxGeocoding.builder()
           .accessToken(getString(R.string.mapbox_access_token))
           .query(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
-          .geocodingTypes(GeocodingCriteria.TYPE_PLACE)
-          .mode(GeocodingCriteria.MODE_PLACES)
+          .geocodingTypes(GeocodingCriteria.TYPE_ADDRESS)
           .build();
       client.enqueueCall(new Callback<GeocodingResponse>() {
         @Override
@@ -427,26 +425,30 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
           if (response.body() != null) {
             final List<CarmenFeature> results = response.body().features();
             if (results.size() > 0) {
+
               // Get the first Feature from the successful geocoding response
               final CarmenFeature feature = results.get(0);
-              callback.accept(feature.address());
+              Timber.tag("%%%").d("CarmenFeature = %s", feature);
+              Timber.tag("%%%").d("CarmenFeature placeName= %s", feature.placeName());
+              callback.accept(feature.placeName());
+
             } else {
               Toast.makeText(PickAddressActivity.this, R.string.geocode_no_results, Toast.LENGTH_SHORT).show();
             }
           } else {
-            Timber.e("Response body is null");
+            Timber.tag("%%%").e("Response body is null");
             Toast.makeText(PickAddressActivity.this, "Response body is null", Toast.LENGTH_SHORT).show();
           }
         }
 
         @Override
         public void onFailure(@NonNull Call<GeocodingResponse> call, @NonNull Throwable throwable) {
-          Timber.e("Geocoding Failure: " + throwable.getMessage());
+          Timber.tag("%%%").e("Geocoding Failure: " + throwable.getMessage());
           Toast.makeText(PickAddressActivity.this, "Geocoding Failure: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
         }
       });
     } catch (ServicesException servicesException) {
-      Timber.e("Error geocoding: " + servicesException.toString());
+      Timber.tag("%%%").e("Error geocoding: " + servicesException.toString());
       servicesException.printStackTrace();
       Toast.makeText(PickAddressActivity.this, "Error geocoding: " + servicesException.getMessage(), Toast.LENGTH_SHORT).show();
     }

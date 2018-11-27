@@ -18,7 +18,7 @@ import com.google.firebase.firestore.Query;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
-import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
+import com.pkhh.projectcndd.screen.detail.DetailActivity;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
@@ -39,13 +39,11 @@ import static java.util.Objects.requireNonNull;
 public final class SavedRoomsActivity extends AppCompatActivity implements RecyclerOnClickListener, Consumer<Integer> {
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private final FirebaseAuth auth = FirebaseAuth.getInstance();
-
-  private SavedRoomAdapter adapter;
-
   @BindView(R.id.recycler_saved_room) RecyclerView recyclerView;
   @BindView(R.id.progressbar) ProgressBar progressBar;
   @BindView(R.id.empty_layout) ConstraintLayout emptyLayout;
   @BindView(R.id.root_layout) ConstraintLayout rootLayout;
+  private SavedRoomAdapter adapter;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,7 +98,7 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
     if (view.getId() == R.id.image_saved_room_bookmark) {
       removeSaved(item);
     } else {
-      final Intent intent = new Intent(this, MotelRoomDetailActivity.class);
+      final Intent intent = new Intent(this, DetailActivity.class);
       intent.putExtra(EXTRA_MOTEL_ROOM_ID, item.getId());
       startActivity(intent);
     }
@@ -115,12 +113,8 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
 
     firestore.document(Constants.ROOMS_NAME_COLLECION + "/" + item.getId())
         .update("user_ids_saved", FieldValue.arrayRemove(currentUser.getUid()))
-        .addOnSuccessListener(this, aVoid -> {
-          Snackbar.make(recyclerView.getRootView(), "Done", Snackbar.LENGTH_SHORT).show();
-        })
-        .addOnFailureListener(this, e -> {
-          Snackbar.make(recyclerView.getRootView(), e.getMessage(), Snackbar.LENGTH_SHORT).show();
-        });
+        .addOnSuccessListener(this, aVoid -> Snackbar.make(recyclerView.getRootView(), R.string.remove_from_saved_list_successfully, Snackbar.LENGTH_SHORT).show())
+        .addOnFailureListener(this, e -> Snackbar.make(recyclerView.getRootView(), e.getMessage(), Snackbar.LENGTH_SHORT).show());
   }
 
   @Override

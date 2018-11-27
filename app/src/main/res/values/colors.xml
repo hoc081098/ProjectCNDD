@@ -15,4 +15,6 @@
     <color name="colorError">#ef5350</color>
     <color name="colorMaterialTeal500">#009688</color>
     <color name="colorProfileBg">#F6F6F6</color>
+
+    <color name="colorBottomNavBg">#fafafa</color>
 </resources>

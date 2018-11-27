@@ -20,14 +20,12 @@ import butterknife.ButterKnife;
 
 public class SavedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
   public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
-
+  private final RecyclerOnClickListener onClickListener;
   @BindView(R.id.image_saved_room) ImageView image;
   @BindView(R.id.image_saved_room_bookmark) AppCompatImageView imageRemoveBookmark;
   @BindView(R.id.text_saved_room_address) TextView textAddress;
   @BindView(R.id.text_saved_room_price) TextView textPrice;
   @BindView(R.id.text_saved_room_title) TextView textTitle;
-
-  private final RecyclerOnClickListener onClickListener;
 
   public SavedViewHolder(@NonNull View itemView, RecyclerOnClickListener onClickListener) {
     super(itemView);

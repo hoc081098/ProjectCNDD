@@ -1,6 +1,7 @@
 package com.pkhh.projectcndd.screen.detail;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,12 +34,13 @@ public class PhotoSlideActivity extends AppCompatActivity {
     ButterKnife.bind(this, this);
 
     final Intent intent = getIntent();
-    final ArrayList<String> images = intent.getStringArrayListExtra(EXTRA_IMAGES);
+    @Nullable final ArrayList<String> imagesString = intent.getStringArrayListExtra(EXTRA_IMAGES);
+    @SuppressWarnings("unchecked") final ArrayList<Uri> imagesUri = (ArrayList<Uri>) intent.getSerializableExtra(EXTRA_IMAGES);
     final int index = intent.getIntExtra(EXTRA_INDEX, 0);
 
     viewPager.setAdapter(new PagerAdapter() {
       @Override
-      public int getCount() { return images.size(); }
+      public int getCount() { return imagesString != null ? imagesString.size() : imagesUri.size(); }
 
       @Override
       public boolean isViewFromObject(@NonNull View view, @NonNull Object object) { return view == object; }
@@ -54,11 +56,19 @@ public class PhotoSlideActivity extends AppCompatActivity {
         final PhotoView photoView = new PhotoView(container.getContext());
 
         // load image
-        Picasso.get()
-            .load(images.get(position))
-            .fit()
-            .centerCrop()
-            .into(photoView);
+        if (imagesString != null) {
+          Picasso.get()
+              .load(imagesString.get(position))
+              .fit()
+              .centerCrop()
+              .into(photoView);
+        } else {
+          Picasso.get()
+              .load(imagesUri.get(position))
+              .fit()
+              .centerCrop()
+              .into(photoView);
+        }
 
         // Now just add PhotoView to ViewPager and return it
         container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

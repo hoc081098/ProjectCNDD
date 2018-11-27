@@ -14,6 +14,8 @@ import static java.util.Objects.requireNonNull;
 
 public final class LoginRegisterActivity extends AppCompatActivity implements LoginFragment.Listener, RegisterFragment.Listener {
   public static final String TAG = LoginRegisterActivity.class.getSimpleName();
+  public static final String REGISTER_FRAGMENT = "REGISTER_FRAGMENT";
+  public static final String LOGIN_FRAGMENT = "LOGIN_FRAGMENT";
   private boolean isSuccessfully = false;
 
   @Override
@@ -27,7 +29,7 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
           .beginTransaction()
           .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
               R.anim.slide_in_left, R.anim.slide_out_right)
-          .add(R.id.login_register_container, new LoginFragment(), "LOGIN_FRAGMENT")
+          .add(R.id.login_register_container, new LoginFragment(), LOGIN_FRAGMENT)
           .commit();
     }
   }
@@ -50,7 +52,7 @@ public final class LoginRegisterActivity extends AppCompatActivity implements Lo
         .beginTransaction()
         .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
             R.anim.slide_in_left, R.anim.slide_out_right)
-        .replace(R.id.login_register_container, new RegisterFragment(), "REGISTER_FRAGMENT")
+        .replace(R.id.login_register_container, new RegisterFragment(), REGISTER_FRAGMENT)
         .addToBackStack(null)
         .commit();
   }

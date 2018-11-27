@@ -49,15 +49,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            android:text="Hiển thị địa chỉ tương đối"
+            android:text="@string/display_relative_location"
             android:textSize="12sp" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_relative"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            app:srcCompat="@android:color/white"
-            tools:src="@color/colorPrimary" />
+            app:srcCompat="@drawable/relative_unchecked"
+            tools:src="@drawable/relative_checked" />
     </LinearLayout>
 
 

@@ -7,14 +7,16 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.pkhh.projectcndd.R;
+import com.pkhh.projectcndd.screen.detail.PhotoSlideActivity;
+import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -28,11 +30,9 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
   private static final int REQUEST_CODE_SELECT_IMAGE = 1;
   private static final int REQUEST_IMAGE_CAPTURE = 2;
   private static final String CAPTURE_IMAGE_FILE_PROVIDER = "your.package.name.fileprovider";
-
-  private ImageAdapter mAdapter;
-
   @BindView(R.id.button_select_take_photo) View mSelectTakeImage;
   @BindView(R.id.recycler_img) RecyclerView mRecyclerViewImages;
+  private ImageAdapter mAdapter;
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -112,7 +112,12 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
       getDataOutput().getUris().remove(position);
       mAdapter.notifyItemRemoved(position);
     } else if (view.getId() == R.id.img_preview) {
-      Toast.makeText(requireContext(), "Clicked " + getDataOutput().getUris().get(position), Toast.LENGTH_SHORT).show();
+
+      final Intent intent = new Intent(requireContext(), PhotoSlideActivity.class);
+      intent.putExtra(Constants.EXTRA_IMAGES, new ArrayList<>(getDataOutput().getUris()));
+      intent.putExtra(Constants.EXTRA_INDEX, position);
+      startActivity(intent);
+
     }
   }
 
@@ -125,7 +130,7 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
   @Override
   protected void onInvalid() {
     super.onInvalid();
-    Snackbar.make(Objects.requireNonNull(getView()), "Hãy chọn ít nhất 3 ảnh!", Snackbar.LENGTH_SHORT).show();
+    Snackbar.make(Objects.requireNonNull(getView()), getString(R.string.select_at_least_3_photos), Snackbar.LENGTH_SHORT).show();
   }
 
   @Override

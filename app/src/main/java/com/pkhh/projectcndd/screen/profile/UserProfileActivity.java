@@ -25,7 +25,7 @@ import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
-import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
+import com.pkhh.projectcndd.screen.detail.DetailActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
@@ -55,7 +55,7 @@ import static com.pkhh.projectcndd.utils.Constants.USERS_NAME_COLLECION;
 public class UserProfileActivity extends AppCompatActivity {
 
   public static final int PAGE_SIZE = 15;
-
+  private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   @BindView(R.id.root_user_profile) CoordinatorLayout root;
   @BindView(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout collapsingToolbarLayout;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
@@ -67,8 +67,6 @@ public class UserProfileActivity extends AppCompatActivity {
   @BindView(R.id.text_email) TextView textEmail;
   @BindView(R.id.text_name) TextView textName;
   @BindView(R.id.text_address) TextView textAddress;
-
-  private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
   private FirestorePagingAdapter<MotelRoom, CommonRoomVH> adapter;
   private String userName = " ";
 
@@ -145,7 +143,7 @@ public class UserProfileActivity extends AppCompatActivity {
       private void onItemClick(View __, int position) {
         final DocumentSnapshot snapshot = getItem(position);
         if (snapshot != null) {
-          final Intent intent = new Intent(UserProfileActivity.this, MotelRoomDetailActivity.class);
+          final Intent intent = new Intent(UserProfileActivity.this, DetailActivity.class);
           intent.putExtra(EXTRA_MOTEL_ROOM_ID, snapshot.getId());
           startActivity(intent);
         }

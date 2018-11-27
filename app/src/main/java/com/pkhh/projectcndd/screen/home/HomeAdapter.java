@@ -2,7 +2,6 @@ package com.pkhh.projectcndd.screen.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Consumer;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
@@ -31,7 +31,7 @@ import com.daimajia.slider.library.Transformers.ZoomInTransformer;
 import com.daimajia.slider.library.Transformers.ZoomOutSlideTransformer;
 import com.daimajia.slider.library.Transformers.ZoomOutTransformer;
 import com.pkhh.projectcndd.R;
-import com.pkhh.projectcndd.screen.detail.MotelRoomDetailActivity;
+import com.pkhh.projectcndd.screen.detail.DetailActivity;
 import com.pkhh.projectcndd.screen.search.SearchActivity;
 import com.squareup.picasso.Picasso;
 
@@ -52,8 +52,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
+import timber.log.Timber;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
@@ -108,6 +107,9 @@ class HeaderItem implements HomeListItem {
 }
 
 class RoomItem implements HomeListItem {
+  public static final int HIDE = 2;
+  public static final int SHOW_NOT_SAVED = 3;
+  public static final int SHOW_SAVED = 4;
   final String id;
   final String title;
   final long price;
@@ -115,7 +117,6 @@ class RoomItem implements HomeListItem {
   final String districtName;
   @Nullable final String image;
   @BookMarkIconState final int bookMarkIconState;
-
   RoomItem(String id, String title, long price, String address, String districtName, @Nullable String image, int bookMarkIconState) {
     this.id = id;
     this.title = title;
@@ -125,14 +126,6 @@ class RoomItem implements HomeListItem {
     this.image = image;
     this.bookMarkIconState = bookMarkIconState;
   }
-
-  @IntDef(value = {HIDE, SHOW_NOT_SAVED, SHOW_SAVED})
-  @Retention(RetentionPolicy.SOURCE)
-  @interface BookMarkIconState {}
-
-  public static final int HIDE = 2;
-  public static final int SHOW_NOT_SAVED = 3;
-  public static final int SHOW_SAVED = 4;
 
   @Override
   public boolean equals(Object o) {
@@ -152,6 +145,10 @@ class RoomItem implements HomeListItem {
   public int hashCode() {
     return Objects.hash(id, title, price, address, districtName, image, bookMarkIconState);
   }
+
+  @IntDef(value = {HIDE, SHOW_NOT_SAVED, SHOW_SAVED})
+  @Retention(RetentionPolicy.SOURCE)
+  @interface BookMarkIconState {}
 }
 
 class BannerItem implements HomeListItem {
@@ -178,12 +175,8 @@ class BannerItem implements HomeListItem {
 }
 
 class SeeAll implements HomeListItem {
-  public static final int COUNT_VIEW_DESCENDING = 2;
-  public static final int CREATED_AT_DESCENDING = 3;
-
-  @IntDef(value = {CREATED_AT_DESCENDING, COUNT_VIEW_DESCENDING})
-  @interface QueryDirection {}
-
+  static final int COUNT_VIEW_DESCENDING = 2;
+  static final int CREATED_AT_DESCENDING = 3;
   @QueryDirection final int queryDirection;
 
   SeeAll(@QueryDirection int queryDirection) {
@@ -202,18 +195,21 @@ class SeeAll implements HomeListItem {
   public int hashCode() {
     return Objects.hash(queryDirection);
   }
+
+  @IntDef(value = {CREATED_AT_DESCENDING, COUNT_VIEW_DESCENDING})
+  @interface QueryDirection {}
 }
 
 class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
   private static final DecimalFormat PRICE_FORMAT = new DecimalFormat("###,###");
 
   @NonNull
-  private final Function1<String, Void> onAddToOrRemoveFromSavedRooms;
+  private final Consumer<String> onAddToOrRemoveFromSavedRooms;
 
   @NonNull
-  private final Function0<Void> onChangeLocationClick;
+  private final Runnable onChangeLocationClick;
 
-  HomeAdapter(@NonNull Function1<String, Void> onAddToOrRemoveFromSavedRooms, @NonNull Function0<Void> onChangeLocationClick) {
+  HomeAdapter(@NonNull Consumer<String> onAddToOrRemoveFromSavedRooms, @NonNull Runnable onChangeLocationClick) {
     super(new DiffUtil.ItemCallback<HomeListItem>() {
       @Override
       public boolean areItemsTheSame(@NonNull HomeListItem oldItem, @NonNull HomeListItem newItem) {
@@ -292,6 +288,25 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     public abstract void bind(HomeListItem item);
   }
 
+  static class HeaderVH extends VH {
+    @BindView(R.id.text_header_title)
+    TextView textView;
+
+    HeaderVH(@NonNull View itemView) {
+      super(itemView);
+      ButterKnife.bind(this, itemView);
+    }
+
+    @Override
+    public void bind(HomeListItem item) {
+      if (item instanceof HeaderItem) {
+        textView.setText(((HeaderItem) item).title);
+      } else {
+        throw new IllegalStateException("HeaderVH::bind only accept parameters type HeaderItem");
+      }
+    }
+  }
+
   class HomeBannerVH extends VH implements View.OnClickListener {
     private final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
         new AccordionTransformer(),
@@ -316,7 +331,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     @BindView(R.id.slider_layout) SliderLayout sliderLayout;
     @BindView(R.id.button_change_loc) Button buttonChangeLocation;
 
-    public HomeBannerVH(@NonNull View itemView) {
+    HomeBannerVH(@NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
     }
@@ -325,7 +340,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
     @OnClick({R.id.button_change_loc, R.id.edit_text_search})
     public void onClick(View v) {
       if (v.getId() == R.id.button_change_loc) {
-        onChangeLocationClick.invoke();
+        onChangeLocationClick.run();
         return;
       }
 
@@ -338,7 +353,7 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
       if (!(item instanceof BannerItem)) {
         throw new IllegalStateException("HomeBannerVH::bind only accept parameters type BannerItem");
       }
-      Log.d("@@@", "HomeBannerVH::bind");
+      Timber.tag("@@@").d("HomeBannerVH::bind");
       final BannerItem bannerItem = (BannerItem) item;
 
       buttonChangeLocation.setText(bannerItem.selectedProvinceName);
@@ -426,35 +441,16 @@ class HomeAdapter extends ListAdapter<HomeListItem, HomeAdapter.VH> {
           final String id = ((RoomItem) item).id;
 
           if (v.getId() == R.id.image_saved_room_bookmark) {
-            onAddToOrRemoveFromSavedRooms.invoke(id);
+            onAddToOrRemoveFromSavedRooms.accept(id);
           } else {
 
             final Context context = itemView.getContext();
-            final Intent intent = new Intent(context, MotelRoomDetailActivity.class);
+            final Intent intent = new Intent(context, DetailActivity.class);
             intent.putExtra(EXTRA_MOTEL_ROOM_ID, id);
             context.startActivity(intent);
 
           }
         }
-      }
-    }
-  }
-
-  static class HeaderVH extends VH {
-    @BindView(R.id.text_header_title)
-    TextView textView;
-
-    HeaderVH(@NonNull View itemView) {
-      super(itemView);
-      ButterKnife.bind(this, itemView);
-    }
-
-    @Override
-    public void bind(HomeListItem item) {
-      if (item instanceof HeaderItem) {
-        textView.setText(((HeaderItem) item).title);
-      } else {
-        throw new IllegalStateException("HeaderVH::bind only accept parameters type HeaderItem");
       }
     }
   }

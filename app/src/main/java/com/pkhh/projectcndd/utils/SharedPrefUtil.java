@@ -20,6 +20,18 @@ public final class SharedPrefUtil {
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
   }
 
+  @NonNull
+  public static SharedPrefUtil getInstance(Context context) {
+    if (sInstance == null) {
+      synchronized (SharedPrefUtil.class) {
+        if (sInstance == null) {
+          sInstance = new SharedPrefUtil(context);
+        }
+      }
+    }
+    return sInstance;
+  }
+
   public void saveSelectedProvinceId(@Nullable String id) {
     sharedPreferences.edit().putString(SELECTED_PROVINCE_ID_KEY, id).apply();
   }
@@ -36,17 +48,5 @@ public final class SharedPrefUtil {
   @Nullable
   public String getSelectedProvinceName(String defValue) {
     return sharedPreferences.getString(SELECTED_PROVINCE_NAME_KEY, defValue);
-  }
-
-  @NonNull
-  public static SharedPrefUtil getInstance(Context context) {
-    if (sInstance == null) {
-      synchronized (SharedPrefUtil.class) {
-        if (sInstance == null) {
-          sInstance = new SharedPrefUtil(context);
-        }
-      }
-    }
-    return sInstance;
   }
 }
