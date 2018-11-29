@@ -45,6 +45,8 @@ import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.screen.PhotoSlideActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -202,8 +204,16 @@ public class MotelRoomDetailFragment extends Fragment {
             )
         )
         .build();
-    Picasso.get()
+    Picasso
+        .get()
         .load(staticImage.url().toString())
+        .memoryPolicy(MemoryPolicy.NO_CACHE)
+        .networkPolicy(NetworkPolicy.NO_CACHE)
+        .noFade()
+        .fit()
+        .centerCrop()
+        .placeholder(R.drawable.ic_home_primary_dark_24dp)
+        .error(R.drawable.ic_home_primary_dark_24dp)
         .into(imageMap);
 
     // card 2

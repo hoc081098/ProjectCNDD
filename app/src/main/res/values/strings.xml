@@ -58,7 +58,7 @@
     <string name="require_login_to_see_saved_room">To view saved room(s), you must be logged in!</string>
     <string name="ok">OK</string>
     <string name="logout">Logout</string>
-    <string name="sure_logout">Are you sure you want to log out?</string>
+    <string name="sure_logout">Are you sure want to log out?</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="require_login_description">To restricted spam, scam, this function requires you must be logged in!</string>
@@ -162,6 +162,15 @@
     <string name="view_count">View count</string>
     <string name="available_yes">Yes</string>
     <string name="available_no">No</string>
+    <string name="select_options">Options</string>
+    <string name="delete_comment">Delete comment</string>
+    <string name="edit_comment">Edit comment</string>
+    <string name="sure_delete_comment">Are you sure want to delete this comment?</string>
+    <string name="delete_comment_successfully">Delete comment successfully</string>
+    <string name="edit_comment_successfully">Edit comment successfully</string>
+    <string name="add_saved">Add to saved list</string>
+    <string name="share">Share</string>
+    <string name="error">Error: %s</string>
 
 
 </resources>

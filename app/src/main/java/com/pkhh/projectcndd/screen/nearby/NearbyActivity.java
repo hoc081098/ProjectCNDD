@@ -2,8 +2,13 @@ package com.pkhh.projectcndd.screen.nearby;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -41,18 +46,23 @@ import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.utils.Constants;
+import com.pkhh.projectcndd.utils.StringUtil;
 
 import java.util.List;
-import java.util.Objects;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
+
+import static com.pkhh.projectcndd.screen.home.MotelRoomVH.PRICE_FORMAT;
+import static java.util.Objects.requireNonNull;
 
 public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, LocationEngineListener, PermissionsListener {
   private static final String TAG = "@@@@";
@@ -81,6 +91,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_nearby);
+    requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     mapView = findViewById(R.id.map_view);
     mapView.onCreate(savedInstanceState);
@@ -144,7 +155,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
   private void getRoute(@NonNull Point origin, @NonNull Point destination) {
     NavigationRoute.builder(this)
-        .accessToken(Objects.requireNonNull(Mapbox.getAccessToken()))
+        .accessToken(requireNonNull(Mapbox.getAccessToken()))
         .origin(origin)
         .destination(destination)
         .build()
@@ -370,15 +381,41 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
                   .position(new LatLng(room.getAddressGeoPoint().getLatitude(), room.getAddressGeoPoint().getLongitude()))
                   .title(room.getTitle())
                   .icon(
-                      IconFactory.getInstance(this)
-                          .fromResource(R.drawable.ic_action_location_on)
+                      IconFactory
+                          .getInstance(this)
+                          .fromBitmap(getBitmapFromVectorDrawable(R.drawable.ic_location_on_accent_24dp))
                   )
-                  .snippet(room.getDescription())
+                  .snippet(
+                      StringUtil.ellipsize(room.getDescription(), 20) + "\n"
+                          + getString(R.string.price) + ": "
+                          + getString(R.string.detail_price, PRICE_FORMAT.format(room.getPrice()))
+                  )
               )
               .toList();
           Toast.makeText(this, "getDocumentNearBy: {" + latitude + ", " + longitude + ", " + distance + "} --> " + markers.size(), Toast.LENGTH_SHORT).show();
           this.markers = mMap.addMarkers(markers);
         })
         .addOnFailureListener(this, e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+  }
+
+  private Bitmap getBitmapFromVectorDrawable(@DrawableRes int drawableId) {
+    Drawable drawable = ContextCompat.getDrawable(this, drawableId);
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      drawable = DrawableCompat.wrap(drawable).mutate();
+    }
+    final Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+    final Canvas canvas = new Canvas(bitmap);
+    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+    drawable.draw(canvas);
+    return bitmap;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == android.R.id.home) {
+      onBackPressed();
+      return true;
+    }
+    return super.onOptionsItemSelected(item);
   }
 }

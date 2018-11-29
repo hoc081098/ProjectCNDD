@@ -93,8 +93,7 @@ public class RelatedFragment extends Fragment {
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
   private Unbinder unbinder;
-  private FirestoreRecyclerAdapter<MotelRoom, RelatedRoomItemVH> adapter;
-  private String roomId;
+  @Nullable private FirestoreRecyclerAdapter<MotelRoom, RelatedRoomItemVH> adapter;
 
   @BindView(R.id.recycler_related) RecyclerView recyclerView;
   @BindView(R.id.progressbar) ProgressBar progressbar;
@@ -119,13 +118,13 @@ public class RelatedFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     unbinder = ButterKnife.bind(this, view);
 
-    roomId = Objects.requireNonNull(getArguments()).getString(EXTRA_MOTEL_ROOM_ID);
+    String roomId = Objects.requireNonNull(getArguments()).getString(EXTRA_MOTEL_ROOM_ID);
 
     firestore
         .document(Constants.ROOMS_NAME_COLLECION + "/" + roomId)
         .get()
         .continueWith(task -> FirebaseModel.documentSnapshotToObject(Objects.requireNonNull(task.getResult()), MotelRoom.class))
-        .addOnSuccessListener(this::setupRecycler);
+        .addOnSuccessListener(requireActivity(), this::setupRecycler);
   }
 
   private void setupRecycler(MotelRoom room) {
@@ -196,7 +195,9 @@ public class RelatedFragment extends Fragment {
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    adapter.stopListening();
+    if (adapter != null) {
+      adapter.stopListening();
+    }
     unbinder.unbind();
   }
 }

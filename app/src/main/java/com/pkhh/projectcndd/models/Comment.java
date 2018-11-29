@@ -108,7 +108,6 @@ public class Comment extends FirebaseModel {
     return createdAt;
   }
 
-  @ServerTimestamp
   @PropertyName("created_at")
   public void setCreatedAt(Date createdAt) {
     this.createdAt = createdAt;
@@ -121,7 +120,6 @@ public class Comment extends FirebaseModel {
     return updatedAt;
   }
 
-  @ServerTimestamp
   @PropertyName("updated_at")
   public void setUpdatedAt(@Nullable Date updatedAt) {
     this.updatedAt = updatedAt;

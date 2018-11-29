@@ -79,16 +79,19 @@
 
         <activity
             android:name=".screen.post.PickAddressActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/pick_address"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.post.WardActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/select_ward"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.post.DistrictActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/select_district"
             android:screenOrientation="portrait" />
 
@@ -113,49 +116,59 @@
 
         <activity
             android:name=".screen.post.PostActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".screen.loginregister.LoginRegisterActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.saved.SavedRoomsActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/saved"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.nearby.NearbyActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/nearby"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.home.ShowMoreActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.profile.UserProfileActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".screen.PhotoSlideActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Dialog" />
 
         <activity
             android:name=".screen.search.SearchActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/search"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".screen.home.MainActivity"
+            android:configChanges="layoutDirection|locale"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".screen.detail.DetailActivity"
+            android:configChanges="layoutDirection|locale"
             android:label="@string/detail" />
 
         <service

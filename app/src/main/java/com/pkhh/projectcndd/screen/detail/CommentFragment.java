@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,7 +28,9 @@ import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.Comment;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.screen.loginregister.LoginRegisterActivity;
+import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.utils.Constants;
+import com.pkhh.projectcndd.utils.RecyclerOnLongClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -35,10 +38,12 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -51,6 +56,8 @@ import butterknife.Unbinder;
 
 import static com.pkhh.projectcndd.utils.Constants.COMMENTS_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_FULL_NAME;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_USER_ID;
 import static java.util.Objects.requireNonNull;
 
 class CommentVH extends RecyclerView.ViewHolder {
@@ -60,9 +67,23 @@ class CommentVH extends RecyclerView.ViewHolder {
   @BindView(R.id.item_comment_text_name_date) TextView textNameDate;
   @BindView(R.id.item_comment_text_content) TextView textContent;
 
-  public CommentVH(@NonNull View itemView) {
+
+  public CommentVH(@NonNull View itemView, final @NonNull RecyclerOnLongClickListener longClickListener, final @NonNull RecyclerOnLongClickListener clickListener) {
     super(itemView);
     ButterKnife.bind(this, itemView);
+    imageAvatar.setOnClickListener(v -> {
+      final int position = getAdapterPosition();
+      if (position != RecyclerView.NO_POSITION) {
+        clickListener.onLongClick(v, position);
+      }
+    });
+    itemView.setOnLongClickListener(v -> {
+      final int position = getAdapterPosition();
+      if (position != RecyclerView.NO_POSITION) {
+        longClickListener.onLongClick(v, position);
+      }
+      return true;
+    });
   }
 
   @SuppressLint("SetTextI18n")
@@ -83,8 +104,6 @@ class CommentVH extends RecyclerView.ViewHolder {
 }
 
 public class CommentFragment extends Fragment {
-
-
   public static final int MIN_LENGTH_OF_COMMENT = 5;
 
   public static CommentFragment newInstance(String id) {
@@ -101,6 +120,8 @@ public class CommentFragment extends Fragment {
   private String roomId;
   private Unbinder unbinder;
   private AlertDialog requireLoginDialog;
+  private AlertDialog deleteDialog;
+  private AlertDialog editDialog;
   private FirestoreRecyclerAdapter<Comment, CommentVH> adapter;
 
   @BindView(R.id.recycler_comments) RecyclerView recyclerComments;
@@ -184,11 +205,11 @@ public class CommentFragment extends Fragment {
                 .collection(COMMENTS_NAME_COLLECION)
                 .add(commentMap);
           })
-          .addOnSuccessListener(documentReference -> {
+          .addOnSuccessListener(requireActivity(), documentReference -> {
             Toast.makeText(requireContext(), R.string.add_comment_successfully, Toast.LENGTH_SHORT).show();
             requireNonNull(textInputComment.getEditText()).setText(null);
           })
-          .addOnFailureListener(e -> {
+          .addOnFailureListener(requireActivity(), e -> {
             Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
           });
 
@@ -215,8 +236,9 @@ public class CommentFragment extends Fragment {
       @Override
       public CommentVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new CommentVH(
-            LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_item_layout, parent, false)
-        );
+            LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_item_layout, parent, false),
+            CommentFragment.this::onLongClick,
+            CommentFragment.this::onClick);
       }
 
       @Override
@@ -241,26 +263,114 @@ public class CommentFragment extends Fragment {
       }
     };
     recyclerComments.setAdapter(adapter);
+
+    adapter.startListening();
   }
 
-  @Override
-  public void onResume() {
-    super.onResume();
-    adapter.startListening();
+  private void onClick(View view, int position) {
+    if (view.getId() == R.id.item_comment_image_avatar) {
+      final Comment item = adapter.getItem(position);
+      final Intent intent = new Intent(requireContext(), UserProfileActivity.class);
+      intent.putExtra(EXTRA_USER_ID, item.getUserId());
+      intent.putExtra(EXTRA_USER_FULL_NAME, item.getUserName());
+      startActivity(intent);
+    }
+  }
+
+  private void onLongClick(View view, int position) {
+    final Comment item = adapter.getItem(position);
+    final FirebaseUser currentUser = auth.getCurrentUser();
+    if (currentUser != null && Objects.equals(item.getUserId(), currentUser.getUid())) {
+      final PopupMenu popupMenu = new PopupMenu(requireContext(), view);
+      popupMenu.inflate(R.menu.comment_popup_menu);
+      popupMenu.setOnMenuItemClickListener(menuItem -> {
+        switch (menuItem.getItemId()) {
+          case R.id.action_delete_comment:
+            deleteComment(item.getId());
+            return true;
+          case R.id.action_edit_comment:
+            editComment(item);
+            return true;
+        }
+        return false;
+      });
+      popupMenu.show();
+    }
+  }
+
+  private void editComment(Comment comment) {
+    View view = getLayoutInflater().inflate(R.layout.edit_comment_dialog, null);
+    final TextInputLayout textInputComment = view.findViewById(R.id.text_input_comment);
+    final EditText editText = requireNonNull(textInputComment.getEditText());
+    editText.setText(comment.getContent());
+
+    editDialog = new AlertDialog.Builder(requireContext())
+        .setTitle(R.string.edit_comment)
+        .setIcon(R.drawable.ic_edit_black_24dp)
+        .setView(view)
+        .setNegativeButton(R.string.cancel, (dialog, __) -> dialog.dismiss())
+        .setPositiveButton(R.string.ok, (dialog, __) -> {
+          dialog.dismiss();
+          final String newContent = editText.getText().toString();
+          if (!Objects.equals(newContent, comment.getContent())) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("content", newContent);
+            map.put("updated_at", FieldValue.serverTimestamp());
+
+            firestore
+                .document(COMMENTS_NAME_COLLECION + "/" + comment.getId())
+                .update(map)
+                .addOnSuccessListener(requireActivity(), documentReference -> {
+                  Toast.makeText(requireContext(), R.string.edit_comment_successfully, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(requireActivity(), e -> {
+                  Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+          }
+        })
+        .show();
+  }
+
+  private void deleteComment(String id) {
+    deleteDialog = new AlertDialog.Builder(requireContext())
+        .setTitle(R.string.delete_comment)
+        .setMessage(R.string.sure_delete_comment)
+        .setIcon(R.drawable.ic_delete_grey_24dp)
+        .setNegativeButton(R.string.cancel, (dialog, __) -> dialog.dismiss())
+        .setPositiveButton(R.string.ok, (dialog, __) -> {
+          dialog.dismiss();
+          firestore
+              .document(COMMENTS_NAME_COLLECION + "/" + id)
+              .delete()
+              .addOnSuccessListener(requireActivity(), documentReference -> {
+                Toast.makeText(requireContext(), R.string.delete_comment_successfully, Toast.LENGTH_SHORT).show();
+              })
+              .addOnFailureListener(requireActivity(), e -> {
+                Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+              });
+        })
+        .show();
   }
 
   @Override
   public void onPause() {
     super.onPause();
-    adapter.stopListening();
     if (requireLoginDialog != null && requireLoginDialog.isShowing()) {
       requireLoginDialog.dismiss();
+    }
+    if (deleteDialog != null && deleteDialog.isShowing()) {
+      deleteDialog.dismiss();
+    }
+    if (editDialog != null && editDialog.isShowing()) {
+      editDialog.dismiss();
     }
   }
 
   @Override
   public void onDestroyView() {
     super.onDestroyView();
+    adapter.stopListening();
+
     unbinder.unbind();
   }
 }

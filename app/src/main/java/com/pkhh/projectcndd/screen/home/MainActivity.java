@@ -34,6 +34,8 @@ import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.screen.saved.SavedRoomsActivity;
 import com.pkhh.projectcndd.utils.Language;
 import com.pkhh.projectcndd.utils.LanguageUtil;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.security.MessageDigest;
@@ -368,11 +370,16 @@ public class MainActivity extends AppCompatActivity
               textEmail.setText(user.getEmail());
 
               if (!TextUtils.isEmpty(user.getAvatar())) {
-                Picasso.get()
+                Picasso
+                    .get()
                     .load(user.getAvatar())
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .noFade()
                     .fit()
                     .centerCrop()
-                    .noFade()
+                    .placeholder(R.drawable.avatar_default_icon)
+                    .error(R.drawable.avatar_default_icon)
                     .into(imageAvatar);
               }
             }

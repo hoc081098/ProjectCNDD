@@ -149,5 +149,13 @@
     <string name="view_count">Lượt xem</string>
     <string name="available_yes">Còn</string>
     <string name="available_no">Không còn</string>
-
+    <string name="select_options">Tùy chọn</string>
+    <string name="delete_comment">Xóa nhận xét</string>
+    <string name="edit_comment">Chỉnh sửa nhận xét</string>
+    <string name="sure_delete_comment">Bạn muốn xóa nhận xét này?</string>
+    <string name="delete_comment_successfully">Xóa nhận xét thành công</string>
+    <string name="edit_comment_successfully">Chỉnh sửa nhận xét thành công</string>
+    <string name="add_saved">Thêm vào đã lưu</string>
+    <string name="share">Chia sẻ</string>
+    <string name="error">Lỗi: %s</string>
 </resources>
