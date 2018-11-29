@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito_sans"
-        android:text="Xem profile"
+        android:text="@string/view_profile"
         android:textColor="#DC424242" />
 
 </LinearLayout>

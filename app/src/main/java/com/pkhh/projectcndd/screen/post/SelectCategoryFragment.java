@@ -1,5 +1,6 @@
 package com.pkhh.projectcndd.screen.post;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,16 +62,15 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
     }
   };
 
-  @Nullable
-  private final Consumer<Category> onSelectCategory;
-
-  @Nullable
-  private Category selectedCategory;
+  @Nullable private final Consumer<Category> onSelectCategory;
+  @Nullable private Category selectedCategory;
   private List<Category> categories;
+  private Context context;
 
-  CategoryAdapter(@Nullable Consumer<Category> onSelectCategory) {
+  CategoryAdapter(@Nullable Consumer<Category> onSelectCategory, Context context) {
     super(DIFF_CALLBACK);
     this.onSelectCategory = onSelectCategory;
+    this.context = context;
   }
 
   void submitListCategories(@NonNull List<Category> categories) {
@@ -83,9 +83,9 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
       return;
     }
     List<Object> list = new ArrayList<>();
-    list.add("Đã chọn");
+    list.add(context.getString(R.string.selected));
     list.add(new SelectionCategory(true, selectedCategory));
-    list.add("Lựa chọn khác");
+    list.add(context.getString(R.string.other_selection));
     List<SelectionCategory> notSelected = Stream.ofNullable(categories)
         .filterNot(i -> i.equals(selectedCategory))
         .map(i -> new SelectionCategory(false, i))
@@ -210,13 +210,13 @@ class CategoryAdapter extends ListAdapter<Object, RecyclerView.ViewHolder> {
 
 public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput> {
   private final Query query = FirebaseFirestore.getInstance().collection(CATEGORIES_NAME_COLLECION);
-  private final CategoryAdapter adapter = new CategoryAdapter(this::onSelectCategory);
+
   @BindView(R.id.recycler_category) RecyclerView recyclerView;
+  private CategoryAdapter adapter;
   private ListenerRegistration registration;
 
-  private Void onSelectCategory(Category category) {
+  private void onSelectCategory(Category category) {
     getDataOutput().setSelectedCategoryId(category.getId());
-    return null;
   }
 
   @Override
@@ -245,6 +245,7 @@ public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput>
   }
 
   private void setupRecyclerView() {
+    adapter = new CategoryAdapter(this::onSelectCategory, requireContext());
     recyclerView.setHasFixedSize(true);
     recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
     recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), VERTICAL));
@@ -254,7 +255,7 @@ public class SelectCategoryFragment extends StepFragment<CategoryFragmentOutput>
   @Override
   public void onInvalid() {
     super.onInvalid();
-    Snackbar.make(Objects.requireNonNull(getView()), "Hãy chọn một thể loại", Snackbar.LENGTH_SHORT).show();
+    Snackbar.make(Objects.requireNonNull(getView()), getString(R.string.must_select_a_category), Snackbar.LENGTH_SHORT).show();
   }
 
   @Override

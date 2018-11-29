@@ -15,10 +15,12 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true" />
+        android:required="false" />
+
 
     <application
         android:name=".App"
@@ -28,6 +30,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.pkhh.projectcndd.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
 
         <!-- Facebook -->
         <meta-data
@@ -114,6 +127,7 @@
 
         <activity
             android:name=".screen.nearby.NearbyActivity"
+            android:label="@string/nearby"
             android:screenOrientation="portrait" />
 
         <activity
@@ -126,7 +140,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".screen.detail.PhotoSlideActivity"
+            android:name=".screen.PhotoSlideActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Dialog" />
 

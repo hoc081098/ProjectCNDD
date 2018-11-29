@@ -339,7 +339,6 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void getDocumentNearBy(double latitude, double longitude, double distance) {
-
     // ~1 mile of lat and lon in degrees
     double lat = 0.0144927536231884;
     double lon = 0.0181818181818182;
@@ -355,6 +354,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
 
     CollectionReference docRef = FirebaseFirestore.getInstance().collection(Constants.ROOMS_NAME_COLLECION);
     Query query = docRef
+        .whereEqualTo("approve", true)
         .whereGreaterThan("address_geopoint", lesserGeoPoint)
         .whereLessThan("address_geopoint", greaterGeoPoint);
 
@@ -371,7 +371,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
                   .title(room.getTitle())
                   .icon(
                       IconFactory.getInstance(this)
-                          .fromResource(R.drawable.ic_location_on_black_24dp)
+                          .fromResource(R.drawable.ic_action_location_on)
                   )
                   .snippet(room.getDescription())
               )

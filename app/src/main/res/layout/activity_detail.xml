@@ -14,8 +14,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:menu="@menu/bottom_detail_menu"
-        app:itemIconTint="@color/colorAccent"
-        app:itemTextColor="#212121"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
         app:itemBackground="@color/colorBottomNavBg"
         app:layout_constraintStart_toStartOf="parent" />
 

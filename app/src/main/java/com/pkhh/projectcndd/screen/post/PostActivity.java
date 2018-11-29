@@ -6,14 +6,12 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Property;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -96,7 +94,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
   private void setupActionBar() {
     final ActionBar supportActionBar = requireNonNull(getSupportActionBar());
     supportActionBar.setDisplayHomeAsUpEnabled(true);
-    supportActionBar.setTitle("Bạn đăng tin");
+    supportActionBar.setTitle(getString(R.string.post_room));
   }
 
   private void initStepLayout(List<StepFragment> fragmentList) {
@@ -158,13 +156,13 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     final ActionBar supportActionBar = requireNonNull(getSupportActionBar());
 
     if (position == 0) {
-      supportActionBar.setTitle("Chọn thể loại");
+      supportActionBar.setTitle(getString(R.string.select_category));
     } else if (position == 1) {
-      supportActionBar.setTitle("Thêm địa chỉ");
+      supportActionBar.setTitle(getString(R.string.add_address));
     } else if (position == 2) {
-      supportActionBar.setTitle("Thêm ảnh");
+      supportActionBar.setTitle(getString(R.string.add_image));
     } else if (position == 3) {
-      supportActionBar.setTitle("Thêm thông tin");
+      supportActionBar.setTitle(getString(R.string.add_info));
     }
     mContainer.setCurrentItem(position, true);
   }
@@ -224,20 +222,12 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     }
   }
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.post, menu);
-    return true;
-  }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == android.R.id.home) {
       onBackPressed();
-    }
-    if (item.getItemId() == R.id.action_review) {
-      //TODO: Xem lại thông tin
-      Toast.makeText(this, "TODO: xem lại thông tin", Toast.LENGTH_SHORT).show();
+      return true;
     }
     return super.onOptionsItemSelected(item);
   }
@@ -262,12 +252,12 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
 
     // address
     room.setAddress(mSelectAddressLocationFragment.getDataOutput().getAddress());
-    room.setAddressGeoPoint(new GeoPoint(mSelectAddressLocationFragment.getDataOutput().getLatLng().latitude, mSelectAddressLocationFragment.getDataOutput().getLatLng().longitude));
+    room.setAddressGeoPoint(new GeoPoint(requireNonNull(mSelectAddressLocationFragment.getDataOutput().getLatLng()).latitude, mSelectAddressLocationFragment.getDataOutput().getLatLng().longitude));
     final DocumentReference provinceRef = firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + mSelectAddressLocationFragment.getDataOutput().getProvinceId());
     room.setProvince(provinceRef);
-    final DocumentReference districtRef = provinceRef.collection(Constants.DISTRICTS_NAME_COLLECION).document(mSelectAddressLocationFragment.getDataOutput().getDistrictId());
+    final DocumentReference districtRef = provinceRef.collection(Constants.DISTRICTS_NAME_COLLECION).document(requireNonNull(mSelectAddressLocationFragment.getDataOutput().getDistrictId()));
     room.setDistrict(districtRef);
-    final DocumentReference wardRef = districtRef.collection(Constants.WARDS_NAME_COLLECION).document(mSelectAddressLocationFragment.getDataOutput().getWardId());
+    final DocumentReference wardRef = districtRef.collection(Constants.WARDS_NAME_COLLECION).document(requireNonNull(mSelectAddressLocationFragment.getDataOutput().getWardId()));
     room.setWard(wardRef);
 
     // some others

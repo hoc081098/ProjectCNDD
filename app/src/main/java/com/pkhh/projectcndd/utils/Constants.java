@@ -6,6 +6,7 @@ public class Constants {
   public static final String EXTRA_USER_ID = "com.pkhh.projectcndd.user_id";
   public static final String EXTRA_USER_FULL_NAME = "com.pkhh.projectcndd.user_name";
   public static final String EXTRA_IMAGES = "com.pkhh.projectcndd.room_images";
+  public static final String EXTRA_IMAGES_URIS = "com.pkhh.projectcndd.room_images_uris";
   public static final String EXTRA_INDEX = "com.pkhh.projectcndd.index";
   public static final String EXTRA_QUERY_DIRECTION = "com.pkhh.projectcndd.query_direction";
   public static final String EXTRA_ADDRESS = "com.pkhh.projectcndd.address";
@@ -24,6 +25,7 @@ public class Constants {
   public static final String PROVINCES_NAME_COLLECION = "provinces";
   public static final String DISTRICTS_NAME_COLLECION = "districts";
   public static final String WARDS_NAME_COLLECION = "wards";
+  public static final String COMMENTS_NAME_COLLECION = "comments";
 
   private Constants() {}
 }

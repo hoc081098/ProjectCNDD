@@ -17,6 +17,22 @@ import android.widget.Toast;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
+import com.daimajia.slider.library.Transformers.AccordionTransformer;
+import com.daimajia.slider.library.Transformers.BackgroundToForegroundTransformer;
+import com.daimajia.slider.library.Transformers.BaseTransformer;
+import com.daimajia.slider.library.Transformers.CubeInTransformer;
+import com.daimajia.slider.library.Transformers.DefaultTransformer;
+import com.daimajia.slider.library.Transformers.DepthPageTransformer;
+import com.daimajia.slider.library.Transformers.FadeTransformer;
+import com.daimajia.slider.library.Transformers.FlipHorizontalTransformer;
+import com.daimajia.slider.library.Transformers.FlipPageViewTransformer;
+import com.daimajia.slider.library.Transformers.RotateDownTransformer;
+import com.daimajia.slider.library.Transformers.RotateUpTransformer;
+import com.daimajia.slider.library.Transformers.StackTransformer;
+import com.daimajia.slider.library.Transformers.TabletTransformer;
+import com.daimajia.slider.library.Transformers.ZoomInTransformer;
+import com.daimajia.slider.library.Transformers.ZoomOutSlideTransformer;
+import com.daimajia.slider.library.Transformers.ZoomOutTransformer;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -27,6 +43,7 @@ import com.mapbox.geojson.Point;
 import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
+import com.pkhh.projectcndd.screen.PhotoSlideActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.squareup.picasso.Picasso;
 
@@ -37,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,6 +78,28 @@ import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 
 public class MotelRoomDetailFragment extends Fragment {
   public final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
+
+  private static final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
+      new AccordionTransformer(),
+      new BackgroundToForegroundTransformer(),
+      new CubeInTransformer(),
+      new FlipHorizontalTransformer(),
+      new FlipPageViewTransformer(),
+      new FadeTransformer(),
+      new DepthPageTransformer(),
+      new DefaultTransformer(),
+      new CubeInTransformer(),
+      new RotateDownTransformer(),
+      new RotateUpTransformer(),
+      new StackTransformer(),
+      new TabletTransformer(),
+      new ZoomInTransformer(),
+      new ZoomOutSlideTransformer(),
+      new ZoomOutTransformer()
+  };
+  private final Random random = new Random();
+
+
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
   @BindView(R.id.sliderLayout) SliderLayout sliderLayout;
@@ -138,7 +178,7 @@ public class MotelRoomDetailFragment extends Fragment {
     final MapboxStaticMap staticImage = MapboxStaticMap.builder()
         .accessToken(getString(R.string.mapbox_access_token))
         .styleId(StaticMapCriteria.LIGHT_STYLE)
-        .cameraPoint(point) // Image's centerpoint on map
+        .cameraPoint(point) // Image's center point on map
         .cameraZoom(8)
         .width(dpToPx(92)) // Image width
         .height(dpToPx(92)) // Image height
@@ -196,6 +236,8 @@ public class MotelRoomDetailFragment extends Fragment {
           .setScaleType(BaseSliderView.ScaleType.FitCenterCrop);
       sliderLayout.addSlider(sliderView);
     }
+
+    sliderLayout.setPagerTransformer(true, TRANSFORMERS[random.nextInt(TRANSFORMERS.length)]);
   }
 
   private void onSliderClick(int index, List<String> images) {

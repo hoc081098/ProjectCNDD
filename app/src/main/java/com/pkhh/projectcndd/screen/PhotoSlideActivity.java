@@ -1,4 +1,4 @@
-package com.pkhh.projectcndd.screen.detail;
+package com.pkhh.projectcndd.screen;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -21,6 +21,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_IMAGES;
+import static com.pkhh.projectcndd.utils.Constants.EXTRA_IMAGES_URIS;
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_INDEX;
 
 public class PhotoSlideActivity extends AppCompatActivity {
@@ -35,7 +36,7 @@ public class PhotoSlideActivity extends AppCompatActivity {
 
     final Intent intent = getIntent();
     @Nullable final ArrayList<String> imagesString = intent.getStringArrayListExtra(EXTRA_IMAGES);
-    @SuppressWarnings("unchecked") final ArrayList<Uri> imagesUri = (ArrayList<Uri>) intent.getSerializableExtra(EXTRA_IMAGES);
+    @SuppressWarnings("unchecked") final ArrayList<Uri> imagesUri = (ArrayList<Uri>) intent.getSerializableExtra(EXTRA_IMAGES_URIS);
     final int index = intent.getIntExtra(EXTRA_INDEX, 0);
 
     viewPager.setAdapter(new PagerAdapter() {

@@ -118,6 +118,7 @@ public class UserProfileActivity extends AppCompatActivity {
   private void setupRecyclerView(String userId) {
     final Query query = firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("user", firestore.document(USERS_NAME_COLLECION + "/" + userId))
+        .whereEqualTo("approve", true)
         .orderBy("created_at", Query.Direction.DESCENDING);
 
     final PagedList.Config config = new PagedList.Config.Builder()

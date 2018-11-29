@@ -7,6 +7,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.pkhh.projectcndd.R;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import androidx.annotation.Nullable;
@@ -42,16 +43,18 @@ public class DetailActivity extends AppCompatActivity {
   private void initViews() {
     Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+    final List<Fragment> fragments = Arrays.asList(
+        MotelRoomDetailFragment.newInstance(roomId),
+        CommentFragment.newInstance(roomId),
+        RelatedFragment.newInstance(roomId)
+    );
+
     viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
       @Override
-      public Fragment getItem(int position) {
-        return Arrays.asList(
-            MotelRoomDetailFragment.newInstance(roomId)
-        ).get(position);
-      }
+      public Fragment getItem(int position) { return fragments.get(position); }
 
       @Override
-      public int getCount() { return 1; }
+      public int getCount() { return fragments.size(); }
     });
 
     bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {

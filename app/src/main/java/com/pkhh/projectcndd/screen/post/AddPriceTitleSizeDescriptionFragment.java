@@ -97,10 +97,10 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
         textPrice.setText(NumberToVietnamese.convert(price));
 
         if (price < 100_000) {
-          textInputPrice.setError("Giá quá thấp. Vui lòng sửa lại giá thực tế");
+          textInputPrice.setError(getString(R.string.price_too_low));
           isPriceValid = false;
         } else if (price > 10_000_000) {
-          textInputPrice.setError("Giá quá cao. Vui lòng sửa lại giá thực tế");
+          textInputPrice.setError(getString(R.string.price_too_high));
         } else {
           textInputPrice.setError(null);
           isPriceValid = true;
@@ -126,7 +126,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
 
           if (Double.compare(size, 0) <= 0) {
             isSizeValid = false;
-            textInputSize.setError("Nhập sai diện tích");
+            textInputSize.setError(getString(R.string.invalid_size));
           } else {
 
             updateSuggestTitle(size);
@@ -136,7 +136,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
           }
 
         } catch (NumberFormatException e) {
-          textInputSize.setError("Nhập sai diện tích");
+          textInputSize.setError(getString(R.string.invalid_size));
           isSizeValid = false;
           size = 0;
         }
@@ -158,7 +158,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (s.length() < MIN_LENGTH_OF_TITLE) {
-          textInputTitle.setError("Tiêu đề quá ngắn");
+          textInputTitle.setError(getString(R.string.too_short_title));
           isTitleValid = false;
         } else {
           textInputTitle.setError(null);
@@ -198,7 +198,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         isPhoneValid = Patterns.PHONE.matcher(s).matches();
-        textInputPhone.setError(isPhoneValid ? null : "Số điện thoại sai định dạng. Vui lòng nhập lại!");
+        textInputPhone.setError(isPhoneValid ? null : getString(R.string.invalid_phone));
         getDataOutput().setPhone(s.toString());
       }
 
@@ -228,7 +228,7 @@ public class AddPriceTitleSizeDescriptionFragment extends StepFragment<PriceTitl
   @Override
   protected void onInvalid() {
     super.onInvalid();
-    Snackbar.make(Objects.requireNonNull(getView()), "Hãy cung cấp đủ thông tin!", Snackbar.LENGTH_SHORT).show();
+    Snackbar.make(Objects.requireNonNull(getView()), getString(R.string.must_provide_full_info), Snackbar.LENGTH_SHORT).show();
   }
 
 

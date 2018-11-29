@@ -61,6 +61,7 @@ public class ShowMoreActivity extends AppCompatActivity {
 
     if (queryDir == CREATED_AT_DESCENDING) {
       final Query query = firestore.collection(Constants.ROOMS_NAME_COLLECION)
+          .whereEqualTo("approve", true)
           .whereEqualTo("province", selectedProvinceRef)
           .whereEqualTo("is_active", true)
           .orderBy("created_at", Query.Direction.DESCENDING);
@@ -70,6 +71,7 @@ public class ShowMoreActivity extends AppCompatActivity {
 
     } else if (queryDir == COUNT_VIEW_DESCENDING) {
       final Query query = firestore.collection(ROOMS_NAME_COLLECION)
+          .whereEqualTo("approve", true)
           .whereEqualTo("province", selectedProvinceRef)
           .whereEqualTo("is_active", true)
           .orderBy("count_view", Query.Direction.DESCENDING);

@@ -5,25 +5,19 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-
-    <string name="action_settings">Cài đặt</string>
-
+    <string name="action_change_language">@string/change_language_title</string>
     <string name="pick_address">Chọn vị trí</string>
     <string name="hint_location">Tim vị trí của bạn</string>
-
     <string name="user_location_permission_explanation" />
     <string name="user_location_permission_not_granted">Quyền vị tri không được cho phép</string>
-
     <string name="select_province_city">Chọn tỉnh, thành phố</string>
     <string name="select_district">Chọn quận, huyện</string>
     <string name="select_ward">Chọn xã, phường, thị trấn</string>
     <string name="images">Hình ảnh</string>
     <string name="saved">Đã lưu</string>
-
     <string name="login_with_facebook">Login bằng Facebook</string>
     <string name="login">Đăng nhập</string>
     <string name="register_account">Đăng kí tài khoản</string>
@@ -66,7 +60,7 @@
     <string name="image">Ảnh %d</string>
     <string name="posted_date">Ngày đăng: %s</string>
     <string name="detail_price">$ %s đ</string>
-    <string name="view_all">View all</string>
+    <string name="view_all">Xem tất cả</string>
     <string name="newest">Mới nhất</string>
     <string name="watch_more">Xem nhiều</string>
     <string name="change_province">Thay đổi tỉnh, thành phố</string>
@@ -83,4 +77,73 @@
     <string name="detail">Chi tiết</string>
     <string name="comment">Nhận xét</string>
     <string name="related">Tương tự</string>
+    <string name="have_not_camera">Thiết bị không hỗ trợ camera</string>
+
+
+    <!--change language-->
+    <string name="change_language_title">Thay đổi ngôn ngữ</string>
+
+
+    <string name="home_page">Trang chủ</string>
+    <string name="post">Đăng bài</string>
+    <string name="service_not_available">Dịch vụ không có sẵn</string>
+    <string name="invalid_lat_long_used">Kinh độ vĩ độ không hợp lệ</string>
+    <string name="no_address_found">Không tìm thấy địa chỉ</string>
+    <string name="empty_comment">Không có nhận xét nào</string>
+    <string name="invalid_comment">Ít nhất %d kí tự</string>
+    <string name="add_comment_successfully">Thêm nhận xét thành công</string>
+    <string name="have_not_camera_app">Không có camera app</string>
+    <string name="post_room">Bạn đăng tin</string>
+    <string name="must_select_a_category">Hãy chọn một thể loại</string>
+    <string name="selected">Đã chọn</string>
+    <string name="other_selection">Lựa chọn khác</string>
+    <string name="must_provide_address">Hãy nhập địa chỉ</string>
+    <string name="must_provide_lat">Hãy nhập vĩ độ</string>
+    <string name="invalid_lat_range">Vĩ độ phải trong khoảng -90..90</string>
+    <string name="invalid_format_lat">Vĩ độ sai định dạng</string>
+    <string name="must_provide_lng">Hãy nhập kinh độ</string>
+    <string name="invalid_lng_range">Kinh độ phải trong khoảng -180..180</string>
+    <string name="invalid_format_lng">Kinh độ sai định dạng</string>
+    <string name="select_province_before">Bạn phải chọn tỉnh trước</string>
+    <string name="select_district_before">Bạn phải chọn huyện trước</string>
+    <string name="must_provide_full_address">Hãy cung cấp đầy đủ địa chỉ</string>
+    <string name="price_too_low">Giá quá thấp. Vui lòng sửa lại giá thực tế</string>
+    <string name="price_too_high">Giá quá cao. Vui lòng sửa lại giá thực tế</string>
+    <string name="invalid_size">Nhập sai diện tích</string>
+    <string name="too_short_title">Tiêu đề quá ngắn</string>
+    <string name="invalid_phone">Số điện thoại sai định dạng. Vui lòng nhập lại!</string>
+    <string name="must_provide_full_info">Hãy cung cấp đủ thông tin!</string>
+    <string name="select_category">Chọn thể loại</string>
+    <string name="add_address">Thêm địa chỉ</string>
+    <string name="add_image">Thêm ảnh</string>
+    <string name="add_info">Thêm thông tin</string>
+    <string name="start_navigation">Bắt đầu điều hướng</string>
+    <string name="email_ellipsis">Email…</string>
+    <string name="address_ellipsis">Địa chỉ…</string>
+    <string name="posted_rooms">Các bài đã đăng</string>
+    <string name="take_photo">Chụp ảnh</string>
+    <string name="select_image_gallery">Chọn ảnh trong máy</string>
+    <string name="select_image_or_take_photo">Chọn ảnh / Chụp ảnh</string>
+    <string name="price">Giá phòng</string>
+    <string name="size">Diện tích</string>
+    <string name="title">Tiêu đề</string>
+    <string name="select_suggest_title">Chọn tiêu đề gợi ý</string>
+    <string name="add_description">Thêm mô tả</string>
+    <string name="contact_phone_number">Số điện thoại liên lạc</string>
+    <string name="contact">Liên hệ:</string>
+    <string name="call">Gọi điện</string>
+    <string name="send_sms">Nhắn sms</string>
+    <string name="province_city">TỈNH, THÀNH PHỐ (*):</string>
+    <string name="Longitude">Kinh độ</string>
+    <string name="latitude">Vĩ độ</string>
+    <string name="district">QUẬN, HUYỆN (*):</string>
+    <string name="ward">XÃ, PHƯỜNG, THỊ TRẤN (*):</string>
+    <string name="street_number_house_number">số đường, số nhà (*):</string>
+    <string name="view_profile">Xem profile</string>
+    <string name="should_grant_location_permission">Bạn nên cho phép truy cập quyển vị trí</string>
+    <string name="location_you_select">Vị trí bạn chọn</string>
+    <string name="location">Vị trí</string>
+    <string name="current_location">Vị trí hiện tại</string>
+    <string name="nearby">Gần đây</string>
+
 </resources>

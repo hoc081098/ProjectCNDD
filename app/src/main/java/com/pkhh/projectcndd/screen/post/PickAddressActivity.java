@@ -2,6 +2,8 @@ package com.pkhh.projectcndd.screen.post;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -45,7 +47,9 @@ import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.geojson.Point;
 import com.pkhh.projectcndd.R;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -54,6 +58,11 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -110,6 +119,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   @Nullable private LatLng mInputLatLng;
   @Nullable private CharSequence mInputAddress;
 
+  private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,6 +176,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
   protected void onStop() {
     super.onStop();
 
+    compositeDisposable.clear();
     if (shouldRequestLocationUpdate) {
       Log.d(TAG, "removeLocationUpdates");
       getFusedLocationProviderClient().removeLocationUpdates(getLocationCallback());
@@ -215,14 +226,14 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
       getFusedLocationProviderClient().removeLocationUpdates(getLocationCallback());
 
       makeGeocodeSearch(new com.mapbox.mapboxsdk.geometry.LatLng(latLng.latitude, latLng.longitude),
-          address -> updateSearchEditTextAndMap(address, latLng, "Vị trí bạn chọn"));
+          address -> updateSearchEditTextAndMap(address, latLng, getString(R.string.location_you_select)));
     });
 
     if (mInputAddress != null && mInputLatLng != null) {
       // show input address
       shouldRequestLocationUpdate = false;
       getFusedLocationProviderClient().removeLocationUpdates(getLocationCallback());
-      updateSearchEditTextAndMap(mInputAddress, mInputLatLng, "Vị trí");
+      updateSearchEditTextAndMap(mInputAddress, mInputLatLng, getString(R.string.location));
     }
   }
 
@@ -296,7 +307,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
       if (IntStream.of(grantResults).anyMatch(i -> i == PERMISSION_GRANTED)) {
         onClickImageCurrentLocation();
       } else {
-        Toast.makeText(this, "Bạn nên cho phép truy cập quyển vị trí", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.should_grant_location_permission), Toast.LENGTH_SHORT).show();
       }
     }
   }
@@ -330,7 +341,7 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
           Toast.makeText(this, status.getStatusMessage(), Toast.LENGTH_SHORT).show();
           break;
         case RESULT_CANCELED:
-          Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
+          Toast.makeText(this, R.string.cancel, Toast.LENGTH_SHORT).show();
           break;
       }
     }
@@ -404,54 +415,96 @@ public class PickAddressActivity extends AppCompatActivity implements OnMapReady
 
           final LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
           makeGeocodeSearch(new com.mapbox.mapboxsdk.geometry.LatLng(latLng.latitude, latLng.longitude),
-              address -> updateSearchEditTextAndMap(address, latLng, "Vị trí hiện tại"));
+              address -> updateSearchEditTextAndMap(address, latLng, getString(R.string.current_location)));
         }
       }
     };
   }
 
   private void makeGeocodeSearch(final com.mapbox.mapboxsdk.geometry.LatLng latLng, final Consumer<String> callback) {
-    Timber.tag("%%%").d("makeGeocodeSearch %s", latLng);
-    try {
-      // Build a Mapbox geocoding request
-      final MapboxGeocoding client = MapboxGeocoding.builder()
-          .accessToken(getString(R.string.mapbox_access_token))
-          .query(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
-          .geocodingTypes(GeocodingCriteria.TYPE_ADDRESS)
-          .build();
-      client.enqueueCall(new Callback<GeocodingResponse>() {
-        @Override
-        public void onResponse(@NonNull Call<GeocodingResponse> call, @NonNull Response<GeocodingResponse> response) {
-          if (response.body() != null) {
-            final List<CarmenFeature> results = response.body().features();
-            if (results.size() > 0) {
+    final Disposable subscribe = Observable.fromCallable(() -> {
+      Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+      List<Address> addresses = null;
+      String errorMessage = "";
 
-              // Get the first Feature from the successful geocoding response
-              final CarmenFeature feature = results.get(0);
-              Timber.tag("%%%").d("CarmenFeature = %s", feature);
-              Timber.tag("%%%").d("CarmenFeature placeName= %s", feature.placeName());
-              callback.accept(feature.placeName());
+      try {
+        addresses = geocoder.getFromLocation(
+            latLng.getLatitude(),
+            latLng.getLongitude(),
+            // In this sample, get just a single address.
+            1);
+      } catch (IOException ioException) {
+        // Catch network or other I/O problems.
+        errorMessage = getString(R.string.service_not_available);
+        Log.e(TAG, errorMessage, ioException);
+      } catch (IllegalArgumentException illegalArgumentException) {
+        // Catch invalid latitude or longitude values.
+        errorMessage = getString(R.string.invalid_lat_long_used);
+        Log.e(TAG, errorMessage + ". " +
+            "Latitude = " + latLng.getLatitude() +
+            ", Longitude = " +
+            latLng.getLongitude(), illegalArgumentException);
+      }
 
-            } else {
-              Toast.makeText(PickAddressActivity.this, R.string.geocode_no_results, Toast.LENGTH_SHORT).show();
-            }
-          } else {
-            Timber.tag("%%%").e("Response body is null");
-            Toast.makeText(PickAddressActivity.this, "Response body is null", Toast.LENGTH_SHORT).show();
+      // Handle case where no address was found.
+      if (addresses == null || addresses.size() == 0) {
+        if (errorMessage.isEmpty()) {
+          errorMessage = getString(R.string.no_address_found);
+          Log.e(TAG, errorMessage);
+        }
+        throw new IllegalStateException(errorMessage);
+
+      } else {
+        return addresses.get(0).getAddressLine(0);
+      }
+    }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(callback::accept, e -> {
+          Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+          Timber.tag("%%%").d("makeGeocodeSearch %s", latLng);
+          try {
+            // Build a Mapbox geocoding request
+            final MapboxGeocoding client = MapboxGeocoding.builder()
+                .accessToken(getString(R.string.mapbox_access_token))
+                .query(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
+                .geocodingTypes(GeocodingCriteria.TYPE_PLACE)
+                .build();
+            client.enqueueCall(new Callback<GeocodingResponse>() {
+              @Override
+              public void onResponse(@NonNull Call<GeocodingResponse> call, @NonNull Response<GeocodingResponse> response) {
+                if (response.body() != null) {
+                  final List<CarmenFeature> results = response.body().features();
+                  if (results.size() > 0) {
+
+                    // Get the first Feature from the successful geocoding response
+                    final CarmenFeature feature = results.get(0);
+                    Timber.tag("%%%").d("CarmenFeature = %s", feature);
+                    Timber.tag("%%%").d("CarmenFeature placeName= %s", feature.placeName());
+                    callback.accept(feature.placeName());
+
+                  } else {
+                    Toast.makeText(PickAddressActivity.this, R.string.geocode_no_results, Toast.LENGTH_SHORT).show();
+                  }
+                } else {
+                  Timber.tag("%%%").e("Response body is null");
+                  Toast.makeText(PickAddressActivity.this, "Response body is null", Toast.LENGTH_SHORT).show();
+                }
+              }
+
+              @Override
+              public void onFailure(@NonNull Call<GeocodingResponse> call, @NonNull Throwable throwable) {
+                Timber.tag("%%%").e("Geocoding Failure: " + throwable.getMessage());
+                Toast.makeText(PickAddressActivity.this, "Geocoding Failure: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+              }
+            });
+          } catch (ServicesException servicesException) {
+            Timber.tag("%%%").e("Error geocoding: " + servicesException.toString());
+            servicesException.printStackTrace();
+            Toast.makeText(PickAddressActivity.this, "Error geocoding: " + servicesException.getMessage(), Toast.LENGTH_SHORT).show();
           }
-        }
-
-        @Override
-        public void onFailure(@NonNull Call<GeocodingResponse> call, @NonNull Throwable throwable) {
-          Timber.tag("%%%").e("Geocoding Failure: " + throwable.getMessage());
-          Toast.makeText(PickAddressActivity.this, "Geocoding Failure: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-      });
-    } catch (ServicesException servicesException) {
-      Timber.tag("%%%").e("Error geocoding: " + servicesException.toString());
-      servicesException.printStackTrace();
-      Toast.makeText(PickAddressActivity.this, "Error geocoding: " + servicesException.getMessage(), Toast.LENGTH_SHORT).show();
-    }
+        });
+    compositeDisposable.add(subscribe);
   }
 
   @MainThread

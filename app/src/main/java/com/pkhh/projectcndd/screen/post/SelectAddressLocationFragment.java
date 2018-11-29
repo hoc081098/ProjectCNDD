@@ -51,6 +51,7 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
   @BindView(R.id.edit_text_address) TextInputLayout mEditTextAddress;
   @BindView(R.id.edit_lat) TextInputLayout mTextInputLat;
   @BindView(R.id.edit_lng) TextInputLayout mTextInputLng;
+
   @Nullable private Double latInput = null;
   @Nullable private Double lngInput = null;
 
@@ -80,7 +81,7 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
         final String addressString = s.toString();
         if (addressString.isEmpty()) {
           getDataOutput().setAddress(null);
-          mEditTextAddress.setError("Hãy nhập địa chỉ");
+          mEditTextAddress.setError(getString(R.string.must_provide_address));
         } else {
           getDataOutput().setAddress(addressString);
           mEditTextAddress.setError(null);
@@ -103,7 +104,7 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
 
           getDataOutput().setLatLng(null);
           latInput = null;
-          mTextInputLat.setError("Hãy nhập vĩ độ");
+          mTextInputLat.setError(getString(R.string.must_provide_lat));
           return;
 
         }
@@ -123,14 +124,14 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
 
             latInput = null;
             getDataOutput().setLatLng(null);
-            mTextInputLat.setError("Vĩ độ phải trong khoảng -90..90");
+            mTextInputLat.setError(getString(R.string.invalid_lat_range));
 
           }
         } catch (NumberFormatException e) {
 
           getDataOutput().setLatLng(null);
           latInput = null;
-          mTextInputLat.setError("Vĩ độ sai định dạng");
+          mTextInputLat.setError(getString(R.string.invalid_format_lat));
 
         }
       }
@@ -151,7 +152,7 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
 
           lngInput = null;
           getDataOutput().setLatLng(null);
-          mTextInputLng.setError("Hãy nhập kinh độ");
+          mTextInputLng.setError(getString(R.string.must_provide_lng));
           return;
 
         }
@@ -171,14 +172,14 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
 
             lngInput = null;
             getDataOutput().setLatLng(null);
-            mTextInputLng.setError("Kinh độ phải trong khoảng -180..180");
+            mTextInputLng.setError(getString(R.string.invalid_lng_range));
 
           }
         } catch (NumberFormatException e) {
 
           lngInput = null;
           getDataOutput().setLatLng(null);
-          mTextInputLng.setError("Kinh độ sai định dạng");
+          mTextInputLng.setError(getString(R.string.invalid_format_lng));
 
         }
       }
@@ -201,16 +202,16 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
           intent.putExtra(EXTRA_PROVINCE_ID, getDataOutput().getProvinceId());
           startActivityForResult(intent, REQUEST_CODE_SELECT_DISTRICT);
         } else {
-          Toast.makeText(getContext(), "Bạn phải chọn tỉnh trước", Toast.LENGTH_SHORT).show();
+          Toast.makeText(getContext(), R.string.select_province_before, Toast.LENGTH_SHORT).show();
         }
         break;
       case R.id.layout_wards:
         if (getDataOutput().getProvinceId() == null) {
-          Toast.makeText(requireContext(), "Bạn phải chọn tỉnh trước", Toast.LENGTH_SHORT).show();
+          Toast.makeText(requireContext(), R.string.select_province_before, Toast.LENGTH_SHORT).show();
           break;
         }
-        if (getDataOutput().getProvinceId() == null) {
-          Toast.makeText(getContext(), "Bạn phải chọn huyện trước", Toast.LENGTH_SHORT).show();
+        if (getDataOutput().getDistrictId() == null) {
+          Toast.makeText(getContext(), R.string.select_district_before, Toast.LENGTH_SHORT).show();
           break;
         }
 
@@ -284,8 +285,8 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
       getDataOutput().setLatLng(latLng);
 
       requireNonNull(mEditTextAddress.getEditText()).setText(addressString);
-      requireNonNull(mTextInputLat.getEditText()).setText(String.format(Locale.getDefault(), "%.4f", latLng.latitude));
-      requireNonNull(mTextInputLng.getEditText()).setText(String.format(Locale.getDefault(), "%.4f", latLng.longitude));
+      requireNonNull(mTextInputLat.getEditText()).setText(String.format(Locale.US, "%.4f", latLng.latitude));
+      requireNonNull(mTextInputLng.getEditText()).setText(String.format(Locale.US, "%.4f", latLng.longitude));
     }
   }
 
@@ -311,7 +312,7 @@ public class SelectAddressLocationFragment extends StepFragment<AddressLocationF
   @Override
   public void onInvalid() {
     super.onInvalid();
-    Snackbar.make(requireNonNull(getView()), "Hãy cung cấp đầy đủ địa chỉ", Snackbar.LENGTH_SHORT).show();
+    Snackbar.make(requireNonNull(getView()), getString(R.string.must_provide_full_address), Snackbar.LENGTH_SHORT).show();
   }
 
   @NotNull

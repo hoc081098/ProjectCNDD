@@ -2,7 +2,17 @@
 <resources>
 
     <string name="category_id_cho_thue" translatable="false">5DaVnnftECMXJO6t9KXx</string>
-    <string name="category_id_can_thue" translatable="false">8nJeL4bC1IunGtSmNrZZ</string>
     <string name="category_id_tim_nguoi_o_ghep" translatable="false">sqGydvf9D5NEvD0TLLxn</string>
+
+    <!-- Facebook -->
+    <string name="facebook_app_id" translatable="false">498821270638471</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb498821270638471</string>
+
+    <!--Mapbox access token-->
+    <string name="mapbox_access_token" translatable="false">pk.eyJ1IjoicGV0cnVzdGhhaWhvYyIsImEiOiJjampycW1uY2s4bTRnM3BwMXo0M2Q3OTduIn0.dRqQsp8tc1SictvFyOP7tQ</string>
+
+    <!--Da Nang province (default)-->
+    <string name="da_nang_id" translatable="false">NtHjwobYdIi0YwTUHz05</string>
+    <string name="da_nang_name" translatable="false">TP.Đà Nẵng</string>
 
 </resources>

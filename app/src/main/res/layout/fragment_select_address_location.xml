@@ -21,7 +21,7 @@
             android:background="#f2e8e8"
             android:fontFamily="@font/nunito_sans"
             android:padding="8dp"
-            android:text="TỈNH, THÀNH PHỐ(*):"
+            android:text="@string/province_city"
             android:textColor="#424242"
             android:textSize="16sp" />
 
@@ -65,7 +65,7 @@
             android:background="#f2e8e8"
             android:fontFamily="@font/nunito_sans"
             android:padding="8dp"
-            android:text="QUẬN, HUYỆN(*):"
+            android:text="@string/district"
             android:textSize="16sp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -109,7 +109,7 @@
             android:background="#f2e8e8"
             android:fontFamily="@font/nunito_sans"
             android:padding="8dp"
-            android:text="XÃ, PHƯỜNG, THỊ TRẤN(*):"
+            android:text="@string/ward"
             android:textSize="16sp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -155,7 +155,7 @@
                 android:id="@+id/edit_text_address"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="số đường, số nhà (*):"
+                android:hint="@string/street_number_house_number"
                 app:errorEnabled="true"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
@@ -196,7 +196,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:hint="Vĩ độ"
+            android:hint="@string/latitude"
             app:errorEnabled="true"
             app:hintAnimationEnabled="true"
             app:hintEnabled="true"
@@ -219,7 +219,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:hint="Kinh độ"
+            android:hint="@string/Longitude"
             app:errorEnabled="true"
             app:hintAnimationEnabled="true"
             app:hintEnabled="true"

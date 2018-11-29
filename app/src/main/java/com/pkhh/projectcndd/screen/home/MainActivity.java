@@ -12,6 +12,7 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,10 +32,13 @@ import com.pkhh.projectcndd.screen.nearby.NearbyActivity;
 import com.pkhh.projectcndd.screen.post.PostActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.screen.saved.SavedRoomsActivity;
+import com.pkhh.projectcndd.utils.Language;
+import com.pkhh.projectcndd.utils.LanguageUtil;
 import com.squareup.picasso.Picasso;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,6 +69,7 @@ public class MainActivity extends AppCompatActivity
 
   @Nullable private User user;
   @Nullable private ListenerRegistration listenerRegistration;
+  @Nullable private AlertDialog changeLanguageDialog;
 
   public static void printHashKey(Context pContext) {
     try {
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    LanguageUtil.loadLocale(this);
     setContentView(R.layout.activity_main);
 
     // setup toolbar
@@ -156,6 +162,9 @@ public class MainActivity extends AppCompatActivity
   protected void onStop() {
     super.onStop();
     firebaseAuth.removeAuthStateListener(this);
+    if (changeLanguageDialog != null) {
+      changeLanguageDialog.dismiss();
+    }
   }
 
   @Override
@@ -191,11 +200,37 @@ public class MainActivity extends AppCompatActivity
     int id = item.getItemId();
 
     //noinspection SimplifiableIfStatement
-    if (id == R.id.action_settings) {
+    if (id == R.id.action_change_language) {
+      showChangeLanguageDialog();
       return true;
     }
 
     return super.onOptionsItemSelected(item);
+  }
+
+  private void showChangeLanguageDialog() {
+    final List<Language> languages = LanguageUtil.getAllLanguages(this);
+    final ArrayAdapter<Language> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, languages);
+
+    changeLanguageDialog = new AlertDialog.Builder(this)
+        .setTitle(R.string.change_language_title)
+        .setSingleChoiceItems(
+            adapter,
+            languages.indexOf(LanguageUtil.getCurrentLanguage(this)),
+            (dialog, position) -> {
+              dialog.dismiss();
+
+              LanguageUtil.changeLanguage(this, languages.get(position));
+              final Intent intent = getIntent();
+              finish();
+              intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              startActivity(intent);
+            }
+        )
+        .setNegativeButton(getString(R.string.cancel), (dialog, __) -> dialog.dismiss())
+        .show();
+
   }
 
   @Override
@@ -254,7 +289,7 @@ public class MainActivity extends AppCompatActivity
 
             final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
             for (UserInfo userInfo : currentUser.getProviderData()) {
-              if ("facebook.com" .equals(userInfo.getProviderId())) {
+              if ("facebook.com".equals(userInfo.getProviderId())) {
                 LoginManager.getInstance().logOut();
               }
             }

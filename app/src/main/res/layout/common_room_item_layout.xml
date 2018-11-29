@@ -89,7 +89,6 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:lines="2"
-            android:text="TextView"
             android:textColor="#706F6F"
             app:layout_constraintBottom_toBottomOf="@+id/cardView3"
             app:layout_constraintEnd_toEndOf="parent"

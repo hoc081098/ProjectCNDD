@@ -122,6 +122,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     final DocumentReference selectedProvinceRef = firestore.document(PROVINCES_NAME_COLLECION + "/" + selectedProvinceId);
 
     registration1 = firestore.collection(ROOMS_NAME_COLLECION)
+        .whereEqualTo("approve", true)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("created_at", Query.Direction.DESCENDING)
@@ -135,6 +136,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
 
     registration2 = firestore.collection(ROOMS_NAME_COLLECION)
+        .whereEqualTo("approve", true)
         .whereEqualTo("province", selectedProvinceRef)
         .whereEqualTo("is_active", true)
         .orderBy("count_view", Query.Direction.DESCENDING)
@@ -222,6 +224,23 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   }
 
   @Override
+  public void onStop() {
+    super.onStop();
+
+    if (registration1 != null) {
+      registration1.remove();
+    }
+    if (registration2 != null) {
+      registration2.remove();
+    }
+    firebaseAuth.removeAuthStateListener(this);
+
+    if (changeProvinceDialog != null && changeProvinceDialog.isShowing()) {
+      changeProvinceDialog.dismiss();
+    }
+  }
+
+  @Override
   public void onDestroyView() {
     super.onDestroyView();
     unbinder.unbind();
@@ -263,7 +282,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     });
   }
 
-  private Void onChangeLocationClick() {
+  private void onChangeLocationClick() {
     final ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(requireContext(),
         android.R.layout.simple_list_item_1, provinceNames);
 
@@ -290,10 +309,9 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
         .setNegativeButton(getString(R.string.cancel), (dialog, __) -> dialog.dismiss())
         .show();
 
-    return null;
   }
 
-  private Void onAddToOrRemoveFromSavedRooms(String id) {
+  private void onAddToOrRemoveFromSavedRooms(String id) {
     firestore.runTransaction(transaction -> {
       final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
       if (currentUser == null) {
@@ -334,7 +352,6 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
     }).addOnFailureListener(requireNonNull(getActivity()), e -> Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show());
 
-    return null;
   }
 
   @Override

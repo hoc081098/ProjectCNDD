@@ -17,4 +17,6 @@
     <color name="colorProfileBg">#F6F6F6</color>
 
     <color name="colorBottomNavBg">#fafafa</color>
+    <color name="selected_bottom_nav">@color/colorAccent</color>
+    <color name="unselected_bottom_nav">#212121</color>
 </resources>
