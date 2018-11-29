@@ -87,6 +87,8 @@ public class DetailActivity extends AppCompatActivity {
         prevSelectedMenuItem = item;
       }
     });
+
+    viewPager.setOffscreenPageLimit(fragments.size());
   }
 
   @Override

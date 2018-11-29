@@ -68,7 +68,7 @@ public class AddPhotoFragment extends StepFragment<ImagesPhotosFragmentOutput> i
     File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     return File.createTempFile(
         imageFileName,  /* prefix */
-        ".jpg",         /* suffix */
+        ".jpg",    /* suffix */
         storageDir      /* directory */
     );
   }

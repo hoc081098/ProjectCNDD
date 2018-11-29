@@ -158,6 +158,10 @@
     <string name="location">Location</string>
     <string name="current_location">Current location</string>
     <string name="nearby">Nearby</string>
+    <string name="available">Available</string>
+    <string name="view_count">View count</string>
+    <string name="available_yes">Yes</string>
+    <string name="available_no">No</string>
 
 
 </resources>

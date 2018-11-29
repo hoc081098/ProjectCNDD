@@ -2,6 +2,7 @@ package com.pkhh.projectcndd.screen.detail;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +27,7 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -139,7 +140,22 @@ public class RelatedFragment extends Fragment {
         .limit(LIMIT);
 
     recyclerView.setHasFixedSize(true);
-    recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+    recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+    recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+      @Override
+      public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+        final int space = 4;
+        final int position = parent.getChildAdapterPosition(view);
+        if (position != NO_POSITION) {
+          outRect.left = space;
+          outRect.right = space;
+          outRect.bottom = space;
+          outRect.top = space;
+        }
+      }
+    });
+
+
     final FirestoreRecyclerOptions<MotelRoom> motelRoomFirestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<MotelRoom>()
         .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
         .build();

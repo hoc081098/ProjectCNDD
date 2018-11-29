@@ -145,5 +145,9 @@
     <string name="location">Vị trí</string>
     <string name="current_location">Vị trí hiện tại</string>
     <string name="nearby">Gần đây</string>
+    <string name="available">Còn phòng</string>
+    <string name="view_count">Lượt xem</string>
+    <string name="available_yes">Còn</string>
+    <string name="available_no">Không còn</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.pkhh.projectcndd.models;
 
 import com.google.firebase.firestore.PropertyName;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 import java.util.Objects;
@@ -14,7 +15,8 @@ public class Comment extends FirebaseModel {
   private String userAvatar;
   private String content;
   private Date createdAt;
-  @Nullable private Date updatedAt;
+  @Nullable
+  private Date updatedAt;
 
   public Comment() {
   }
@@ -100,22 +102,26 @@ public class Comment extends FirebaseModel {
     this.content = content;
   }
 
+  @ServerTimestamp
   @PropertyName("created_at")
   public Date getCreatedAt() {
     return createdAt;
   }
 
+  @ServerTimestamp
   @PropertyName("created_at")
   public void setCreatedAt(Date createdAt) {
     this.createdAt = createdAt;
   }
 
+  @ServerTimestamp
   @PropertyName("updated_at")
   @Nullable
   public Date getUpdatedAt() {
     return updatedAt;
   }
 
+  @ServerTimestamp
   @PropertyName("updated_at")
   public void setUpdatedAt(@Nullable Date updatedAt) {
     this.updatedAt = updatedAt;

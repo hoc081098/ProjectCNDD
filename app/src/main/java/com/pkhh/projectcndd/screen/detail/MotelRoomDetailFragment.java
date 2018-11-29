@@ -48,6 +48,8 @@ import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,8 +80,9 @@ import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 
 public class MotelRoomDetailFragment extends Fragment {
   public final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy", Locale.getDefault());
+  public final NumberFormat viewCountFormat = new DecimalFormat("###,###");
 
-  private static final BaseTransformer[] TRANSFORMERS = new BaseTransformer[]{
+  private static final BaseTransformer[] TRANSFORMERS = {
       new AccordionTransformer(),
       new BackgroundToForegroundTransformer(),
       new CubeInTransformer(),
@@ -111,6 +114,11 @@ public class MotelRoomDetailFragment extends Fragment {
   @BindView(R.id.text_name) TextView textName;
   @BindView(R.id.text_phone) TextView textPhone;
   @BindView(R.id.image_avatar) ImageView imageAvatar;
+  @BindView(R.id.text_category) TextView textCategory;
+  @BindView(R.id.text_title) TextView textTitle;
+  @BindView(R.id.text_available) TextView textAvailable;
+  @BindView(R.id.text_view_count) TextView textViewCount;
+
 
   @Nullable private User user;
   @Nullable private ListenerRegistration registration;
@@ -137,7 +145,6 @@ public class MotelRoomDetailFragment extends Fragment {
 
     id = Objects.requireNonNull(getArguments()).getString(EXTRA_MOTEL_ROOM_ID);
     increaseViewCount(id);
-    getDetail(id);
   }
 
   private void getDetail(String id) {
@@ -167,21 +174,22 @@ public class MotelRoomDetailFragment extends Fragment {
   }
 
   private void updateUi(@NonNull MotelRoom motelRoom) {
+    // slider
     updateImageSlider(motelRoom);
 
+    // card 1
     textPrice.setText(getString(R.string.detail_price, PRICE_FORMAT.format(motelRoom.getPrice())));
     textAddress.setText(motelRoom.getAddress());
     textTimePost.setText(getString(R.string.posted_date, dateFormat.format(motelRoom.getCreatedAt())));
     textArea.setText(HtmlCompat.fromHtml(motelRoom.getSize() + " m<sup><small>2</small></sup>", FROM_HTML_SEPARATOR_LINE_BREAK_DIV));
-
     final Point point = Point.fromLngLat(motelRoom.getAddressGeoPoint().getLongitude(), motelRoom.getAddressGeoPoint().getLatitude());
     final MapboxStaticMap staticImage = MapboxStaticMap.builder()
         .accessToken(getString(R.string.mapbox_access_token))
         .styleId(StaticMapCriteria.LIGHT_STYLE)
         .cameraPoint(point) // Image's center point on map
-        .cameraZoom(8)
-        .width(dpToPx(92)) // Image width
-        .height(dpToPx(92)) // Image height
+        .cameraZoom(9)
+        .width(dpToPx(128)) // Image width
+        .height(dpToPx(128)) // Image height
         .retina(false) // Retina 2x image will be returned
         .staticMarkerAnnotations(
             Collections.singletonList(
@@ -198,15 +206,30 @@ public class MotelRoomDetailFragment extends Fragment {
         .load(staticImage.url().toString())
         .into(imageMap);
 
-    motelRoom.getUser()
+    // card 2
+    motelRoom
+        .getUser()
         .get()
-        .addOnSuccessListener(documentSnapshot -> {
+        .addOnSuccessListener(requireActivity(), documentSnapshot -> {
           user = documentSnapshotToObject(documentSnapshot, User.class);
           updateUserInformation(user);
         })
-        .addOnFailureListener(e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
+        .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     textPhone.setText(motelRoom.getPhone());
+
+    // card 3
+    motelRoom
+        .getCategory()
+        .get()
+        .addOnSuccessListener(requireActivity(), documentSnapshot -> {
+          textCategory.setText(documentSnapshot.getString("name"));
+        })
+        .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    textTitle.setText(motelRoom.getTitle());
+    textAvailable.setText(
+        motelRoom.isActive() ? R.string.available_yes : R.string.available_no
+    );
+    textViewCount.setText(viewCountFormat.format(motelRoom.getCountView()));
   }
 
   private void updateUserInformation(@NonNull User user) {

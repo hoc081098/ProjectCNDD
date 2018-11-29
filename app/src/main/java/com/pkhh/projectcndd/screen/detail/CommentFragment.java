@@ -62,6 +62,7 @@ class CommentVH extends RecyclerView.ViewHolder {
 
   public CommentVH(@NonNull View itemView) {
     super(itemView);
+    ButterKnife.bind(this, itemView);
   }
 
   @SuppressLint("SetTextI18n")
@@ -72,8 +73,10 @@ class CommentVH extends RecyclerView.ViewHolder {
         .centerCrop()
         .noFade()
         .into(imageAvatar);
-    textNameDate.setText(comment.getUserName() + "\u2022" + dateFormat.format(
-        comment.getUpdatedAt() != null ? comment.getUpdatedAt() : comment.getCreatedAt()
+    textNameDate.setText(comment.getUserName() + " \u2022 " + dateFormat.format(
+        comment.getUpdatedAt() != null
+            ? comment.getUpdatedAt()
+            : comment.getCreatedAt()
     ));
     textContent.setText(comment.getContent());
   }
@@ -125,12 +128,18 @@ public class CommentFragment extends Fragment {
     requireNonNull(textInputComment.getEditText()).addTextChangedListener(new TextWatcher() {
 
       @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-      }
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
+        if (s.length() < MIN_LENGTH_OF_COMMENT) {
+          textInputComment.setError(getString(R.string.invalid_comment, MIN_LENGTH_OF_COMMENT));
+          imageSend.setImageResource(R.drawable.ic_send_grey_24dp);
+        } else {
+          textInputComment.setError(null);
+          imageSend.setImageResource(R.drawable.ic_send_accent_24dp);
+        }
+
         if (auth.getCurrentUser() == null) {
           requireLoginDialog = new AlertDialog.Builder(requireContext())
               .setTitle(R.string.require_login)
@@ -145,20 +154,10 @@ public class CommentFragment extends Fragment {
               .show();
           return;
         }
-
-        if (s.length() < MIN_LENGTH_OF_COMMENT) {
-          textInputComment.setError(getString(R.string.invalid_comment, MIN_LENGTH_OF_COMMENT));
-          imageSend.setImageResource(R.drawable.ic_send_grey_24dp);
-        } else {
-          textInputComment.setError(null);
-          imageSend.setImageResource(R.drawable.ic_send_accent_24dp);
-        }
       }
 
       @Override
-      public void afterTextChanged(Editable s) {
-
-      }
+      public void afterTextChanged(Editable s) { }
     });
 
     imageSend.setOnClickListener(__ -> {
@@ -187,6 +186,7 @@ public class CommentFragment extends Fragment {
           })
           .addOnSuccessListener(documentReference -> {
             Toast.makeText(requireContext(), R.string.add_comment_successfully, Toast.LENGTH_SHORT).show();
+            requireNonNull(textInputComment.getEditText()).setText(null);
           })
           .addOnFailureListener(e -> {
             Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -241,18 +241,26 @@ public class CommentFragment extends Fragment {
       }
     };
     recyclerComments.setAdapter(adapter);
+  }
 
+  @Override
+  public void onResume() {
+    super.onResume();
     adapter.startListening();
   }
 
-
   @Override
-  public void onDestroyView() {
-    super.onDestroyView();
+  public void onPause() {
+    super.onPause();
     adapter.stopListening();
     if (requireLoginDialog != null && requireLoginDialog.isShowing()) {
       requireLoginDialog.dismiss();
     }
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
     unbinder.unbind();
   }
 }

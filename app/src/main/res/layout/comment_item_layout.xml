@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:background="@android:color/white"
     android:layout_height="wrap_content"
+    android:padding="8dp"
     android:orientation="vertical">
 
 
@@ -22,7 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/nunito_sans"
-        android:textColor="#212121"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/text_input_comment"
         app:layout_constraintEnd_toEndOf="parent"
