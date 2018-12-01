@@ -168,5 +168,5 @@
     <string name="select_price">Khoảng giá (1_000đ)</string>
     <string name="asc">Tăng dần</string>
     <string name="desc">Giảm dần</string>
-    <string name="apply_filter">Lọc</string>
+    <string name="apply_filter">Áp dụng Lọc</string>
 </resources>

@@ -30,6 +30,7 @@ import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.screen.loginregister.LoginRegisterActivity;
 import com.pkhh.projectcndd.screen.nearby.NearbyActivity;
 import com.pkhh.projectcndd.screen.post.PostActivity;
+import com.pkhh.projectcndd.screen.posted.PostedRoomsActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.screen.saved.SavedRoomsActivity;
 import com.pkhh.projectcndd.utils.Language;
@@ -151,6 +152,7 @@ public class MainActivity extends AppCompatActivity
     navigationView.getMenu().findItem(R.id.nav_post).setCheckable(false);
     navigationView.getMenu().findItem(R.id.nav_saved).setCheckable(false);
     navigationView.getMenu().findItem(R.id.nav_login).setCheckable(false);
+    navigationView.getMenu().findItem(R.id.nav_posted_room).setCheckable(false);
 
     textName.setText(getString(R.string.loading));
     textEmail.setText(getString(R.string.loading));
@@ -253,10 +255,17 @@ public class MainActivity extends AppCompatActivity
       case R.id.nav_login:
         onClickNavLogin();
         break;
+      case R.id.nav_posted_room:
+        onClickNavPostedRoom();
+        break;
     }
 
     drawerLayout.closeDrawer(GravityCompat.START);
     return true;
+  }
+
+  private void onClickNavPostedRoom() {
+    startActivity(new Intent(this, PostedRoomsActivity.class));
   }
 
   private void onClickSaved() {

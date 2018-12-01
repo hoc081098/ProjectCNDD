@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MaterialRangebar</string>
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    <declare-styleable name="RangeBar">
+        <attr format="float" name="mrb_tickStart"/>
+        <attr format="float" name="mrb_tickEnd"/>
+        <attr format="float" name="mrb_tickInterval"/>
+        <attr format="dimension" name="mrb_tickHeight"/>
+        <attr format="color" name="mrb_tickColor"/>
+        <attr format="dimension" name="mrb_barWeight"/>
+        <attr format="reference|color" name="mrb_rangeBarColor"/>
+        <attr format="dimension" name="mrb_selectorSize"/>
+        <attr format="reference|color" name="mrb_selectorBoundaryColor"/>
+        <attr format="dimension" name="mrb_selectorBoundarySize"/>
+        <attr format="reference|color" name="mrb_pinTextColor"/>
+        <attr format="reference|color" name="mrb_pinColor"/>
+        <attr format="dimension" name="mrb_pinPadding"/>
+        <attr format="dimension" name="mrb_pinMinFont"/>
+        <attr format="dimension" name="mrb_pinMaxFont"/>
+        <attr format="dimension" name="mrb_rangeBarPaddingBottom"/>
+        <attr format="reference|color" name="mrb_selectorColor"/>
+        <attr format="boolean" name="mrb_rangeBar"/>
+        <attr format="boolean" name="mrb_temporaryPins"/>
+        <attr format="boolean" name="mrb_rangeBar_rounded"/>
+        <attr format="dimension" name="mrb_connectingLineWeight"/>
+        <attr format="reference|color" name="mrb_connectingLineColor"/>
+        <attr format="dimension" name="mrb_pinRadius"/>
+        <attr format="reference" name="mrb_connectingLineColors"/>
+    </declare-styleable>
+</resources>

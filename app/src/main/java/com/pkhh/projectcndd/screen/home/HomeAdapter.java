@@ -62,12 +62,12 @@ interface HomeListItem {
 }
 
 class ImageAndDescriptionBanner {
-  final String image;
-  final String description;
+  public final String image;
+  public final String description;
 
-  ImageAndDescriptionBanner() {this("Something is not empty (^^)", "");}
+  public ImageAndDescriptionBanner() {this("Something is not empty (^^)", "");}
 
-  ImageAndDescriptionBanner(String image, String description) {
+  public ImageAndDescriptionBanner(String image, String description) {
     this.image = image;
     this.description = description;
   }
@@ -119,6 +119,7 @@ class RoomItem implements HomeListItem {
   final String districtName;
   @Nullable final String image;
   @BookMarkIconState final int bookMarkIconState;
+
   RoomItem(String id, String title, long price, String address, String districtName, @Nullable String image, int bookMarkIconState) {
     this.id = id;
     this.title = title;

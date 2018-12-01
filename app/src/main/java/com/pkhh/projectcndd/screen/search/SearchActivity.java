@@ -87,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
     recyclerView.setHasFixedSize(true);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    setupAdapter(firestore.collection(Constants.ROOMS_NAME_COLLECION));
+    setupAdapter(firestore.collection(Constants.ROOMS_NAME_COLLECION).whereEqualTo("approve", true));
     setupFilterBottomSheet();
   }
 

@@ -25,6 +25,11 @@
             android:icon="@drawable/ic_person_add_black_24dp"
             android:title="@string/login" />
 
+        <item
+            android:id="@+id/nav_posted_room"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/posted_rooms" />
+
     </group>
 
 

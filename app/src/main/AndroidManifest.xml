@@ -171,6 +171,7 @@
             android:name=".screen.detail.DetailActivity"
             android:configChanges="layoutDirection|locale"
             android:label="@string/detail" />
+        <activity android:name=".screen.posted.PostedRoomsActivity" />
 
         <service
             android:name=".service.PostRoomJobIntentService"
