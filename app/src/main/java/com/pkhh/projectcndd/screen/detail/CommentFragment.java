@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -31,6 +32,8 @@ import com.pkhh.projectcndd.screen.loginregister.LoginRegisterActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.RecyclerOnLongClickListener;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -53,6 +56,7 @@ import androidx.transition.TransitionManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import timber.log.Timber;
 
 import static com.pkhh.projectcndd.utils.Constants.COMMENTS_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
@@ -88,17 +92,32 @@ class CommentVH extends RecyclerView.ViewHolder {
 
   @SuppressLint("SetTextI18n")
   public void bind(Comment comment) {
+    Timber.tag("%$%").d("bind %s", comment);
+
     Picasso.get()
         .load(comment.getUserAvatar())
+        .networkPolicy(NetworkPolicy.NO_CACHE)
+        .memoryPolicy(MemoryPolicy.NO_CACHE)
         .fit()
         .centerCrop()
         .noFade()
+        .placeholder(R.drawable.avatar_default_icon)
+        .error(R.drawable.avatar_default_icon)
         .into(imageAvatar);
-    textNameDate.setText(comment.getUserName() + " \u2022 " + dateFormat.format(
-        comment.getUpdatedAt() != null
-            ? comment.getUpdatedAt()
-            : comment.getCreatedAt()
-    ));
+
+    final Timestamp updatedAt = comment.getUpdatedAt();
+    final Timestamp createdAt = comment.getCreatedAt();
+    if (updatedAt == null && createdAt == null) {
+      textNameDate.setText(comment.getUserName());
+    } else {
+      textNameDate.setText(
+          comment.getUserName() + " \u2022 " + dateFormat.format(
+              updatedAt != null
+                  ? updatedAt.toDate()
+                  : createdAt.toDate()
+          )
+      );
+    }
     textContent.setText(comment.getContent());
   }
 }
@@ -182,9 +201,23 @@ public class CommentFragment extends Fragment {
     });
 
     imageSend.setOnClickListener(__ -> {
-      final String comment = requireNonNull(textInputComment.getEditText()).getText().toString();
+      final String commentStr = requireNonNull(textInputComment.getEditText()).getText().toString();
       final FirebaseUser currentUser = auth.getCurrentUser();
-      if (comment.length() < MIN_LENGTH_OF_COMMENT || currentUser == null) {
+
+      if (commentStr.length() < MIN_LENGTH_OF_COMMENT) {
+        return;
+      } else if (currentUser == null) {
+        requireLoginDialog = new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.require_login)
+            .setIcon(R.drawable.ic_exit_to_app_black_24dp)
+            .setMessage(R.string.you_must_login_to_perform_this_function)
+            .setNegativeButton(getString(R.string.cancel), (dialog, ___) -> dialog.dismiss())
+            .setPositiveButton(getString(R.string.ok), (dialog, ___) -> {
+              dialog.dismiss();
+              final Intent intent = new Intent(requireContext(), LoginRegisterActivity.class);
+              startActivity(intent);
+            })
+            .show();
         return;
       }
       final DocumentReference userRef = firestore.document(Constants.USERS_NAME_COLLECION + "/" + currentUser.getUid());
@@ -193,17 +226,19 @@ public class CommentFragment extends Fragment {
           .continueWithTask(task -> {
             final DocumentSnapshot documentSnapshot = requireNonNull(task.getResult());
 
-            final Map<String, Object> commentMap = new HashMap<>();
-            commentMap.put("created_at", FieldValue.serverTimestamp());
-            commentMap.put("user_id", userRef.getId());
-            commentMap.put("room_id", roomId);
-            commentMap.put("user_name", requireNonNull(documentSnapshot.get("full_name")));
-            commentMap.put("user_avatar", requireNonNull(documentSnapshot.get("avatar")));
-            commentMap.put("content", comment);
+            Comment comment =new Comment(
+                currentUser.getUid(),
+                roomId,
+                requireNonNull(documentSnapshot.getString("full_name")),
+                requireNonNull(documentSnapshot.getString("avatar")),
+                commentStr,
+                null,
+                null
+            );
 
             return firestore
                 .collection(COMMENTS_NAME_COLLECION)
-                .add(commentMap);
+                .add(comment);
           })
           .addOnSuccessListener(requireActivity(), documentReference -> {
             Toast.makeText(requireContext(), R.string.add_comment_successfully, Toast.LENGTH_SHORT).show();
@@ -280,6 +315,8 @@ public class CommentFragment extends Fragment {
   private void onLongClick(View view, int position) {
     final Comment item = adapter.getItem(position);
     final FirebaseUser currentUser = auth.getCurrentUser();
+    Timber.tag("%$%").d("%s %s", item, currentUser);
+
     if (currentUser != null && Objects.equals(item.getUserId(), currentUser.getUid())) {
       final PopupMenu popupMenu = new PopupMenu(requireContext(), view);
       popupMenu.inflate(R.menu.comment_popup_menu);
@@ -295,6 +332,7 @@ public class CommentFragment extends Fragment {
         return false;
       });
       popupMenu.show();
+      Timber.tag("%$%").d("show dialog");
     }
   }
 

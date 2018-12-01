@@ -66,6 +66,7 @@ public class DetailActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_detail);
     ButterKnife.bind(this, this);
+    getSupportActionBar().setTitle(R.string.detail);
 
     roomId = getIntent().getStringExtra(EXTRA_MOTEL_ROOM_ID);
     roomRef = firestore.document(Constants.ROOMS_NAME_COLLECION + "/" + roomId);
@@ -173,23 +174,31 @@ public class DetailActivity extends AppCompatActivity {
   }
 
   @Override
+  public boolean onPrepareOptionsMenu(Menu menu) {
+    final MenuItem menuItem = menu.findItem(R.id.action_add_to_saved_or_remove_from_saved);
+    if (menuItem != null) {
+      switch (savedIconState) {
+        case HIDE:
+          menuItem.setVisible(false);
+          break;
+        case SHOW_NOT_SAVED:
+          menuItem.setVisible(true);
+          menuItem.setIcon(R.drawable.ic_bookmark_border_grey_24dp);
+          menuItem.setTitle(R.string.add_saved);
+          break;
+        case SHOW_SAVED:
+          menuItem.setVisible(true);
+          menuItem.setIcon(R.drawable.ic_bookmark_black_24dp);
+          menuItem.setTitle(R.string.remove_saved);
+          break;
+      }
+    }
+    return true;
+  }
+
+  @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.detail_menu, menu);
-    final MenuItem menuItem = menu.findItem(R.id.action_add_to_saved_or_remove_from_saved);
-
-    switch (savedIconState) {
-      case HIDE:
-        menuItem.setVisible(false);
-        break;
-      case SHOW_NOT_SAVED:
-        menuItem.setVisible(true);
-        menuItem.setIcon(R.drawable.ic_bookmark_border_grey_24dp);
-        break;
-      case SHOW_SAVED:
-        menuItem.setVisible(true);
-        menuItem.setIcon(R.drawable.ic_bookmark_black_24dp);
-        break;
-    }
     return true;
   }
 

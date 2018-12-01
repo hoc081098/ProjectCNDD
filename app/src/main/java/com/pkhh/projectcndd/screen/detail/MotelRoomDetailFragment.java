@@ -207,9 +207,6 @@ public class MotelRoomDetailFragment extends Fragment {
     Picasso
         .get()
         .load(staticImage.url().toString())
-        .memoryPolicy(MemoryPolicy.NO_CACHE)
-        .networkPolicy(NetworkPolicy.NO_CACHE)
-        .noFade()
         .fit()
         .centerCrop()
         .placeholder(R.drawable.ic_home_primary_dark_24dp)

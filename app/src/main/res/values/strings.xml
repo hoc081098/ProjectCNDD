@@ -169,8 +169,19 @@
     <string name="delete_comment_successfully">Delete comment successfully</string>
     <string name="edit_comment_successfully">Edit comment successfully</string>
     <string name="add_saved">Add to saved list</string>
+    <string name="remove_saved">Remove from saved list</string>
     <string name="share">Share</string>
     <string name="error">Error: %s</string>
+    <string name="not_found">Not found</string>
+    <string name="filter">Filter</string>
+    <string name="limit_number">Limit number</string>
+    <string name="sort_posted_date">Sort posted date</string>
+    <string name="sort_price">Sort price</string>
+    <string name="sort_view_count">Sort view count</string>
+    <string name="select_price">Select price (1_000VND)</string>
+    <string name="asc">Ascending</string>
+    <string name="desc">Descending</string>
+    <string name="apply_filter">Apply filter</string>
 
 
 </resources>

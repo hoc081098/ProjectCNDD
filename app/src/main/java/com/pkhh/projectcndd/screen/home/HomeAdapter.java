@@ -65,6 +65,8 @@ class ImageAndDescriptionBanner {
   final String image;
   final String description;
 
+  ImageAndDescriptionBanner() {this("Something is not empty (^^)", "");}
+
   ImageAndDescriptionBanner(String image, String description) {
     this.image = image;
     this.description = description;

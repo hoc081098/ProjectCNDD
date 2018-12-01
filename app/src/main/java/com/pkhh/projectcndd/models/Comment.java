@@ -1,9 +1,9 @@
 package com.pkhh.projectcndd.models;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 import com.google.firebase.firestore.ServerTimestamp;
 
-import java.util.Date;
 import java.util.Objects;
 
 import androidx.annotation.Nullable;
@@ -14,14 +14,12 @@ public class Comment extends FirebaseModel {
   private String userName;
   private String userAvatar;
   private String content;
-  private Date createdAt;
-  @Nullable
-  private Date updatedAt;
+  @Nullable private Timestamp createdAt;
+  @Nullable private Timestamp updatedAt;
 
-  public Comment() {
-  }
+  public Comment() { }
 
-  public Comment(String userId, String roomId, String userName, String userAvatar, String content, Date createdAt, @Nullable Date updatedAt) {
+  public Comment(String userId, String roomId, String userName, String userAvatar, String content, @Nullable Timestamp createdAt, @Nullable Timestamp updatedAt) {
     this.userId = userId;
     this.roomId = roomId;
     this.userName = userName;
@@ -104,24 +102,24 @@ public class Comment extends FirebaseModel {
 
   @ServerTimestamp
   @PropertyName("created_at")
-  public Date getCreatedAt() {
+  @Nullable
+  public Timestamp getCreatedAt() {
     return createdAt;
   }
 
   @PropertyName("created_at")
-  public void setCreatedAt(Date createdAt) {
+  public void setCreatedAt(  @Nullable Timestamp createdAt) {
     this.createdAt = createdAt;
   }
 
-  @ServerTimestamp
   @PropertyName("updated_at")
   @Nullable
-  public Date getUpdatedAt() {
+  public Timestamp getUpdatedAt() {
     return updatedAt;
   }
 
   @PropertyName("updated_at")
-  public void setUpdatedAt(@Nullable Date updatedAt) {
+  public void setUpdatedAt(@Nullable Timestamp updatedAt) {
     this.updatedAt = updatedAt;
   }
 

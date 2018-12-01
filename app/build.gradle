@@ -72,8 +72,6 @@ dependencies {
 
     // image slider
     implementation project(':image-slider')
-    // search view
-    implementation 'com.miguelcatalan:materialsearchview:1.4.0'
     // circle imageview
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     // photo view
@@ -91,6 +89,9 @@ dependencies {
 
     // number to Vietnamese words
     implementation project(':number-to-vietnamese-words')
+
+    // material range bar
+    implementation project(':materialrangebar')
 
     // rx
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'

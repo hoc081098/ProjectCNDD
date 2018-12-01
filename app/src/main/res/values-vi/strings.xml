@@ -156,6 +156,17 @@
     <string name="delete_comment_successfully">Xóa nhận xét thành công</string>
     <string name="edit_comment_successfully">Chỉnh sửa nhận xét thành công</string>
     <string name="add_saved">Thêm vào đã lưu</string>
+    <string name="remove_saved">Xóa khỏi đã lưu</string>
     <string name="share">Chia sẻ</string>
     <string name="error">Lỗi: %s</string>
+    <string name="not_found">Không có nhà trọ nào</string>
+    <string name="filter">Lọc</string>
+    <string name="limit_number">Giới hạn</string>
+    <string name="sort_posted_date">Ngày đăng</string>
+    <string name="sort_price">Giá cả</string>
+    <string name="sort_view_count">Lượt xem</string>
+    <string name="select_price">Khoảng giá (1_000đ)</string>
+    <string name="asc">Tăng dần</string>
+    <string name="desc">Giảm dần</string>
+    <string name="apply_filter">Lọc</string>
 </resources>

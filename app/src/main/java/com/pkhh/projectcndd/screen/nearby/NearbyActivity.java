@@ -91,7 +91,9 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_nearby);
+
     requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    requireNonNull(getSupportActionBar()).setTitle(R.string.nearby);
 
     mapView = findViewById(R.id.map_view);
     mapView.onCreate(savedInstanceState);
@@ -392,7 +394,7 @@ public class NearbyActivity extends AppCompatActivity implements OnMapReadyCallb
                   )
               )
               .toList();
-          Toast.makeText(this, "getDocumentNearBy: {" + latitude + ", " + longitude + ", " + distance + "} --> " + markers.size(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(this, "getDocumentNearBy: {" + latitude + ", " + longitude + ", " + distance + "} --> " + markers.size(), Toast.LENGTH_SHORT).show();
           this.markers = mMap.addMarkers(markers);
         })
         .addOnFailureListener(this, e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());

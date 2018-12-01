@@ -26,6 +26,7 @@ public class Constants {
   public static final String DISTRICTS_NAME_COLLECION = "districts";
   public static final String WARDS_NAME_COLLECION = "wards";
   public static final String COMMENTS_NAME_COLLECION = "comments";
+  public static final String BANNERS_NAME_COLLECION = "banners";
 
   private Constants() {}
 }

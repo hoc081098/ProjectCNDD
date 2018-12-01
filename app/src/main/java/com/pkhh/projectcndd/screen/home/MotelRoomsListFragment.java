@@ -24,7 +24,6 @@ import com.pkhh.projectcndd.utils.SharedPrefUtil;
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +47,7 @@ import static com.pkhh.projectcndd.models.FirebaseModel.querySnapshotToObjects;
 import static com.pkhh.projectcndd.screen.home.RoomItem.HIDE;
 import static com.pkhh.projectcndd.screen.home.RoomItem.SHOW_NOT_SAVED;
 import static com.pkhh.projectcndd.screen.home.RoomItem.SHOW_SAVED;
+import static com.pkhh.projectcndd.utils.Constants.BANNERS_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.PROVINCES_NAME_COLLECION;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 import static java.util.Collections.emptyList;
@@ -68,11 +68,13 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
   private Unbinder unbinder;
   @Nullable private AlertDialog changeProvinceDialog;
 
-
   @NonNull private List<MotelRoom> listRoomCreatedDes = emptyList();
   @NonNull private List<MotelRoom> listRoomCountViewDes = emptyList();
+  @NonNull private List<ImageAndDescriptionBanner> banners= emptyList();
+  @Nullable private List<HomeListItem> homeListItems;
   @Nullable private ListenerRegistration registration1;
   @Nullable private ListenerRegistration registration2;
+  @Nullable private ListenerRegistration registration3;
 
   @NonNull private List<Province> provinces = emptyList();
   @NonNull private Map<String, Province> provinceMap = emptyMap();
@@ -94,7 +96,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     selectedProvinceName = SharedPrefUtil.getInstance(requireContext()).getSelectedProvinceName(getString(R.string.da_nang_name));
 
     setupRecyclerViewAndAdapter(view);
-    updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
+    updateRecycler(banners, listRoomCreatedDes, listRoomCountViewDes);
 
     firestore.collection(PROVINCES_NAME_COLLECION)
         .addSnapshotListener(requireActivity(), (queryDocumentSnapshots, e) -> {
@@ -131,7 +133,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
           if (e != null) return;
 
           listRoomCreatedDes = queryDocumentSnapshots != null ? querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
-          updateRecycler(listRoomCreatedDes, listRoomCreatedDes);
+          updateRecycler(banners, listRoomCreatedDes, listRoomCreatedDes);
         });
 
 
@@ -145,7 +147,18 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
           if (e != null) return;
 
           listRoomCountViewDes = queryDocumentSnapshots != null ? querySnapshotToObjects(queryDocumentSnapshots, MotelRoom.class) : emptyList();
-          updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
+          updateRecycler(banners, listRoomCreatedDes, listRoomCountViewDes);
+        });
+
+    registration3 = firestore
+        .collection(BANNERS_NAME_COLLECION)
+        .limit(3)
+        .addSnapshotListener((queryDocumentSnapshots, e) -> {
+          if (e != null) return;
+          if (queryDocumentSnapshots != null) {
+            banners = queryDocumentSnapshots.toObjects(ImageAndDescriptionBanner.class);
+            updateRecycler(banners, listRoomCreatedDes, listRoomCountViewDes);
+          }
         });
   }
 
@@ -180,19 +193,10 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     return strings.get(0);
   }
 
-  private void updateRecycler(List<MotelRoom> createdAtDes, List<MotelRoom> countViewDes) {
+  private void updateRecycler(List<ImageAndDescriptionBanner> banners, List<MotelRoom> createdAtDes, List<MotelRoom> countViewDes) {
     List<HomeListItem> homeListItems = new ArrayList<>(5 + createdAtDes.size() + countViewDes.size());
 
-    homeListItems.add(
-        new BannerItem(
-            Arrays.asList(
-                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1504333638930-c8787321eee0?ixlib=rb-0.3.5&s=8fa53af55b1f12c07d2c3d4c1358c20a&w=1000&q=80", "Image 1"),
-                new ImageAndDescriptionBanner("https://images.unsplash.com/photo-1483356256511-b48749959172?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=fbb470799cbb69de82bc80822eee3255&w=1000&q=80", "Image 2"),
-                new ImageAndDescriptionBanner("http://file.vforum.vn/hinh/2015/11/vforum.vn-hinh-anh-nen-ngan-ha-vu-tru-bao-la-10.jpg", "Image 3")
-            ),
-            selectedProvinceName
-        )
-    );
+    homeListItems.add(new BannerItem(banners, selectedProvinceName));
 
     homeListItems.add(new HeaderItem(getString(R.string.newest)));
     homeListItems.addAll(of(createdAtDes).map(this::toRoomItem).toList());
@@ -203,7 +207,9 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     homeListItems.add(new SeeAll(SeeAll.COUNT_VIEW_DESCENDING));
 
     Timber.tag("@@@").d("submit List %s", homeListItems);
-    adapter.submitList(homeListItems);
+    if (!Objects.equals(this.homeListItems, homeListItems)) {
+      adapter.submitList(this.homeListItems = homeListItems);
+    }
   }
 
   @Override
@@ -215,6 +221,9 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     }
     if (registration2 != null) {
       registration2.remove();
+    }
+    if (registration3 != null) {
+      registration3.remove();
     }
     firebaseAuth.removeAuthStateListener(this);
 
@@ -299,7 +308,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
           selectedProvinceId = provinceIds.get(position);
           selectedProvinceName = requireNonNull(provinceMap.get(selectedProvinceId)).getName();
-          updateRecycler(listRoomCreatedDes = emptyList(), listRoomCountViewDes = emptyList());
+          updateRecycler(banners, listRoomCreatedDes = emptyList(), listRoomCountViewDes = emptyList());
           subscribe();
 
           final SharedPrefUtil sharedPrefUtil = SharedPrefUtil.getInstance(requireContext());
@@ -348,7 +357,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
       listRoomCreatedDes = of(listRoomCreatedDes).map(r -> Objects.equals(r.getId(), id) ? room : r).toList();
       listRoomCountViewDes = of(listRoomCountViewDes).map(r -> Objects.equals(r.getId(), id) ? room : r).toList();
 
-      updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
+      updateRecycler(banners, listRoomCreatedDes, listRoomCountViewDes);
 
     }).addOnFailureListener(requireNonNull(getActivity()), e -> Snackbar.make(rootLayout, "Error: " + e.getMessage(), Snackbar.LENGTH_SHORT).show());
 
@@ -356,6 +365,6 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
 
   @Override
   public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-    updateRecycler(listRoomCreatedDes, listRoomCountViewDes);
+    updateRecycler(banners, listRoomCreatedDes, listRoomCountViewDes);
   }
 }

@@ -90,6 +90,7 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel, VH exte
     if (lastVisible != null) {
       list.add(LOAD_MORE_ITEM);
       notifyItemInserted(list.size() - 1);
+      onDataChanged();
     }
 
     (lastVisible != null ? query.startAfter(lastVisible) : query)
@@ -103,14 +104,17 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel, VH exte
           if (!this.list.isEmpty()) {
             this.list.remove(this.list.size() - 1);
             notifyItemRemoved(this.list.size());
+            onDataChanged();
           }
           if (lastVisible == null) {
             this.list.clear();
             notifyDataSetChanged();
+            onDataChanged();
           }
           int oldSize = this.list.size();
           this.list.addAll(firebaseModels);
           notifyItemRangeInserted(oldSize, firebaseModels.size());
+          onDataChanged();
 
           if (lastVisible == null) {
             onFirstLoaded();
@@ -127,11 +131,11 @@ public abstract class MyFirebaseLoadMoreAdapter<T extends FirebaseModel, VH exte
         .addOnFailureListener(e -> hasError = true);
   }
 
-  protected void onLastItemReached() {
-  }
+  protected  void onDataChanged(){}
 
-  protected void onFirstLoaded() {
-  }
+  protected void onLastItemReached() { }
+
+  protected void onFirstLoaded() { }
 
   @NonNull
   public Object getItem(int position) {

@@ -52,6 +52,8 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
 
     ButterKnife.bind(this, this);
     requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    requireNonNull(getSupportActionBar()).setTitle(R.string.saved);
+
 
     progressBar.setIndeterminate(true);
     progressBar.setVisibility(View.VISIBLE);

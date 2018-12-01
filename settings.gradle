@@ -1,1 +1,1 @@
-include ':app', ':image-slider', ':number-to-vietnamese-words'
+include ':app', ':image-slider', ':number-to-vietnamese-words', ':materialrangebar'

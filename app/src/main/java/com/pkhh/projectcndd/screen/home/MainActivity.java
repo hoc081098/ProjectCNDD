@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity
 
     // setup toolbar
     setSupportActionBar(findViewById(R.id.toolbar));
+    getSupportActionBar().setTitle(R.string.app_name);
+
 
     findViewById(R.id.fab).setOnClickListener(__ -> startActivity(new Intent(this, NearbyActivity.class)));
 
