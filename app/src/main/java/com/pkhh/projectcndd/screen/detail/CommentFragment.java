@@ -51,6 +51,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionManager;
 import butterknife.BindView;
@@ -243,6 +244,14 @@ public class CommentFragment extends Fragment {
           .addOnSuccessListener(requireActivity(), documentReference -> {
             Toast.makeText(requireContext(), R.string.add_comment_successfully, Toast.LENGTH_SHORT).show();
             requireNonNull(textInputComment.getEditText()).setText(null);
+            final LinearSmoothScroller linearSmoothScroller = new LinearSmoothScroller(requireContext()) {
+              @Override
+              protected int getVerticalSnapPreference() {
+                return LinearSmoothScroller.SNAP_TO_START;
+              }
+            };
+            linearSmoothScroller.setTargetPosition(0);
+            requireNonNull(recyclerComments.getLayoutManager()).startSmoothScroll(linearSmoothScroller);
           })
           .addOnFailureListener(requireActivity(), e -> {
             Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();

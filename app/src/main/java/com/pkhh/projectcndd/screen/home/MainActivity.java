@@ -354,6 +354,7 @@ public class MainActivity extends AppCompatActivity
   public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
     final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
     final MenuItem loginOrLogoutMenuItem = navigationView.getMenu().findItem(R.id.nav_login);
+    final MenuItem postedRoomMenuItem = navigationView.getMenu().findItem(R.id.nav_posted_room);
 
     if (currentUser == null) {
       Picasso.get()
@@ -367,6 +368,7 @@ public class MainActivity extends AppCompatActivity
 
       loginOrLogoutMenuItem.setTitle(getString(R.string.login));
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_person_add_black_24dp);
+      postedRoomMenuItem.setVisible(false);
 
       user = null;
       if (listenerRegistration != null) {
@@ -397,6 +399,7 @@ public class MainActivity extends AppCompatActivity
           });
       loginOrLogoutMenuItem.setTitle(getString(R.string.logout));
       loginOrLogoutMenuItem.setIcon(R.drawable.ic_exit_to_app_black_24dp);
+      postedRoomMenuItem.setVisible(true);
     }
   }
 }

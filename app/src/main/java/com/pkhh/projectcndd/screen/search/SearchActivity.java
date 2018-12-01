@@ -366,7 +366,8 @@ public class SearchActivity extends AppCompatActivity {
         .whereEqualTo(
             "district",
             firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + SharedPrefUtil.getInstance(this).getSelectedProvinceId(getString(R.string.da_nang_id))
-                + "/" + Constants.DISTRICTS_NAME_COLLECION + "/" + district.getId())
+                + "/" + Constants.DISTRICTS_NAME_COLLECION + "/" + district.getId()
+            )
         )
         .whereGreaterThanOrEqualTo("price", minPrice)
         .whereLessThanOrEqualTo("price", maxPrice)
@@ -378,11 +379,11 @@ public class SearchActivity extends AppCompatActivity {
   }
 
   static class District extends FirebaseModel {
-    final String name;
+    public final String name;
 
-    District() { this(""); }
+    public District() { this(""); }
 
-    District(String name) { this.name = name; }
+    public District(String name) { this.name = name; }
 
     @Override
     public boolean equals(Object o) {
@@ -404,11 +405,11 @@ public class SearchActivity extends AppCompatActivity {
   }
 
   static class Category extends FirebaseModel {
-    final String name;
+    public final String name;
 
-    Category() { this(""); }
+    public Category() { this(""); }
 
-    Category(String name) { this.name = name; }
+    public Category(String name) { this.name = name; }
 
     @Override
     public boolean equals(Object o) {
