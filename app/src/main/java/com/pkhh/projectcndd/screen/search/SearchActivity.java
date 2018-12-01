@@ -348,11 +348,11 @@ public class SearchActivity extends AppCompatActivity {
     final Query.Direction sortPrice = toDirection((String) spinnerSortPrice.getSelectedItem());
     final Query.Direction sortViewCount = toDirection((String) spinnerSortViewCount.getSelectedItem());
     final Category category = (Category) spinnerSelectCategory.getSelectedItem();
-    
+
     if (limit == null || district == null || sortDate == null || sortPrice == null || sortViewCount == null || category == null) {
       return;
-    }  
-    
+    }
+
     final long minPrice = this.minPrice * 1_000;
     final long maxPrice = this.maxPrice * 1_000;
 
@@ -362,10 +362,12 @@ public class SearchActivity extends AppCompatActivity {
     final Query query = firestore
         .collection(Constants.ROOMS_NAME_COLLECION)
         .whereEqualTo("approve", true)
-        .whereEqualTo("category", firestore.collection(Constants.CATEGORIES_NAME_COLLECION) + "/" + category.getId())
-        .whereEqualTo("district", firestore.collection(Constants.PROVINCES_NAME_COLLECION + "/"
-        + SharedPrefUtil.getInstance(this).getSelectedProvinceId(getString(R.string.da_nang_id))
-        + "/" + Constants.DISTRICTS_NAME_COLLECION + "/" + district.getId()))
+        .whereEqualTo("category", firestore.document(Constants.CATEGORIES_NAME_COLLECION + "/" + category.getId()))
+        .whereEqualTo(
+            "district",
+            firestore.document(Constants.PROVINCES_NAME_COLLECION + "/" + SharedPrefUtil.getInstance(this).getSelectedProvinceId(getString(R.string.da_nang_id))
+                + "/" + Constants.DISTRICTS_NAME_COLLECION + "/" + district.getId())
+        )
         .whereGreaterThanOrEqualTo("price", minPrice)
         .whereLessThanOrEqualTo("price", maxPrice)
         .orderBy("price", sortPrice)
