@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.appyvet.materialrangebar.RangeBar;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -23,7 +25,6 @@ import com.pkhh.projectcndd.R;
 import com.pkhh.projectcndd.models.FirebaseModel;
 import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.screen.detail.DetailActivity;
-import com.pkhh.projectcndd.screen.home.MyFirebaseLoadMoreAdapter;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.SharedPrefUtil;
 
@@ -51,7 +52,6 @@ import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
 import static java.util.Objects.requireNonNull;
 
 public class SearchActivity extends AppCompatActivity {
-  public static final int PAGE_SIZE = 20;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.empty_layout) ConstraintLayout emptyLayout;
@@ -72,7 +72,7 @@ public class SearchActivity extends AppCompatActivity {
   private long minPrice = 0;
 
   private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-  private MyFirebaseLoadMoreAdapter<MotelRoom, RecyclerView.ViewHolder> adapter;
+  private FirestoreRecyclerAdapter<MotelRoom, CommonRoomVH> adapter;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
     recyclerView.setHasFixedSize(true);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    setupAdapter(firestore.collection(Constants.ROOMS_NAME_COLLECION).whereEqualTo("approve", true));
+    setupAdapter(firestore.collection(Constants.ROOMS_NAME_COLLECION).whereEqualTo("approve", true).limit(50));
     setupFilterBottomSheet();
   }
 
@@ -251,57 +251,33 @@ public class SearchActivity extends AppCompatActivity {
   }
 
   private void setupAdapter(Query query) {
+    if (adapter != null) {
+      adapter.stopListening();
+    }
     progressbar.setVisibility(View.VISIBLE);
     emptyLayout.setVisibility(View.INVISIBLE);
 
-    adapter = new MyFirebaseLoadMoreAdapter<MotelRoom, RecyclerView.ViewHolder>(
-        query,
-        MotelRoom.class,
-        snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class),
-        PAGE_SIZE,
-        PAGE_SIZE / 2,
-        recyclerView
-    ) {
+    final FirestoreRecyclerOptions<MotelRoom> motelRoomFirestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<MotelRoom>()
+        .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
+        .build();
 
+    adapter = new FirestoreRecyclerAdapter<MotelRoom, CommonRoomVH>(motelRoomFirestoreRecyclerOptions) {
       @NonNull
       @Override
-      public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == TYPE_FIREBASE_MODEL_ITEM) {
-          View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.common_room_item_layout, parent, false);
-          return new CommonRoomVH(itemView, this::onItemClick);
-        }
-        if (viewType == TYPE_LOAD_MORE) {
-          View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.load_more_item_layout, parent, false);
-          return new LoadMoreVH(itemView);
-        }
-        throw new IllegalStateException("Don't know viewType = " + viewType);
-      }
-
-      @Override
-      public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final Object item = getItem(position);
-        if (holder instanceof CommonRoomVH && item instanceof MotelRoom) {
-          ((CommonRoomVH) holder).bind((MotelRoom) item);
-        }
+      public CommonRoomVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.common_room_item_layout, parent, false);
+        return new CommonRoomVH(itemView, this::onItemClick);
       }
 
       private void onItemClick(View __, int position) {
-        final Object item = getItem(position);
-        if (item instanceof MotelRoom) {
-          final MotelRoom room = (MotelRoom) item;
+        final Intent intent = new Intent(SearchActivity.this, DetailActivity.class);
+        intent.putExtra(EXTRA_MOTEL_ROOM_ID, getItem(position).getId());
 
-          final Intent intent = new Intent(SearchActivity.this, DetailActivity.class);
-          intent.putExtra(EXTRA_MOTEL_ROOM_ID, room.getId());
-
-          startActivity(intent);
-        }
+        startActivity(intent);
       }
 
       @Override
-      protected void onFirstLoaded() { progressbar.setVisibility(View.INVISIBLE); }
-
-      @Override
-      protected void onDataChanged() {
+      public void onDataChanged() {
         super.onDataChanged();
         progressbar.setVisibility(View.INVISIBLE);
         if (getItemCount() == 0) {
@@ -313,12 +289,13 @@ public class SearchActivity extends AppCompatActivity {
         }
       }
 
-      class LoadMoreVH extends RecyclerView.ViewHolder {
-        LoadMoreVH(@NonNull View itemView) { super(itemView); }
+      @Override
+      protected void onBindViewHolder(@NonNull CommonRoomVH commonRoomVH, int i, @NonNull MotelRoom motelRoom) {
+        commonRoomVH.bind(motelRoom);
       }
     };
-
     recyclerView.setAdapter(adapter);
+    adapter.startListening();
   }
 
   @Override
@@ -376,6 +353,12 @@ public class SearchActivity extends AppCompatActivity {
         .orderBy("created_at", sortDate)
         .limit(limit);
     setupAdapter(query);
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    adapter.stopListening();
   }
 
   static class District extends FirebaseModel {

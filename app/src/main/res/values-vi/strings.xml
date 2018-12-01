@@ -169,4 +169,7 @@
     <string name="asc">Tăng dần</string>
     <string name="desc">Giảm dần</string>
     <string name="apply_filter">Áp dụng Lọc</string>
+    <string name="approved">Đã duyệt</string>
+    <string name="pending">Chờ duyệt</string>
+    <string name="delete_room_successfully">Xóa bài đăng thành công</string>
 </resources>
