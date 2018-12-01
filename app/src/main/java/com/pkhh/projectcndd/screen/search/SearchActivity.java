@@ -342,12 +342,17 @@ public class SearchActivity extends AppCompatActivity {
 
   @OnClick({R.id.button_apply_filter})
   public void performSearch(View v) {
-    final long limit = (long) spinnerLimit.getSelectedItem();
+    final Long limit = (Long) spinnerLimit.getSelectedItem();
     final District district = (District) spinnerSelectDistrict.getSelectedItem();
     final Query.Direction sortDate = toDirection((String) spinnerSortDate.getSelectedItem());
     final Query.Direction sortPrice = toDirection((String) spinnerSortPrice.getSelectedItem());
     final Query.Direction sortViewCount = toDirection((String) spinnerSortViewCount.getSelectedItem());
     final Category category = (Category) spinnerSelectCategory.getSelectedItem();
+    
+    if (limit == null || district == null || sortDate == null || sortPrice == null || sortViewCount == null || category == null) {
+      return;
+    }  
+    
     final long minPrice = this.minPrice * 1_000;
     final long maxPrice = this.maxPrice * 1_000;
 
