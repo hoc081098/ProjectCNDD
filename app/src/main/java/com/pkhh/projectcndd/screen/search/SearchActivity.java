@@ -358,7 +358,9 @@ public class SearchActivity extends AppCompatActivity {
         .collection(Constants.ROOMS_NAME_COLLECION)
         .whereEqualTo("approve", true)
         .whereEqualTo("category", firestore.collection(Constants.CATEGORIES_NAME_COLLECION) + "/" + category.getId())
-        .whereEqualTo("district", firestore.collection(Constants.DISTRICTS_NAME_COLLECION) + "/" + district.getId())
+        .whereEqualTo("district", firestore.collection(Constants.PROVINCES_NAME_COLLECION + "/"
+        + SharedPrefUtil.getInstance(this).getSelectedProvinceId(getString(R.string.da_nang_id))
+        + "/" + Constants.DISTRICTS_NAME_COLLECION + "/" + district.getId()))
         .whereGreaterThanOrEqualTo("price", minPrice)
         .whereLessThanOrEqualTo("price", maxPrice)
         .orderBy("price", sortPrice)
