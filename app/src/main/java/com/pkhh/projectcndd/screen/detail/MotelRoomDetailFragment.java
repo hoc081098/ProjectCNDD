@@ -45,8 +45,6 @@ import com.pkhh.projectcndd.models.MotelRoom;
 import com.pkhh.projectcndd.models.User;
 import com.pkhh.projectcndd.screen.PhotoSlideActivity;
 import com.pkhh.projectcndd.screen.profile.UserProfileActivity;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -234,7 +232,7 @@ public class MotelRoomDetailFragment extends Fragment {
         .addOnFailureListener(requireActivity(), e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     textTitle.setText(motelRoom.getTitle());
     textAvailable.setText(
-        motelRoom.isActive() ? R.string.available_yes : R.string.available_no
+        motelRoom.isAvailable() ? R.string.available_yes : R.string.available_no
     );
     textViewCount.setText(viewCountFormat.format(motelRoom.getCountView()));
   }

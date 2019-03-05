@@ -24,6 +24,7 @@ import com.pkhh.projectcndd.utils.SharedPrefUtil;
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,7 +127,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     registration1 = firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("approve", true)
         .whereEqualTo("province", selectedProvinceRef)
-        .whereEqualTo("is_active", true)
+        .whereEqualTo("available", true)
         .orderBy("created_at", Query.Direction.DESCENDING)
         .limit(LIMIT_CREATED_DES)
         .addSnapshotListener((queryDocumentSnapshots, e) -> {
@@ -140,7 +141,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     registration2 = firestore.collection(ROOMS_NAME_COLLECION)
         .whereEqualTo("approve", true)
         .whereEqualTo("province", selectedProvinceRef)
-        .whereEqualTo("is_active", true)
+        .whereEqualTo("available", true)
         .orderBy("count_view", Query.Direction.DESCENDING)
         .limit(LIMIT_COUNT_VIEW_DES)
         .addSnapshotListener((queryDocumentSnapshots, e) -> {
@@ -170,7 +171,7 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
     if (currentUser == null) {
       bookmarkIconState = HIDE;
     } else {
-      bookmarkIconState = room.getUserIdsSaved().contains(currentUser.getUid()) ? SHOW_SAVED : SHOW_NOT_SAVED;
+      bookmarkIconState = room.getUserIdsSaved().containsKey(currentUser.getUid()) ? SHOW_SAVED : SHOW_NOT_SAVED;
     }
 
     return new RoomItem(
@@ -330,17 +331,17 @@ public class MotelRoomsListFragment extends Fragment implements FirebaseAuth.Aut
       final String uid = currentUser.getUid();
       final DocumentReference document = firestore.collection(ROOMS_NAME_COLLECION).document(id);
 
-      List<?> userIdsSaved = (List) transaction.get(document).get("user_ids_saved");
-      userIdsSaved = userIdsSaved == null ? emptyList() : userIdsSaved;
+      Map<?, ?> userIdsSaved = (Map<?, ?>) transaction.get(document).get("user_ids_saved");
+      userIdsSaved = userIdsSaved == null ? new HashMap<>() : userIdsSaved;
 
-      if (userIdsSaved.contains(uid)) {
+      if (userIdsSaved.containsKey(uid)) {
 
-        transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
+        transaction.update(document, "user_ids_saved." + uid, FieldValue.serverTimestamp());
         return getString(R.string.remove_from_saved_list_successfully);
 
       } else {
 
-        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
+        transaction.update(document, "user_ids_saved." + uid, FieldValue.delete());
         return getString(R.string.add_to_saved_list_successfully);
 
       }

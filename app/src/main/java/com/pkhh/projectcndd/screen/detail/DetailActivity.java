@@ -19,6 +19,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -37,6 +38,7 @@ import io.reactivex.schedulers.Schedulers;
 import static com.pkhh.projectcndd.utils.Constants.EXTRA_MOTEL_ROOM_ID;
 import static com.pkhh.projectcndd.utils.Constants.ROOMS_NAME_COLLECION;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 public class DetailActivity extends AppCompatActivity {
@@ -48,18 +50,23 @@ public class DetailActivity extends AppCompatActivity {
   private final FirebaseAuth auth = FirebaseAuth.getInstance();
   private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-  @BindView(R.id.bottom_nav) BottomNavigationView bottomNavigationView;
-  @BindView(R.id.viewpager) ViewPager viewPager;
+  @BindView(R.id.bottom_nav)
+  BottomNavigationView bottomNavigationView;
+  @BindView(R.id.viewpager)
+  ViewPager viewPager;
 
   private String roomId;
   private DocumentReference roomRef;
-  @SavedIconState private int savedIconState = HIDE;
-  @Nullable private MenuItem prevSelectedMenuItem = null;
+  @SavedIconState
+  private int savedIconState = HIDE;
+  @Nullable
+  private MenuItem prevSelectedMenuItem = null;
 
 
   @IntDef(value = {HIDE, SHOW_NOT_SAVED, SHOW_SAVED})
   @Retention(RetentionPolicy.SOURCE)
-  @interface SavedIconState {}
+  @interface SavedIconState {
+  }
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,10 +92,14 @@ public class DetailActivity extends AppCompatActivity {
 
     viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
       @Override
-      public Fragment getItem(int position) { return fragments.get(position); }
+      public Fragment getItem(int position) {
+        return fragments.get(position);
+      }
 
       @Override
-      public int getCount() { return fragments.size(); }
+      public int getCount() {
+        return fragments.size();
+      }
     });
 
     bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
@@ -153,17 +164,17 @@ public class DetailActivity extends AppCompatActivity {
       final String uid = currentUser.getUid();
       final DocumentReference document = firestore.collection(ROOMS_NAME_COLLECION).document(roomId);
 
-      List<?> userIdsSaved = (List) transaction.get(document).get("user_ids_saved");
-      userIdsSaved = userIdsSaved == null ? emptyList() : userIdsSaved;
+      Map<?, ?> userIdsSaved = (Map<?, ?>) transaction.get(document).get("user_ids_saved");
+      userIdsSaved = userIdsSaved == null ? emptyMap() : userIdsSaved;
 
-      if (userIdsSaved.contains(uid)) {
+      if (userIdsSaved.containsKey(uid)) {
 
-        transaction.update(document, "user_ids_saved", FieldValue.arrayRemove(uid));
+        transaction.update(document, "user_ids_saved." + uid, FieldValue.serverTimestamp());
         return R.string.remove_from_saved_list_successfully;
 
       } else {
 
-        transaction.update(document, "user_ids_saved", FieldValue.arrayUnion(uid));
+        transaction.update(document, "user_ids_saved." + uid, FieldValue.delete());
         return R.string.add_to_saved_list_successfully;
 
       }
@@ -209,26 +220,26 @@ public class DetailActivity extends AppCompatActivity {
     final Observable<FirebaseAuth> firebaseAuthObservable = RxFirebase
         .authStateChanges(auth)
         .subscribeOn(Schedulers.io());
-    final Observable<List<?>> idsSaved = RxFirebase
+    final Observable<Map<?, ?>> idsSaved = RxFirebase
         .documentSnapshots(roomRef)
         .subscribeOn(Schedulers.io())
         .map(snapshot -> {
-          List<?> userIdsSaved = (List) snapshot.get("user_ids_saved");
-          return userIdsSaved == null ? emptyList() : userIdsSaved;
+          Map<?, ?> userIdsSaved = (Map<?, ?>) snapshot.get("user_ids_saved");
+          return userIdsSaved == null ? emptyMap() : userIdsSaved;
         });
 
     compositeDisposable.add(
         Observable
-            .combineLatest(idsSaved, firebaseAuthObservable, Pair<List<?>, FirebaseAuth>::new)
+            .combineLatest(idsSaved, firebaseAuthObservable, Pair<Map<?, ?>, FirebaseAuth>::new)
             .subscribeOn(Schedulers.io())
             .map(pair -> {
-              final List<?> ids = requireNonNull(pair.first);
+              final Map<?, ?> ids = requireNonNull(pair.first);
               final FirebaseAuth auth = requireNonNull(pair.second);
               @Nullable final FirebaseUser currentUser = auth.getCurrentUser();
               if (currentUser == null) {
                 return HIDE;
               }
-              if (ids.contains(currentUser.getUid())) {
+              if (ids.containsKey(currentUser.getUid())) {
                 return SHOW_SAVED;
               }
               return SHOW_NOT_SAVED;
@@ -238,7 +249,9 @@ public class DetailActivity extends AppCompatActivity {
             .subscribe(savedIconState -> {
               this.savedIconState = savedIconState;
               invalidateOptionsMenu();
-            }, e -> {})
+            }, e -> {
+              Toast.makeText(this, getString(R.string.error, e.getMessage()), Toast.LENGTH_SHORT).show();
+            })
     );
   }
 
