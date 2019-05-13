@@ -63,7 +63,7 @@ public class ShowMoreActivity extends AppCompatActivity {
       final Query query = firestore.collection(Constants.ROOMS_NAME_COLLECION)
           .whereEqualTo("approve", true)
           .whereEqualTo("province", selectedProvinceRef)
-          .whereEqualTo("is_active", true)
+          .whereEqualTo("available", true)
           .orderBy("created_at", Query.Direction.DESCENDING);
 
       getSupportActionBar().setTitle(getString(R.string.newest));
@@ -73,7 +73,7 @@ public class ShowMoreActivity extends AppCompatActivity {
       final Query query = firestore.collection(ROOMS_NAME_COLLECION)
           .whereEqualTo("approve", true)
           .whereEqualTo("province", selectedProvinceRef)
-          .whereEqualTo("is_active", true)
+          .whereEqualTo("available", true)
           .orderBy("count_view", Query.Direction.DESCENDING);
 
       getSupportActionBar().setTitle(getString(R.string.watch_more));

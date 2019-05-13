@@ -22,6 +22,8 @@ import com.pkhh.projectcndd.screen.detail.DetailActivity;
 import com.pkhh.projectcndd.utils.Constants;
 import com.pkhh.projectcndd.utils.RecyclerOnClickListener;
 
+import java.util.Objects;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,8 +70,7 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
 
     final Query query = firestore
         .collection(Constants.ROOMS_NAME_COLLECION)
-        .whereArrayContains("user_ids_saved", requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
-
+        .orderBy("user_ids_saved" + "." + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
     final FirestoreRecyclerOptions<MotelRoom> motelRoomFirestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<MotelRoom>()
         .setQuery(query, snapshot -> FirebaseModel.documentSnapshotToObject(snapshot, MotelRoom.class))
         .build();
@@ -114,7 +115,7 @@ public final class SavedRoomsActivity extends AppCompatActivity implements Recyc
     }
 
     firestore.document(Constants.ROOMS_NAME_COLLECION + "/" + item.getId())
-        .update("user_ids_saved", FieldValue.arrayRemove(currentUser.getUid()))
+        .update("user_ids_saved" + "."+currentUser.getUid(), FieldValue.delete())
         .addOnSuccessListener(this, aVoid -> Snackbar.make(recyclerView.getRootView(), R.string.remove_from_saved_list_successfully, Snackbar.LENGTH_SHORT).show())
         .addOnFailureListener(this, e -> Snackbar.make(recyclerView.getRootView(), e.getMessage(), Snackbar.LENGTH_SHORT).show());
   }

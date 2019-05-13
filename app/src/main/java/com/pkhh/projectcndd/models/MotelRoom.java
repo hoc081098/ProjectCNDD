@@ -3,6 +3,7 @@ package com.pkhh.projectcndd.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -17,6 +18,7 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 
+@SuppressWarnings("unchecked")
 public class MotelRoom extends FirebaseModel implements Parcelable {
   public static final Creator<MotelRoom> CREATOR = new Creator<MotelRoom>() {
     @Override
@@ -38,9 +40,9 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
   private GeoPoint addressGeoPoint;
   private List<String> images;
   private String phone;
-  private boolean isActive;
+  private boolean available;
   private boolean approve;
-  private Map<String, Object> utilities;
+  private List<String> utilities;
   private DocumentReference user;
   private DocumentReference category;
   private DocumentReference province;
@@ -49,7 +51,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
   private String districtName;
   private Date createdAt;
   private Date updatedAt;
-  private List<String> userIdsSaved;
+  private Map<String, Timestamp> userIdsSaved;
 
   // Firebase Firestore require empty constructor
   public MotelRoom() {
@@ -66,19 +68,19 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     images = new ArrayList<>();
     in.readStringList(images);
     phone = in.readString();
-    isActive = in.readByte() == (byte) 1;
+    available = in.readByte() == (byte) 1;
     approve = in.readByte() == (byte) 1;
-    utilities = (HashMap<String, Object>) in.readSerializable();
-    user = FirebaseFirestore.getInstance().document(in.readString());
-    category = FirebaseFirestore.getInstance().document(in.readString());
-    province = FirebaseFirestore.getInstance().document(in.readString());
-    ward = FirebaseFirestore.getInstance().document(in.readString());
-    district = FirebaseFirestore.getInstance().document(in.readString());
+    utilities = new ArrayList<>();
+    in.readStringList(utilities);
+    user = FirebaseFirestore.getInstance().document(Objects.requireNonNull(in.readString()));
+    category = FirebaseFirestore.getInstance().document(Objects.requireNonNull(in.readString()));
+    province = FirebaseFirestore.getInstance().document(Objects.requireNonNull(in.readString()));
+    ward = FirebaseFirestore.getInstance().document(Objects.requireNonNull(in.readString()));
+    district = FirebaseFirestore.getInstance().document(Objects.requireNonNull(in.readString()));
     createdAt = new Date(in.readLong());
     final long aLong = in.readLong();
     updatedAt = aLong >= 0 ? new Date(aLong) : null;
-    userIdsSaved = new ArrayList<>();
-    in.readStringList(userIdsSaved);
+    userIdsSaved = (HashMap<String, Timestamp>) in.readSerializable();
     districtName = in.readString();
   }
 
@@ -94,9 +96,9 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     dest.writeDouble(addressGeoPoint.getLongitude());
     dest.writeStringList(images);
     dest.writeString(phone);
-    dest.writeByte((byte) (isActive ? 1 : 0));
+    dest.writeByte((byte) (available ? 1 : 0));
     dest.writeByte((byte) (approve ? 1 : 0));
-    dest.writeSerializable(new HashMap<>(utilities));
+    dest.writeStringList(utilities);
     dest.writeString(user.getPath());
     dest.writeString(category.getPath());
     dest.writeString(province.getPath());
@@ -104,7 +106,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     dest.writeString(district.getPath());
     dest.writeLong(createdAt == null ? -1 : createdAt.getTime());
     dest.writeLong(updatedAt == null ? -1 : updatedAt.getTime());
-    dest.writeStringList(userIdsSaved);
+    dest.writeSerializable(new HashMap<>(userIdsSaved));
     dest.writeString(districtName);
   }
 
@@ -189,14 +191,14 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     this.phone = phone;
   }
 
-  @PropertyName("is_active")
-  public boolean isActive() {
-    return isActive;
+  @PropertyName("available")
+  public boolean isAvailable() {
+    return available;
   }
 
-  @PropertyName("is_active")
-  public void setActive(boolean active) {
-    this.isActive = active;
+  @PropertyName("available")
+  public void setAvailable(boolean available) {
+    this.available = available;
   }
 
   public boolean isApprove() {
@@ -207,11 +209,11 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     this.approve = approve;
   }
 
-  public Map<String, Object> getUtilities() {
+  public List<String> getUtilities() {
     return utilities;
   }
 
-  public void setUtilities(Map<String, Object> utilities) {
+  public void setUtilities(List<String> utilities) {
     this.utilities = utilities;
   }
 
@@ -277,12 +279,12 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
 
   @NonNull
   @PropertyName("user_ids_saved")
-  public List<String> getUserIdsSaved() {
-    return userIdsSaved == null ? new ArrayList<>() : userIdsSaved;
+  public Map<String, Timestamp> getUserIdsSaved() {
+    return userIdsSaved == null ? new HashMap<>() : userIdsSaved;
   }
 
   @PropertyName("user_ids_saved")
-  public void setUserIdsSaved(List<String> userIdsSaved) {
+  public void setUserIdsSaved(Map<String, Timestamp> userIdsSaved) {
     this.userIdsSaved = userIdsSaved;
   }
 
@@ -305,7 +307,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
         price == motelRoom.price &&
         countView == motelRoom.countView &&
         Double.compare(motelRoom.size, size) == 0 &&
-        isActive == motelRoom.isActive &&
+        available == motelRoom.available &&
         approve == motelRoom.approve &&
         Objects.equals(title, motelRoom.title) &&
         Objects.equals(description, motelRoom.description) &&
@@ -328,7 +330,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
   @Override
   public int hashCode() {
     return Objects.hash(id, title, description, price, countView, size, address, addressGeoPoint,
-        images, phone, isActive, approve, utilities, user, category, province, ward, district, createdAt,
+        images, phone, available, approve, utilities, user, category, province, ward, district, createdAt,
         updatedAt, userIdsSaved, districtName);
   }
 
@@ -344,7 +346,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
         ", addressGeoPoint=" + addressGeoPoint +
         ", images=" + images +
         ", phone='" + phone + '\'' +
-        ", isActive=" + isActive +
+        ", available=" + available +
         ", approve=" + approve +
         ", utilities=" + utilities +
         ", user=" + user +
@@ -370,7 +372,7 @@ public class MotelRoom extends FirebaseModel implements Parcelable {
     map.put("address_geopoint", addressGeoPoint);
     map.put("images", images);
     map.put("phone", phone);
-    map.put("is_active", isActive);
+    map.put("available", available);
     map.put("approve", approve);
     map.put("utilities", utilities);
     map.put("user", user);
