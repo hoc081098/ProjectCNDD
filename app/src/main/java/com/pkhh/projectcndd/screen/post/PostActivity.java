@@ -264,7 +264,7 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     room.setApprove(false);
     room.setCountView(0);
     room.setUpdatedAt(null);
-    room.setActive(true);
+    room.setAvailable(true);
 
 
     room.setSize(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getSize());
@@ -273,8 +273,8 @@ public class PostActivity extends AppCompatActivity implements View.OnClickListe
     room.setPrice(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getPrice());
     room.setPhone(mAddPriceTitleSizeDescriptionFragment.getDataOutput().getPhone());
 
-    room.setUtilities(new HashMap<>());
-    room.setUserIdsSaved(Collections.emptyList());
+    room.setUtilities(new ArrayList<>());
+    room.setUserIdsSaved(Collections.emptyMap());
     room.setUser(firestore.document(Constants.USERS_NAME_COLLECION + "/" + uid));
     room.setImages(Collections.emptyList());
 

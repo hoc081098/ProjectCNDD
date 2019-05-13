@@ -76,7 +76,7 @@ public class MotelRoomVH extends RecyclerView.ViewHolder implements View.OnClick
     final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     if (currentUser != null) {
       imageSave.setVisibility(View.VISIBLE);
-      if (item.getUserIdsSaved().contains(currentUser.getUid())) {
+      if (item.getUserIdsSaved().containsKey(currentUser.getUid())) {
         imageSave.setImageResource(R.drawable.ic_bookmark_white_24dp);
       } else {
         imageSave.setImageResource(R.drawable.ic_bookmark_border_white_24dp);

@@ -13,7 +13,6 @@ public class User extends FirebaseModel {
   private String avatar;
   private boolean isActive;
   private Date createdAt;
-  private Date updatedAt;
 
   public User() {
   }
@@ -82,16 +81,6 @@ public class User extends FirebaseModel {
     this.createdAt = createdAt;
   }
 
-  @PropertyName("updated_at")
-  public Date getUpdatedAt() {
-    return updatedAt;
-  }
-
-  @PropertyName("updated_at")
-  public void setUpdatedAt(Date updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
   @Override
   public String toString() {
     return "User{" +
@@ -100,9 +89,8 @@ public class User extends FirebaseModel {
         ", fullName='" + fullName + '\'' +
         ", address='" + address + '\'' +
         ", avatar='" + avatar + '\'' +
-        ", isActive=" + isActive +
+        ", isAvailable=" + isActive +
         ", createdAt=" + createdAt +
-        ", updatedAt=" + updatedAt +
         ", id='" + id + '\'' +
         '}';
   }
@@ -119,13 +107,12 @@ public class User extends FirebaseModel {
         Objects.equals(fullName, user.fullName) &&
         Objects.equals(address, user.address) &&
         Objects.equals(avatar, user.avatar) &&
-        Objects.equals(createdAt, user.createdAt) &&
-        Objects.equals(updatedAt, user.updatedAt);
+        Objects.equals(createdAt, user.createdAt);
   }
 
   @Override
   public int hashCode() {
 
-    return Objects.hash(email, phone, fullName, address, avatar, isActive, createdAt, updatedAt);
+    return Objects.hash(email, phone, fullName, address, avatar, isActive, createdAt);
   }
 }
